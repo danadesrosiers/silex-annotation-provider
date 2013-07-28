@@ -1,5 +1,5 @@
 <?php 
-namespace DJD\Silex\Provider;
+namespace DJDesrosiers\Silex\Provider;
 
 use Doctrine\Common\Annotations\AnnotationRegistry;
 use Silex\Application;
@@ -9,7 +9,7 @@ class AnnotationServiceProvider implements ServiceProviderInterface
 {
     public function boot(Application $app)
     {
-        AnnotationRegistry::registerAutoloadNamespace("DJD\Silex\Annotations", $srcDir);
+        AnnotationRegistry::registerAutoloadNamespace("DJDesrosiers\Silex\Annotations", $srcDir);
     }
 
     public function register(Application $app)
