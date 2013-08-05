@@ -16,7 +16,7 @@ class Convert implements RouteAnnotation
 	/** @var string */
 	public $callback;
 	
-	public function process(\Silex\Route $route)
+	public function process(\Silex\Controller $route)
 	{
 		$route->convert($this->variable, $this->callback);
 	}

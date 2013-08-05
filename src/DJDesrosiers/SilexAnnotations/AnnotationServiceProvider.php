@@ -11,9 +11,13 @@ class AnnotationServiceProvider implements ServiceProviderInterface
     public function boot(Application $app)
     {
 		// TODO: Allow user to specify their own annotations.
-        AnnotationRegistry::registerAutoloadNamespace("DJDesrosiers\SilexAnnotations\Annotations", $app['srcDir']);
+        AnnotationRegistry::registerAutoloadNamespace("DJDesrosiers\SilexAnnotations\Annotations", $app['annot.srcDir']);
 		foreach ($app['annot.controllers'] as $controllerName)
 		{
+			$app[$controllerName] = $app->share(function(Application $app) use ($controllerName) {
+				return new $controllerName($app);
+			});
+
 			$app['annot']->registerController($controllerName);
 		}
     }

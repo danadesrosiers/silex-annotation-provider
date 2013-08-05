@@ -2,6 +2,8 @@
 
 namespace DJDesrosiers\SilexAnnotations\Annotations;
 
+use Silex\Application;
+
 /**
  * @Annotation
  * @Target({"METHOD", "ANNOTATION"})

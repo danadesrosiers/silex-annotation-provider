@@ -2,6 +2,9 @@
 
 namespace DJDesrosiers\SilexAnnotations\Annotations;
 
+use Silex\Application;
+use DJDesrosiers\SilexAnnotations\Annotations\RouteAnnotation;
+
 /**
  * @Annotation
  * @Target("METHOD")

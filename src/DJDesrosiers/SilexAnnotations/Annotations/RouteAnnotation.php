@@ -3,5 +3,5 @@ namespace DJDesrosiers\SilexAnnotations\Annotations;
 
 interface RouteAnnotation
 {
-	public function process(\Silex\Route $route);
+	public function process(\Silex\Controller $route);
 }

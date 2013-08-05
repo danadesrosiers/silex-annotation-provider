@@ -13,7 +13,7 @@ class Host implements RouteAnnotation
 	/** @var string */
 	public $host;
 	
-	public function process(\Silex\Route $route)
+	public function process(\Silex\Controller $route)
 	{
 		$route->host($this->host);
 	}

@@ -16,7 +16,7 @@ class Assert implements RouteAnnotation
 	/** @var string */
 	public $regex;
 	
-	public function process(\Silex\Route $route)
+	public function process(\Silex\Controller $route)
 	{
 		$route->assert($this->variable, $this->regex);
 	}

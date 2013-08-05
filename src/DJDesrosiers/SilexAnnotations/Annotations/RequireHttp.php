@@ -10,7 +10,7 @@ use DJDesrosiers\SilexAnnotations\Annotations\RouteAnnotation;
  */
 class RequireHttp implements RouteAnnotation
 {
-	public function process(\Silex\Route $route)
+	public function process(\Silex\Controller $route)
 	{
 		$route->requireHttp();
 	}

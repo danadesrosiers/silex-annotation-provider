@@ -16,7 +16,7 @@ class Value implements RouteAnnotation
 	/** @var mixed */
 	public $default;
 	
-	public function process(\Silex\Route $route)
+	public function process(\Silex\Controller $route)
 	{
 		$route->value($this->variable, $this->default);
 	}
