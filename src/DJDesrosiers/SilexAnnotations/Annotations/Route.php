@@ -55,11 +55,14 @@ class Route
 			$route = $request->process($app, $callback);
 			foreach ($this as $annotations)
 			{
-				foreach ($annotations as $annotation)
+				if (is_array($annotations))
 				{
-					if ($annotation instanceof RouteAnnotation)
+					foreach ($annotations as $annotation)
 					{
-						$annotation->process($route);
+						if ($annotation instanceof RouteAnnotation)
+						{
+							$annotation->process($route);
+						}
 					}
 				}
 			}
