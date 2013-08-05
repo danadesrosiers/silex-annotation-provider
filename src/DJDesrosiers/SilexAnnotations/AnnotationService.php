@@ -1,8 +1,8 @@
 <?php 
-namespace DJDesrosiers\SilexAnnotations\Annotations;
+namespace DJDesrosiers\SilexAnnotations;
 
 use Silex\Application;
-use DJDesrosiers\Silex\Annotations\Route;
+use DJDesrosiers\SilexAnnotations\Annotations\Route;
 use Doctrine\Common\Annotations\AnnotationReader;
 use Doctrine\Common\Annotations\CachedReader;
 use Doctrine\Common\Cache\ApcCache;
@@ -20,11 +20,12 @@ class AnnotationService
 		$this->app = $app;
 		
 		// TODO: Allow configuration of caching service
-		$this->reader = new CachedReader(
-			new AnnotationReader(),
-			new ApcCache(),
-			$this->app['debug']
-		);
+//		$this->reader = new CachedReader(
+//			new AnnotationReader(),
+//			new ApcCache(),
+//			$this->app['debug']
+//		);
+		$this->reader = new AnnotationReader();
 	}
 	
 	public function registerController($controller_name)

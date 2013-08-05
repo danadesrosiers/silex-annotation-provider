@@ -2,7 +2,7 @@
 
 namespace DJDesrosiers\SilexAnnotations\Annotations;
 
-use DJDesrosiers\Silex\Annotations\RouteAnnotation;
+use DJDesrosiers\Silex\AnnotationsAnnotations\RouteAnnotation;
 
 /**
  * @Annotation

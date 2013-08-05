@@ -1,5 +1,5 @@
 <?php 
-namespace DJDesrosiers\SilexAnnotations\Annotations;
+namespace DJDesrosiers\SilexAnnotations;
 
 use Doctrine\Common\Annotations\AnnotationRegistry;
 use Silex\Application;
