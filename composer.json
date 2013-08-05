@@ -16,7 +16,7 @@
     },
     "autoload": {
         "psr-0": {
-            "DJDesrosiers\SilexAnnotations": "src/"
+            "DJDesrosiers\\SilexAnnotations\\": "src/"
         }
     },
     "minimum-stability": "stable"
