@@ -1,6 +1,6 @@
 <?php 
 
-namespace DJDesrosiers\Silex\Annotations;
+namespace DJDesrosiers\SilexAnnotations\Annotations;
 
 use DJDesrosiers\Silex\Annotations\RouteAnnotation;
 
@@ -8,13 +8,16 @@ use DJDesrosiers\Silex\Annotations\RouteAnnotation;
  * @Annotation
  * @Target({"METHOD", "ANNOTATION"})
  */
-class Before implements RouteAnnotation
+class Convert implements RouteAnnotation
 {
+	/** @var string */
+	public $variable;
+
 	/** @var string */
 	public $callback;
 	
 	public function process(\Silex\Route $route)
 	{
-		$route->before($this->callback);
+		$route->convert($this->variable, $this->callback);
 	}
 }

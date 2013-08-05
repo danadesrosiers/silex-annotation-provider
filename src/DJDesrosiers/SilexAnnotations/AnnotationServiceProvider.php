@@ -1,16 +1,17 @@
 <?php 
-namespace DJDesrosiers\Silex\Provider;
+namespace DJDesrosiers\SilexAnnotations\Annotations;
 
 use Doctrine\Common\Annotations\AnnotationRegistry;
 use Silex\Application;
 use Silex\ServiceProviderInterface;
+use DJDesrosiers\SilexAnnotations\AnnotationService;
 
 class AnnotationServiceProvider implements ServiceProviderInterface
 {
     public function boot(Application $app)
     {
 		// TODO: Allow user to specify their own annotations.
-        AnnotationRegistry::registerAutoloadNamespace("DJDesrosiers\Silex\Annotations", $app['srcDir']);
+        AnnotationRegistry::registerAutoloadNamespace("DJDesrosiers\SilexAnnotations\Annotations", $app['srcDir']);
 		foreach ($app['annot.controllers'] as $controllerName)
 		{
 			$app['annot']->registerController($controllerName);

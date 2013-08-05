@@ -1,8 +1,11 @@
 <?php 
-namespace DJDesrosiers\Silex;
+namespace DJDesrosiers\SilexAnnotations\Annotations;
 
 use Silex\Application;
 use DJDesrosiers\Silex\Annotations\Route;
+use Doctrine\Common\Annotations\AnnotationReader;
+use Doctrine\Common\Annotations\CachedReader;
+use Doctrine\Common\Cache\ApcCache;
 
 class AnnotationService
 {
@@ -26,8 +29,8 @@ class AnnotationService
 	
 	public function registerController($controller_name)
 	{
-		$reflection_class = new ReflectionClass($controller_name);
-		foreach ($reflection_class->getMethods(ReflectionMethod::IS_PUBLIC) as $reflection_method)
+		$reflection_class = new \ReflectionClass($controller_name);
+		foreach ($reflection_class->getMethods(\ReflectionMethod::IS_PUBLIC) as $reflection_method)
 		{
 			if (!$reflection_method->isStatic())
 			{

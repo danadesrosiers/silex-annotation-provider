@@ -1,6 +1,6 @@
 <?php 
 
-namespace DJDesrosiers\Silex\Annotations;
+namespace DJDesrosiers\SilexAnnotations\Annotations;
 
 /**
  * @Annotation

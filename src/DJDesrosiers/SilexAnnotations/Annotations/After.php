@@ -1,6 +1,6 @@
 <?php 
 
-namespace DJDesrosiers\Silex\Annotations;
+namespace DJDesrosiers\SilexAnnotations\Annotations;
 
 use DJDesrosiers\Silex\Annotations\RouteAnnotation;
 
@@ -8,10 +8,14 @@ use DJDesrosiers\Silex\Annotations\RouteAnnotation;
  * @Annotation
  * @Target({"METHOD", "ANNOTATION"})
  */
-class RequireHttp implements RouteAnnotation
+class After implements RouteAnnotation
 {
+	/** @var string */
+	public $callback;
+	
 	public function process(\Silex\Route $route)
 	{
-		$route->requireHttp();
+		$route->after($this->callback);
 	}
 }
+
