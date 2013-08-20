@@ -1,12 +1,12 @@
 {
-    "name": "djdesrosiers/silex-annotation-provider",
+    "name": "ddesrosiers/silex-annotation-provider",
     "description": "A silex service provider that allows the use of annotations in ServiceControllers.",
     "keywords": ["silex", "annotation", "service", "provider"],
     "license": "MIT",
     "authors": [
         {
             "name": "Dana Desrosiers",
-            "email": "ddesrosiers@gmail.com"
+            "email": "dana.desrosiers@gmail.com"
         }
     ],
     "require": {
@@ -16,7 +16,7 @@
     },
     "autoload": {
         "psr-0": {
-            "DJDesrosiers\\SilexAnnotations\\": "src/"
+            "DDesrosiers\\SilexAnnotations\\": "src/"
         }
     },
     "minimum-stability": "stable"

@@ -1,5 +1,5 @@
 <?php 
-namespace DJDesrosiers\SilexAnnotations\Annotations;
+namespace DDesrosiers\SilexAnnotations\Annotations;
 
 interface RouteAnnotation
 {

@@ -1,9 +1,9 @@
 <?php 
 
-namespace DJDesrosiers\SilexAnnotations\Annotations;
+namespace DDesrosiers\SilexAnnotations\Annotations;
 
 use Silex\Application;
-use DJDesrosiers\SilexAnnotations\Annotations\RouteAnnotation;
+use DDesrosiers\SilexAnnotations\Annotations\RouteAnnotation;
 
 /**
  * @Annotation
@@ -48,11 +48,20 @@ class Route
 		}
 	}
 	
-	public function process(Application $app, $callback)
+	/**
+	 * Process annotations on a method to register it as a controller.
+	 * 
+	 * @param \Silex\Application $app
+	 * @param string $controllerName fully qualified method name of the controller
+	 * @param boolean $newControllerCollection if true add any controllers to a new controller collection,
+	 *											else add to default controller collection
+	 * @return ControllerCollection the controller collection that holds the added controllers
+	 */
+	public function process(Application $app, $controllerName, $controllerCollection)
 	{
 		foreach ($this->request as $request)
 		{
-			$route = $request->process($app, $callback);
+			$controller = $request->process($controllerCollection, $controllerName);
 			foreach ($this as $annotations)
 			{
 				if (is_array($annotations))
@@ -61,11 +70,12 @@ class Route
 					{
 						if ($annotation instanceof RouteAnnotation)
 						{
-							$annotation->process($route);
+							$annotation->process($controller);
 						}
 					}
 				}
 			}
 		}
+		return $controllerCollection;
 	}
 }

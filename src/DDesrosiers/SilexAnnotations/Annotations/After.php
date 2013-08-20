@@ -1,8 +1,8 @@
 <?php 
 
-namespace DJDesrosiers\SilexAnnotations\Annotations;
+namespace DDesrosiers\SilexAnnotations\Annotations;
 
-use DJDesrosiers\Silex\AnnotationsAnnotations\RouteAnnotation;
+use DDesrosiers\Silex\AnnotationsAnnotations\RouteAnnotation;
 
 /**
  * @Annotation
