@@ -116,25 +116,52 @@ The ControllerProviderInterface's connect() requirement was satisfied by calling
 Annotations
 ===========
 **@Route**
+
 The @Route annotation groups annotations into an isolated endpoint definition.  This is required if you have multiple aliases for your controller method with different modifiers.  All other annotations can be included as sub-annotations of @Route or stand on their own.
 
 **@Request**
-The @Request annotation associates a uri pattern to the controller method.
+
+The @Request annotation associates a uri pattern to the controller method.  If multiple @Request annotations are given, all modifers will be applied to all @Requests unless they wrapped in a @Route annotation.
 * method: A valid Silex method (get, post, put, delete, match)
 * uri: The uri pattern.
 
 **@Assert**
 
+Silex\Route::assert()
+* variable
+* regex
+
 **@Convert**
+
+Silex\Route::convert()
+* variable
+* callback
 
 **@Host**
 
+Silex\Route::host()
+* host
+
 **@RequireHttp**
+
+Silex\Route::requireHttp()
 
 **@RequestHttps**
 
+Silex\Route::requireHttps()
+
 **@Value**
+
+Silex\Route::value()
+* variable
+* default
 
 **@Before**
 
+Silex\Route::before()
+* callback
+
 **@After**
+
+Silex\Route::after()
+* callback
