@@ -16,13 +16,26 @@ class AnnotationServiceProvider implements ServiceProviderInterface
 		// Process annotations for any given controllers
 		if ($app->offsetExists('annot.controllers') && is_array($app['annot.controllers']))
 		{
-			foreach ($app['annot.controllers'] as $controllerName)
+			foreach ($app['annot.controllers'] as $groupName => $controllerGroup)
 			{
-				$app[$controllerName] = $app->share(function(Application $app) use ($controllerName) {
-					return new $controllerName($app);
-				});
+				if (!is_array($controllerGroup))
+				{
+					$controllerGroup = array($controllerGroup);
+				}
+				
+				foreach ($controllerGroup as $controllerName)
+				{
+					$app["$controllerName"] = $app->share(function(Application $app) use ($controllerName) {
+						return new $controllerName($app);
+					});
 
-				$app['annot']->process($controllerName);
+					$isCollection = !is_numeric($groupName);
+					$collection = $app['annot']->process($controllerName, true, $isCollection);
+					if ($isCollection)
+					{
+						$app->mount($groupName, $collection);
+					}
+				}
 			}
 		}
     }
