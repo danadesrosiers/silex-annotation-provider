@@ -1,4 +1,13 @@
 <?php 
+/**
+ * This file is part of the silex-annotation-provider package.
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ *
+ * @license    MIT License
+ * @copyright (c) 2013, Dana Desrosiers <dana.desrosiers@gmail.com>
+ */
+
 namespace DDesrosiers\SilexAnnotations;
 
 use DDesrosiers\SilexAnnotations\AnnotationService;
@@ -7,9 +16,18 @@ use Silex\Application;
 use Silex\Provider\ServiceControllerServiceProvider;
 use Silex\ServiceProviderInterface;
 
+/**
+ * Class AnnotationServiceProvider provides the 'annot' service, an instance of
+ * AnnotationService.
+ * 
+ * @author Dana Desrosiers <dana.desrosiers@gmail.com>
+ */
 class AnnotationServiceProvider implements ServiceProviderInterface
 {
-    public function boot(Application $app)
+    /**
+	 * @param \Silex\Application $app
+	 */
+	public function boot(Application $app)
     {
 		AnnotationRegistry::registerAutoloadNamespace("DDesrosiers\\SilexAnnotations\\Annotations", $app['annot.srcDir']);
 		
@@ -40,7 +58,10 @@ class AnnotationServiceProvider implements ServiceProviderInterface
 		}
     }
 
-    public function register(Application $app)
+    /**
+	 * @param \Silex\Application $app
+	 */
+	public function register(Application $app)
     {
 		// Need the ability to register annotation namespace early for ControllerProviders
 		if ($app->offsetExists('annot.srcDir'))

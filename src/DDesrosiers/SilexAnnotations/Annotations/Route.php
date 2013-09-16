@@ -1,13 +1,22 @@
 <?php 
+/**
+ * This file is part of the silex-annotation-provider package.
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ *
+ * @license    MIT License
+ * @copyright (c) 2013, Dana Desrosiers <dana.desrosiers@gmail.com>
+ */
 
 namespace DDesrosiers\SilexAnnotations\Annotations;
 
-use Silex\Application;
+use Silex\ControllerCollection;
 use DDesrosiers\SilexAnnotations\Annotations\RouteAnnotation;
 
 /**
  * @Annotation
  * @Target("METHOD")
+ * @author Dana Desrosiers <dana.desrosiers@gmail.com>
  */
 class Route
 {
@@ -38,6 +47,9 @@ class Route
 	/** @var array<After> */
 	public $after;
 	
+	/**
+	 * @param array $values
+	 */
 	public function __construct(array $values)
 	{
 		foreach ($values['value'] as $annotation)
@@ -51,13 +63,10 @@ class Route
 	/**
 	 * Process annotations on a method to register it as a controller.
 	 * 
-	 * @param \Silex\Application $app
-	 * @param string $controllerName fully qualified method name of the controller
-	 * @param boolean $newControllerCollection if true add any controllers to a new controller collection,
-	 *											else add to default controller collection
-	 * @return ControllerCollection the controller collection that holds the added controllers
+	 * @param \Silex\ControllerCollection $controllerCollection the controller collection to add the route to
+	 * @param type $controllerName fully qualified method name of the controller
 	 */
-	public function process(Application $app, $controllerName, $controllerCollection)
+	public function process(\Silex\ControllerCollection $controllerCollection, $controllerName)
 	{
 		foreach ($this->request as $request)
 		{
@@ -76,6 +85,5 @@ class Route
 				}
 			}
 		}
-		return $controllerCollection;
 	}
 }

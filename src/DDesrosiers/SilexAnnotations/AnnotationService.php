@@ -1,4 +1,13 @@
 <?php 
+/**
+ * This file is part of the silex-annotation-provider package.
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ *
+ * @license    MIT License
+ * @copyright (c) 2013, Dana Desrosiers <dana.desrosiers@gmail.com>
+ */
+
 namespace DDesrosiers\SilexAnnotations;
 
 use DDesrosiers\SilexAnnotations\Annotations\Request;
@@ -11,6 +20,12 @@ use ReflectionMethod;
 use RuntimeException;
 use Silex\Application;
 
+/**
+ * Class AnnotationService parses annotations on classes and converts them to
+ * Silex routes.
+ * 
+ * @author Dana Desrosiers <dana.desrosiers@gmail.com>
+ */
 class AnnotationService
 {
 	/** @var Application */
@@ -19,6 +34,10 @@ class AnnotationService
 	/** @var AnnotationReader */
 	protected $reader;
 	
+	/**
+	 * @param \Silex\Application $app
+	 * @throws RuntimeException
+	 */
 	public function __construct(Application $app)
 	{
 		$this->app = $app;
@@ -43,6 +62,12 @@ class AnnotationService
 		}
 	}
 	
+	/**
+	 * @param string $controllerName
+	 * @param boolean $isServiceController
+	 * @param boolean $newCollection
+	 * @return \Silex\ControllerCollection
+	 */
 	public function process($controllerName, $isServiceController=true, $newCollection=false)
 	{
 		$separator = $isServiceController ? ":" : "::";
@@ -58,7 +83,7 @@ class AnnotationService
 				{
 					if ($annotation instanceof Route)
 					{
-						$annotation->process($this->app, $controllerMethodName, $controllerCollection);
+						$annotation->process($controllerCollection, $controllerMethodName);
 					}
 					else if ($annotation instanceof Request)
 					{
