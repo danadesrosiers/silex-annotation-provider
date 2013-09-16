@@ -17,18 +17,17 @@ Install the silex-annotation-provider using composer.
 }
 ```
 
-Parameters
-==========
-* **annot.srcDir**: The path to the silex-annotation-provider component.  This project uses Doctrine Annotations, provide this path to let silex-annotation-provider register the annotations for you.
-* **annot.cache**: Speficy the type of Doctrine cache used to cache the annotations.  Instruct the reader to use the  {annot.cache}Cache class.  Make sure to include Doctrine Cache as it is not a required dependency of this project.
-* **annot.controllers**: An array of fully qualified controller names.  If set, the provider will automatically register each controller as a ServiceController and set up routes and modifiers based on annotations found.
+Service
+=======
+When registered, an instance of AnnotationService is available via $app['annot'];  The AnnotationService's process() method parses annotations in a class to configure controllers.  It is usually not necesary to use the service directly.
+AnnotationService->process() takes 3 arguments:
+* **controllerName**: The fully qualified class name of the controller to process.
+* **isServiceController**: This matters because Silex expects a different string representation of a controller method for ServiceControllers.  Default: false.
+* **newCollection**: If true, all routes found will be put into a new controller collection and that collection will be returned.  Default: false.
 
-Services
-========
-* **annot**: The annot service includes a process() method that does the work of processing annotations and converting them to routes and modifiers.  Most won't ever need to use it directly.
 
-Registering
-===========
+Registration
+============
 ```php
 $app->register(new DDesrosiers\SilexAnnotations\SilexAnnotationProvider(), array(
     "annot.srcDir" => __DIR__ . "/vendor/ddesrosiers/silex-annotation-provider/src",
@@ -37,9 +36,35 @@ $app->register(new DDesrosiers\SilexAnnotations\SilexAnnotationProvider(), array
 ));
 ```
 
-Usage
-=====
-The following is an example demonstrating the use of annotations to register an endpoint.
+Parameters
+==========
+annot.srcDir
+------------
+The path to the silex-annotation-provider component.  This project uses Doctrine Annotations, provide this path to let silex-annotation-provider register the annotations for you.
+
+annot.cache
+-----------
+Speficy the type of Doctrine cache used to cache the annotations.  Instruct the reader to use the  {annot.cache}Cache class.  Make sure to include Doctrine Cache as it is not a required dependency of this project.
+
+annot.controllers
+-----------------
+An array of fully qualified controller names.  If set, the provider will automatically register each controller as a ServiceController and set up routes and modifiers based on annotations found.  Controllers can be grouped into controller collections by grouping them with an associative array using the array key as the mount point.
+```php
+$app['annot.controllers'] = array(
+	'group1' => array(
+		"MyControllerNamespace\\Controller1",
+		"MyControllerNamespace\\Controller2"
+	),
+	'group2' => array(
+		"MyControllerNamespace\\Controller3",
+		"MyControllerNamespace\\Controller4"
+	)
+);
+```
+
+Annotate Controllers
+====================
+Create your controller.  The following is an example demonstrating the use of annotations to register an endpoint.
 ```
 namespace DDesrosiers\Controller;
 
@@ -68,21 +93,22 @@ class TestController
 }
 ```
 
-The annotations above are equivalent to the following:
+The annotations in our TestController are interpreted as follows:
 ```
 $app->get("test/{var}", "\\DDesrosiers\\Controller\\TestController:testMethod")
 	->assert('var', '\d+')
 	->requireHttp()
 	->convert('var', "\\DDesrosiers\\Controller\\TestController::converter");
 ```
-We assumed above that TestController was registered as a ServiceController.  If TestController is included in the annot.controllers array, it is automatically registered as a ServiceController and its annotations are automatically processed on boot.  
 
+Controller Providers
+====================
 If we want to use a ControllerProvider, we can use the annotations service's process() method directly.
 
 ```
 namespace DDesrosiers\Controller;
 
-use DDesrosiers\SilexAnnotations\Annotations as Silex;
+use DDesrosiers\SilexAnnotations\Annotations as SLX;
 use Silex\Application;
 use Silex\ControllerProviderInterface;
 use Symfony\Component\HttpFoundation\Response;
@@ -96,9 +122,9 @@ class TestProviderController implements ControllerProviderInterface
 	}
 
 	/**
-	 * @Silex\Route(
-	 *		@Silex\Request(method="GET", uri="test/{var}"),
-	 *		@Silex\Assert(variable="var", regex="\d+"),
+	 * @SLX\Route(
+	 *		@SLX\Request(method="GET", uri="test/{var}"),
+	 *		@SLX\Assert(variable="var", regex="\d+"),
 	 * )
 	 */
 	public function testMethod()
@@ -108,10 +134,7 @@ class TestProviderController implements ControllerProviderInterface
 }
 ```
 
-The ControllerProviderInterface's connect() requirement was satisfied by calling the annotation service's process() method.  process() takes 3 arguments:
-* **controllerName**: The fully qualified class name of the controller to process.
-* **isServiceController**: This matters because a Silex expect a different string representation of a controller method for ServiceControllers.  Default: false.
-* **newCollection**: If true, all routes found will be put into a new controller collection and that collection will be returned.  Default: false.
+The ControllerProviderInterface's connect() requirement was satisfied by calling the annotation service's process() method.  
 
 Annotations
 ===========
