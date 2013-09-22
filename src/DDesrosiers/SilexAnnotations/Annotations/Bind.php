@@ -16,17 +16,17 @@ use DDesrosiers\SilexAnnotations\Annotations\RouteAnnotation;
  * @Annotation
  * @Target({"METHOD", "ANNOTATION"})
  */
-class After implements RouteAnnotation
+class Bind implements RouteAnnotation
 {
 	/** @var string */
-	public $callback;
+	public $routeName;
 	
 	/**
 	 * @param \Silex\Controller $route
 	 */
 	public function process(\Silex\Controller $route)
 	{
-		$route->after($this->callback);
+		$route->bind($this->routeName);
 	}
 }
 
