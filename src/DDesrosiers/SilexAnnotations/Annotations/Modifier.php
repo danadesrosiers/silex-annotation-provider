@@ -29,7 +29,8 @@ class Modifier implements RouteAnnotation
 	 */
 	public function process(\Silex\Controller $controller)
 	{
-		if (!method_exists($controller->getRoute(), $this->method))
+		// check that the method exists in the Controller class or the Route class.
+		if (!method_exists($controller->getRoute(), $this->method) && !method_exists($controller, $this->method))
 		{
 			throw new \RuntimeException("Modifier: [$this->method] does not exist.");
 		}
