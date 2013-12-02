@@ -14,6 +14,9 @@
 		"doctrine/annotations": "~1.0",
 		"doctrine/cache": "~1.0"
     },
+    "suggest": {
+        "symfony/security": "You will need this package to use the `Secure` annotation"
+    },
     "autoload": {
         "psr-0": {
             "DDesrosiers\\SilexAnnotations\\": "src/"
