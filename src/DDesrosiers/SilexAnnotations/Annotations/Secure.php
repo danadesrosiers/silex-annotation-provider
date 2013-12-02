@@ -30,13 +30,17 @@ class Secure implements RouteAnnotation
      */
     public function process(Controller $route)
     {
-        $roles = $this->role;
-        $route->before(
-            function (SymfonyRequest $request, Application $app) use ($roles) {
-                if (!$app["security"]->isGranted($roles)) {
-                    throw new AccessDeniedException();
+        if (method_exists($route, "secure")) {
+            $route->secure($this->role);
+        } else {
+            $roles = $this->role;
+            $route->before(
+                function (SymfonyRequest $request, Application $app) use ($roles) {
+                    if (!$app["security"]->isGranted($roles)) {
+                        throw new AccessDeniedException();
+                    }
                 }
-            }
-        );
+            );
+        }
     }
 }
