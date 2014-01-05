@@ -31,7 +31,7 @@ Registration
 ```php
 $app->register(new DDesrosiers\SilexAnnotations\SilexAnnotationProvider(), array(
     "annot.srcDir" => __DIR__ . "/vendor/ddesrosiers/silex-annotation-provider/src",
-    "annot.cache" => "Apc",
+    "annot.cache" => new ApcCache(),
     "annot.controllers" => array("MyControllerNamespace\\MyController")
 ));
 ```
@@ -44,7 +44,7 @@ The path to the silex-annotation-provider component.  This project uses Doctrine
 
 annot.cache
 -----------
-Speficy the type of Doctrine cache used to cache the annotations.  Instruct the reader to use the  {annot.cache}Cache class.  Make sure to include Doctrine Cache as it is not a required dependency of this project.
+An instance of a class that implements Doctrine\Common\Cache\Cache.  This is the cache that will be used by the AnnotationReader to cache annotations so they don't have to be parsed every time.  Make sure to include Doctrine Cache as it is not a required dependency of this project.
 
 annot.controllers
 -----------------

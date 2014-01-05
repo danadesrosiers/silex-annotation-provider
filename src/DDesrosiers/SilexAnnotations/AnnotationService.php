@@ -15,6 +15,7 @@ use DDesrosiers\SilexAnnotations\Annotations\Route;
 use DDesrosiers\SilexAnnotations\Annotations\RouteAnnotation;
 use Doctrine\Common\Annotations\AnnotationReader;
 use Doctrine\Common\Annotations\CachedReader;
+use Doctrine\Common\Cache\Cache;
 use ReflectionClass;
 use ReflectionMethod;
 use RuntimeException;
@@ -42,19 +43,28 @@ class AnnotationService
 	{
 		$this->app = $app;
 		
-		if ($app->offsetExists('annot.cache') && strlen($app['annot.cache']) > 0)
+		if ($app->offsetExists('annot.cache'))
 		{
-			$cache_class = "Doctrine\\Common\\Cache\\{$app['annot.cache']}Cache";
-			if (!class_exists($cache_class))
+			if ($app['annot.cache'] instanceof Cache)
 			{
-				throw new RuntimeException("Cache type: [$cache_class] does not exist.  Make sure you include Doctrine cache.");
+				$cache = $app['annot.cache'];
 			}
-			
-			$this->reader = new CachedReader(
-				new AnnotationReader(),
-				new $cache_class(),
-				$this->app['debug']
-			);
+			else if (strlen($app['annot.cache']) > 0)
+			{
+				$cache_class = "Doctrine\\Common\\Cache\\{$app['annot.cache']}Cache";
+				if (!class_exists($cache_class))
+				{
+					throw new RuntimeException("Cache type: [$cache_class] does not exist.  Make sure you include Doctrine cache.");
+				}
+
+				$cache = new $cache_class();
+			}
+			else
+			{
+				throw new RuntimeException("Cache object does not implement Doctrine\\Common\\Cache\\Cache");
+			}
+
+			$this->reader = new CachedReader(new AnnotationReader(), $cache, $app['debug']);
 		}
 		else 
 		{
