@@ -34,7 +34,7 @@ class Modifier implements RouteAnnotation
 		{
 			throw new \RuntimeException("Modifier: [$this->method] does not exist.");
 		}
-		call_user_func_array(array($controller, $this->method), $this->args);
+		call_user_func_array(array($controller, $this->method), $this->args ?: array());
 	}
 }
 

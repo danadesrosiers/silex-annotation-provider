@@ -46,13 +46,14 @@ class Route
 	
 	/** @var array<After> */
 	public $after;
-	
+
 	/**
 	 * @param array $values
 	 */
 	public function __construct(array $values)
 	{
-		foreach ($values['value'] as $annotation)
+		$annotations = is_array($values['value']) ? $values['value'] : array($values['value']);
+		foreach ($annotations as $annotation)
 		{
 			$classPath = explode("\\", get_class($annotation));
 			$propertyName = lcfirst(array_pop($classPath));
