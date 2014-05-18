@@ -30,9 +30,8 @@ class RequireHttpsTest extends \PHPUnit_Framework_TestCase
 
     public function testHttps()
     {
-        $client = new Client($this->app, array('REQUEST_SCHEME' => 'https'));
-        $client->request("GET", "/test");
-        $response = $client->getResponse();
+        $request = Request::create('https://example.com/test');
+        $response = $this->app->handle($request);
         $this->assertEquals(200, $response->getStatusCode());
     }
 
