@@ -27,7 +27,7 @@ class RequireHttpTest extends \PHPUnit_Framework_TestCase
             "annot.controllers" => array("DDesrosiers\\SilexAnnotations\\Test\\Annotations\\RequireHttpTestController")
         ));
 
-        $this->client = new Client($this->app, array('REQUEST_SCHEME' => 'hsttp'));
+        $this->client = new Client($this->app, array('REQUEST_SCHEME' => 'https'));
     }
 
     public function testHttp()
