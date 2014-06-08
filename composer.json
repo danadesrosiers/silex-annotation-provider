@@ -25,7 +25,7 @@
     "autoload": {
         "psr-0": {
             "DDesrosiers\\SilexAnnotations\\": "src/",
-            "DDesrosiers\\SilexAnnotations\\Test\\": "test/"
+            "DDesrosiers\\Test\\SilexAnnotations\\": "test/"
         }
     },
     "minimum-stability": "stable"

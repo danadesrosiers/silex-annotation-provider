@@ -1,6 +1,6 @@
 <?php
 
-namespace DDesrosiers\SilexAnnotations\Test\Annotations;
+namespace DDesrosiers\Test\SilexAnnotations\Annotations;
 
 use DDesrosiers\SilexAnnotations\Annotations as SLX;
 use DDesrosiers\SilexAnnotations\AnnotationServiceProvider;
@@ -22,8 +22,8 @@ class HostTest extends \PHPUnit_Framework_TestCase
         $this->app['debug'] = true;
 
         $this->app->register(new AnnotationServiceProvider(), array(
-            "annot.srcDir" => __DIR__."/../../../../../../src",
-            "annot.controllers" => array("DDesrosiers\\SilexAnnotations\\Test\\Annotations\\HostTestController")
+            "annot.srcDir" => __DIR__."/../../../../../src",
+            "annot.controllers" => array("DDesrosiers\\Test\\SilexAnnotations\\Annotations\\HostTestController")
         ));
 
         $this->client = new Client($this->app, array('HTTP_HOST' => 'www.test.com'));

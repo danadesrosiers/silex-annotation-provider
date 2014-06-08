@@ -1,6 +1,6 @@
 <?php
 
-namespace DDesrosiers\SilexAnnotations\Test\Annotations;
+namespace DDesrosiers\Test\SilexAnnotations\Annotations;
 
 use DDesrosiers\SilexAnnotations\AnnotationServiceProvider;
 use Silex\Application;
@@ -24,8 +24,8 @@ class RequestTest extends \PHPUnit_Framework_TestCase
         $this->app['debug'] = true;
 
         $this->app->register(new AnnotationServiceProvider(), array(
-            "annot.srcDir" => __DIR__."/../../../../../../src",
-            "annot.controllers" => array("DDesrosiers\\SilexAnnotations\\Test\\Annotations\\RequestTestController")
+            "annot.srcDir" => __DIR__."/../../../../../src",
+            "annot.controllers" => array("DDesrosiers\\Test\\SilexAnnotations\\Annotations\\RequestTestController")
         ));
 
         $this->client = new Client($this->app);

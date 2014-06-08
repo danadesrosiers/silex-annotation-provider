@@ -1,14 +1,15 @@
 <?php
 
-namespace DDesrosiers\SilexAnnotations\Test\Annotations;
+namespace DDesrosiers\Test\SilexAnnotations\Annotations;
 
 use DDesrosiers\SilexAnnotations\Annotations as SLX;
 use DDesrosiers\SilexAnnotations\AnnotationServiceProvider;
+use Exception;
 use Silex\Application;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Client;
 
-class ValueTest extends \PHPUnit_Framework_TestCase
+class AfterTest extends \PHPUnit_Framework_TestCase
 {
     /** @var Application */
     protected $app;
@@ -22,34 +23,34 @@ class ValueTest extends \PHPUnit_Framework_TestCase
         $this->app['debug'] = true;
 
         $this->app->register(new AnnotationServiceProvider(), array(
-            "annot.srcDir" => __DIR__."/../../../../../../src",
-            "annot.controllers" => array("DDesrosiers\\SilexAnnotations\\Test\\Annotations\\ValueTestController")
+            "annot.srcDir" => __DIR__."/../../../../../src",
+            "annot.controllers" => array("DDesrosiers\\Test\\SilexAnnotations\\Annotations\\AfterTestController")
         ));
 
         $this->client = new Client($this->app);
     }
 
-    public function testDefaultValue()
+    public function testAfter()
     {
         $this->client->request("GET", "/test");
         $response = $this->client->getResponse();
-        $this->assertEquals(200, $response->getStatusCode());
-
-        $this->client->request("GET", "/");
-        $response = $this->client->getResponse();
-        $this->assertEquals(200, $response->getStatusCode());
-        $this->assertEquals('default', $response->getContent());
+        $this->assertEquals(500, $response->getStatusCode());
     }
 }
 
-class ValueTestController
+class AfterTestController
 {
     /**
-     * @SLX\Request(method="GET", uri="/{var}")
-     * @SLX\Value(variable="var", default="default")
+     * @SLX\Request(method="GET", uri="/test")
+     * @SLX\After("DDesrosiers\SilexAnnotations\Test\Annotations\AfterTestController::afterCallback")
      */
     public function testMethod($var)
     {
         return new Response($var);
+    }
+
+    public static function afterCallback()
+    {
+        throw new Exception("after callback");
     }
 }

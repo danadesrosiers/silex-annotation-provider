@@ -22,7 +22,7 @@ class RouteTest extends \PHPUnit_Framework_TestCase
         $this->app['debug'] = true;
 
         $this->app->register(new AnnotationServiceProvider(), array(
-            "annot.srcDir" => __DIR__."/../../../../../../src",
+            "annot.srcDir" => __DIR__."/../../../../../src",
             "annot.controllers" => array("DDesrosiers\\Test\\SilexAnnotations\\Annotations\\RouteTestController")
         ));
 

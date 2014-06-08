@@ -1,14 +1,15 @@
 <?php
 
-namespace DDesrosiers\SilexAnnotations\Test\Annotations;
+namespace DDesrosiers\Test\SilexAnnotations\Annotations;
 
 use DDesrosiers\SilexAnnotations\Annotations as SLX;
 use DDesrosiers\SilexAnnotations\AnnotationServiceProvider;
+use Exception;
 use Silex\Application;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Client;
 
-class ConvertTest extends \PHPUnit_Framework_TestCase
+class BeforeTest extends \PHPUnit_Framework_TestCase
 {
     /** @var Application */
     protected $app;
@@ -22,35 +23,34 @@ class ConvertTest extends \PHPUnit_Framework_TestCase
         $this->app['debug'] = true;
 
         $this->app->register(new AnnotationServiceProvider(), array(
-            "annot.srcDir" => __DIR__."/../../../../../../src",
-            "annot.controllers" => array("DDesrosiers\\SilexAnnotations\\Test\\Annotations\\ConvertTestController")
+            "annot.srcDir" => __DIR__."/../../../../../src",
+            "annot.controllers" => array("DDesrosiers\\Test\\SilexAnnotations\\Annotations\\BeforeTestController")
         ));
 
         $this->client = new Client($this->app);
     }
 
-    public function testConvert()
+    public function testBefore()
     {
-        $this->client->request("GET", "/45");
+        $this->client->request("GET", "/test");
         $response = $this->client->getResponse();
-        $this->assertEquals(200, $response->getStatusCode());
-        $this->assertEquals("50", $response->getContent());
+        $this->assertEquals(500, $response->getStatusCode());
     }
 }
 
-class ConvertTestController
+class BeforeTestController
 {
     /**
-     * @SLX\Request(method="GET", uri="/{var}")
-     * @SLX\Convert(variable="var", callback="DDesrosiers\SilexAnnotations\Test\Annotations\ConvertTestController::convert")
+     * @SLX\Request(method="GET", uri="/test")
+     * @SLX\Before("DDesrosiers\SilexAnnotations\Test\Annotations\BeforeTestController::beforeCallback")
      */
     public function testMethod($var)
     {
         return new Response($var);
     }
 
-    public static function convert($var)
+    public static function beforeCallback()
     {
-        return $var+5;
+        throw new Exception("before callback");
     }
 }
