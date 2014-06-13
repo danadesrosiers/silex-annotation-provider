@@ -42,14 +42,14 @@ class AnnotationService
 	public function __construct(Application $app)
 	{
 		$this->app = $app;
-		
+
 		if ($app->offsetExists('annot.cache'))
 		{
 			if ($app['annot.cache'] instanceof Cache)
 			{
 				$cache = $app['annot.cache'];
 			}
-			else if (strlen($app['annot.cache']) > 0)
+			else if (is_string($app['annot.cache']) && strlen($app['annot.cache']) > 0)
 			{
 				$cache_class = "Doctrine\\Common\\Cache\\{$app['annot.cache']}Cache";
 				if (!class_exists($cache_class))
@@ -112,4 +112,9 @@ class AnnotationService
 		
 		return $controllerCollection;
 	}
+
+    public function getReader()
+    {
+        return $this->reader;
+    }
 }

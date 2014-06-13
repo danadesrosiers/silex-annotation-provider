@@ -34,6 +34,6 @@ class Request
 	 */
 	public function process(ControllerCollection $cc, $controllerName)
 	{
-		return $cc->{$this->method}($this->uri, $controllerName);
+		return $cc->{strtolower($this->method)}($this->uri, $controllerName);
 	}
 }

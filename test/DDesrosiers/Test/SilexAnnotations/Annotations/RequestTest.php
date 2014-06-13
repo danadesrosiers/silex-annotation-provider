@@ -38,6 +38,38 @@ class RequestTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('200', $response->getStatusCode());
     }
 
+    public function testPost()
+    {
+        $this->client->request("POST", "/post");
+        $response = $this->client->getResponse();
+        $this->assertEquals('200', $response->getStatusCode());
+    }
+
+    public function testPut()
+    {
+        $this->client->request("PUT", "/put");
+        $response = $this->client->getResponse();
+        $this->assertEquals('200', $response->getStatusCode());
+    }
+
+    public function testDelete()
+    {
+        $this->client->request("DELETE", "/delete");
+        $response = $this->client->getResponse();
+        $this->assertEquals('200', $response->getStatusCode());
+    }
+
+    public function testMatch()
+    {
+        $this->client->request("GET", "/match");
+        $response = $this->client->getResponse();
+        $this->assertEquals('200', $response->getStatusCode());
+
+        $this->client->request("POST", "/match");
+        $response = $this->client->getResponse();
+        $this->assertEquals('200', $response->getStatusCode());
+    }
+
     public function testMultipleRequests()
     {
         $this->client->request("GET", "/firstRequest");
@@ -115,6 +147,38 @@ class RequestTestController
      * @return Response
      */
     public function testMultipleRequestsShareModifiers()
+    {
+        return new Response();
+    }
+
+    /**
+     * @SLX\Request(method="POST", uri="/post")
+     */
+    public function testPostRequest()
+    {
+        return new Response();
+    }
+
+    /**
+     * @SLX\Request(method="PUT", uri="/put")
+     */
+    public function testPutRequest()
+    {
+        return new Response();
+    }
+
+    /**
+     * @SLX\Request(method="DELETE", uri="/delete")
+     */
+    public function testDeleteRequest()
+    {
+        return new Response();
+    }
+
+    /**
+     * @SLX\Request(method="MATCH", uri="/match")
+     */
+    public function testMatchRequest()
     {
         return new Response();
     }
