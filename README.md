@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/danadesrosiers/silex-annotation-provider.svg?branch=master)](https://travis-ci.org/danadesrosiers/silex-annotation-provider)
+
 silex-annotation-provider
 =========================
 
