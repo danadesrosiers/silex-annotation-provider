@@ -4,7 +4,7 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  *
- * @license    MIT License
+ * @license       MIT License
  * @copyright (c) 2014, Dana Desrosiers <dana.desrosiers@gmail.com>
  */
 
@@ -32,10 +32,13 @@ class AnnotationServiceTest extends \PHPUnit_Framework_TestCase
 
     public function testServiceController()
     {
-        $this->app->register(new AnnotationServiceProvider(), array(
-            "annot.srcDir" => __DIR__."/../../../../src",
-            "annot.controllers" => array("DDesrosiers\\Test\\SilexAnnotations\\TestController")
-        ));
+        $this->app->register(
+                  new AnnotationServiceProvider(),
+                  array(
+                      "annot.srcDir"      => __DIR__ . "/../../../../src",
+                      "annot.controllers" => array("DDesrosiers\\Test\\SilexAnnotations\\TestController")
+                  )
+        );
 
         $client = new Client($this->app);
         $client->request("GET", "/test1");
@@ -47,10 +50,13 @@ class AnnotationServiceTest extends \PHPUnit_Framework_TestCase
 
     public function testControllerProvider()
     {
-        $this->app->register(new AnnotationServiceProvider(), array(
-            "annot.srcDir" => __DIR__."/../../../../src",
-            "annot.controllers" => array("DDesrosiers\\Test\\SilexAnnotations\\TestControllerProvider")
-        ));
+        $this->app->register(
+                  new AnnotationServiceProvider(),
+                  array(
+                      "annot.srcDir"      => __DIR__ . "/../../../../src",
+                      "annot.controllers" => array("DDesrosiers\\Test\\SilexAnnotations\\TestControllerProvider")
+                  )
+        );
 
         $client = new Client($this->app);
         $client->request("GET", "/cptest");
@@ -62,24 +68,30 @@ class AnnotationServiceTest extends \PHPUnit_Framework_TestCase
 
     public function testCacheUsingStringIdentifier()
     {
-        $this->app->register(new AnnotationServiceProvider(), array(
-            "annot.srcDir" => __DIR__."/../../../../src",
-            "annot.cache" => 'Array',
-            "annot.controllers" => array("DDesrosiers\\Test\\SilexAnnotations\\TestController")
-        ));
+        $this->app->register(
+                  new AnnotationServiceProvider(),
+                  array(
+                      "annot.srcDir"      => __DIR__ . "/../../../../src",
+                      "annot.cache"       => 'Array',
+                      "annot.controllers" => array("DDesrosiers\\Test\\SilexAnnotations\\TestController")
+                  )
+        );
 
         /** @var AnnotationService $service */
         $service = $this->app['annot'];
         $this->assertInstanceOf("Doctrine\\Common\\Annotations\\CachedReader", $service->getReader());
     }
 
-    public function testCacheUsingImplementationOfCache ()
+    public function testCacheUsingImplementationOfCache()
     {
-        $this->app->register(new AnnotationServiceProvider(), array(
-            "annot.srcDir" => __DIR__."/../../../../src",
-            "annot.cache" => new ApcCache(),
-            "annot.controllers" => array("DDesrosiers\\Test\\SilexAnnotations\\TestController")
-        ));
+        $this->app->register(
+                  new AnnotationServiceProvider(),
+                  array(
+                      "annot.srcDir"      => __DIR__ . "/../../../../src",
+                      "annot.cache"       => new ApcCache(),
+                      "annot.controllers" => array("DDesrosiers\\Test\\SilexAnnotations\\TestController")
+                  )
+        );
 
         /** @var AnnotationService $service */
         $service = $this->app['annot'];
@@ -91,11 +103,14 @@ class AnnotationServiceTest extends \PHPUnit_Framework_TestCase
      */
     public function testInvalidCacheString()
     {
-        $this->app->register(new AnnotationServiceProvider(), array(
-            "annot.srcDir" => __DIR__."/../../../../src",
-            "annot.cache" => 'Fake',
-            "annot.controllers" => array("DDesrosiers\\Test\\SilexAnnotations\\TestController")
-        ));
+        $this->app->register(
+                  new AnnotationServiceProvider(),
+                  array(
+                      "annot.srcDir"      => __DIR__ . "/../../../../src",
+                      "annot.cache"       => 'Fake',
+                      "annot.controllers" => array("DDesrosiers\\Test\\SilexAnnotations\\TestController")
+                  )
+        );
         $this->app['annot'];
     }
 
@@ -104,11 +119,14 @@ class AnnotationServiceTest extends \PHPUnit_Framework_TestCase
      */
     public function testInvalidCacheClass()
     {
-        $this->app->register(new AnnotationServiceProvider(), array(
-            "annot.srcDir" => __DIR__."/../../../../src",
-            "annot.cache" => new InvalidCache(),
-            "annot.controllers" => array("DDesrosiers\\Test\\SilexAnnotations\\TestController")
-        ));
+        $this->app->register(
+                  new AnnotationServiceProvider(),
+                  array(
+                      "annot.srcDir"      => __DIR__ . "/../../../../src",
+                      "annot.cache"       => new InvalidCache(),
+                      "annot.controllers" => array("DDesrosiers\\Test\\SilexAnnotations\\TestController")
+                  )
+        );
         $this->app['annot'];
     }
 }
@@ -128,8 +146,8 @@ class TestController
 
     /**
      * @SLX\Route(
-     *		@SLX\Request(method="GET", uri="test2/{num}"),
-     *		@SLX\RequireHttp
+     *      @SLX\Request(method="GET", uri="test2/{num}"),
+     *      @SLX\RequireHttp
      * )
      */
     public function testMethod($num)

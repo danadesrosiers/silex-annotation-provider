@@ -5,7 +5,7 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  *
- * @license    MIT License
+ * @license       MIT License
  * @copyright (c) 2014, Dana Desrosiers <dana.desrosiers@gmail.com>
  */
 
@@ -35,11 +35,11 @@ class Secure implements RouteAnnotation
         } else {
             $roles = $this->role;
             $route->before(
-                function (SymfonyRequest $request, Application $app) use ($roles) {
-                    if (!$app["security"]->isGranted($roles)) {
-                        throw new AccessDeniedException();
-                    }
-                }
+                  function (SymfonyRequest $request, Application $app) use ($roles) {
+                      if (!$app["security"]->isGranted($roles)) {
+                          throw new AccessDeniedException();
+                      }
+                  }
             );
         }
     }

@@ -4,7 +4,7 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  *
- * @license    MIT License
+ * @license       MIT License
  * @copyright (c) 2014, Dana Desrosiers <dana.desrosiers@gmail.com>
  */
 
@@ -30,10 +30,13 @@ class RequireHttpTest extends \PHPUnit_Framework_TestCase
         $this->app = new Application();
         $this->app['debug'] = true;
 
-        $this->app->register(new AnnotationServiceProvider(), array(
-            "annot.srcDir" => __DIR__."/../../../../../src",
-            "annot.controllers" => array("DDesrosiers\\Test\\SilexAnnotations\\Annotations\\RequireHttpTestController")
-        ));
+        $this->app->register(
+                  new AnnotationServiceProvider(),
+                  array(
+                      "annot.srcDir"      => __DIR__ . "/../../../../../src",
+                      "annot.controllers" => array("DDesrosiers\\Test\\SilexAnnotations\\Annotations\\RequireHttpTestController")
+                  )
+        );
 
         $this->client = new Client($this->app, array('REQUEST_SCHEME' => 'https'));
     }
