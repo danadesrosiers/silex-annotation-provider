@@ -10,6 +10,8 @@
 
 namespace DDesrosiers\SilexAnnotations\Annotations;
 
+use Silex\Controller;
+
 /**
  * @Annotation
  * @Target({"METHOD", "ANNOTATION"})
@@ -23,11 +25,11 @@ class Modifier implements RouteAnnotation
     public $args;
 
     /**
-     * @param \Silex\Controller $controller
+     * @param Controller $controller
      *
      * @throws \RuntimeException
      */
-    public function process(\Silex\Controller $controller)
+    public function process(Controller $controller)
     {
         // check that the method exists in the Controller class or the Route class.
         if (!method_exists($controller->getRoute(), $this->method) && !method_exists($controller, $this->method)) {

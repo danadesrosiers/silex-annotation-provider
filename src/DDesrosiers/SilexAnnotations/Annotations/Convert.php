@@ -10,7 +10,7 @@
 
 namespace DDesrosiers\SilexAnnotations\Annotations;
 
-use DDesrosiers\SilexAnnotations\Annotations\RouteAnnotation;
+use Silex\Controller;
 
 /**
  * @Annotation
@@ -25,9 +25,9 @@ class Convert implements RouteAnnotation
     public $callback;
 
     /**
-     * @param \Silex\Controller $route
+     * @param Controller $route
      */
-    public function process(\Silex\Controller $route)
+    public function process(Controller $route)
     {
         $route->convert($this->variable, $this->callback);
     }

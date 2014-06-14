@@ -10,7 +10,7 @@
 
 namespace DDesrosiers\SilexAnnotations\Annotations;
 
-use DDesrosiers\SilexAnnotations\Annotations\RouteAnnotation;
+use Silex\Controller;
 
 /**
  * @Annotation
@@ -20,9 +20,9 @@ use DDesrosiers\SilexAnnotations\Annotations\RouteAnnotation;
 class RequireHttps implements RouteAnnotation
 {
     /**
-     * @param \Silex\Controller $route
+     * @param Controller $route
      */
-    public function process(\Silex\Controller $route)
+    public function process(Controller $route)
     {
         $route->requireHttps();
     }

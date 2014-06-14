@@ -15,6 +15,7 @@ use Silex\Application;
 use Silex\Controller;
 use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
+use Symfony\Component\Security\Core\SecurityContext;
 
 /**
  * @Annotation
@@ -34,9 +35,12 @@ class Secure implements RouteAnnotation
             $route->secure($this->role);
         } else {
             $roles = $this->role;
+            /** @noinspection PhpUnusedParameterInspection */
             $route->before(
                   function (SymfonyRequest $request, Application $app) use ($roles) {
-                      if (!$app["security"]->isGranted($roles)) {
+                      /** @var SecurityContext $security */
+                      $security = $app['security'];
+                      if (!$security->isGranted($roles)) {
                           throw new AccessDeniedException();
                       }
                   }

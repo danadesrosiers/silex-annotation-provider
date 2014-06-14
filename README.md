@@ -3,7 +3,7 @@
 silex-annotation-provider
 =========================
 
-A Silex ServiceProvider that defines annotations that can be used in a Silex controller.  Define your controllers in a class and use annotations to setup routes and define modfiers.
+A Silex ServiceProvider that defines annotations that can be used in a Silex controller.  Define your controllers in a class and use annotations to setup routes and define modifiers.
 
 
 Installation
@@ -21,7 +21,7 @@ Install the silex-annotation-provider using composer.
 
 Service
 =======
-When registered, an instance of AnnotationService is available via $app['annot'];  The AnnotationService's process() method parses annotations in a class to configure controllers.  It is usually not necesary to use the service directly.
+When registered, an instance of AnnotationService is available via $app['annot'];  The AnnotationService's process() method parses annotations in a class to configure controllers.  It is usually not necessary to use the service directly.
 AnnotationService->process() takes 3 arguments:
 * **controllerName**: The fully qualified class name of the controller to process.
 * **isServiceController**: This matters because Silex expects a different string representation of a controller method for ServiceControllers.  Default: false.
@@ -146,7 +146,7 @@ The @Route annotation groups annotations into an isolated endpoint definition.  
 
 **@Request**
 
-The @Request annotation associates a uri pattern to the controller method.  If multiple @Request annotations are given, all modifers will be applied to all @Requests unless they wrapped in a @Route annotation.
+The @Request annotation associates a uri pattern to the controller method.  If multiple @Request annotations are given, all modifiers will be applied to all @Requests unless they wrapped in a @Route annotation.
 * method: A valid Silex method (get, post, put, delete, match)
 * uri: The uri pattern.
 
@@ -203,4 +203,4 @@ The Modifier annotation is a catch-all to execute any method of the Controller o
 Silex\Route::*()
 Silex\Controller::*()
 * method (name of the method to call on the Route object)
-* args (array of arguements to send the the method)
+* args (array of arguments to send the the method)

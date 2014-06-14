@@ -10,7 +10,6 @@
 
 namespace DDesrosiers\SilexAnnotations;
 
-use DDesrosiers\SilexAnnotations\AnnotationService;
 use Doctrine\Common\Annotations\AnnotationRegistry;
 use Silex\Application;
 use Silex\Provider\ServiceControllerServiceProvider;
@@ -49,7 +48,9 @@ class AnnotationServiceProvider implements ServiceProviderInterface
                     );
 
                     $isCollection = !is_numeric($groupName);
-                    $collection = $app['annot']->process($controllerName, true, $isCollection);
+                    /** @var AnnotationService $annotationService */
+                    $annotationService = $app['annot'];
+                    $collection = $annotationService->process($controllerName, true, $isCollection);
                     if ($isCollection) {
                         $app->mount($groupName, $collection);
                     }

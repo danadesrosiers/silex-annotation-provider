@@ -11,7 +11,6 @@
 namespace DDesrosiers\SilexAnnotations\Annotations;
 
 use Silex\ControllerCollection;
-use DDesrosiers\SilexAnnotations\Annotations\RouteAnnotation;
 
 /**
  * @Annotation
@@ -20,31 +19,31 @@ use DDesrosiers\SilexAnnotations\Annotations\RouteAnnotation;
  */
 class Route
 {
-    /** @var array<Request> */
+    /** @var Request[] */
     public $request;
 
-    /** @var array<Convert> */
+    /** @var Convert[] */
     public $convert;
 
-    /** @var array<Assert> */
+    /** @var Assert[] */
     public $assert;
 
-    /** @var array<RequireHttp> */
+    /** @var RequireHttp[] */
     public $requireHttp;
 
-    /** @var array<RequireHttps> */
+    /** @var RequireHttps[] */
     public $requireHttps;
 
-    /** @var array<Value> */
+    /** @var Value[] */
     public $value;
 
-    /** @var array<Host> */
+    /** @var Host[] */
     public $host;
 
-    /** @var array<Before> */
+    /** @var Before[] */
     public $before;
 
-    /** @var array<After> */
+    /** @var After[] */
     public $after;
 
     /**
@@ -64,9 +63,9 @@ class Route
      * Process annotations on a method to register it as a controller.
      *
      * @param \Silex\ControllerCollection $controllerCollection the controller collection to add the route to
-     * @param type                        $controllerName       fully qualified method name of the controller
+     * @param string                      $controllerName       fully qualified method name of the controller
      */
-    public function process(\Silex\ControllerCollection $controllerCollection, $controllerName)
+    public function process(ControllerCollection $controllerCollection, $controllerName)
     {
         foreach ($this->request as $request) {
             $controller = $request->process($controllerCollection, $controllerName);

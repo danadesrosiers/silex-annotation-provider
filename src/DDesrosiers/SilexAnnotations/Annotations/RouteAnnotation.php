@@ -10,13 +10,15 @@
 
 namespace DDesrosiers\SilexAnnotations\Annotations;
 
+use Silex\Controller;
+
 /**
  * @author Dana Desrosiers <dana.desrosiers@gmail.com>
  */
 interface RouteAnnotation
 {
     /**
-     * @param \Silex\Controller $route
+     * @param Controller $route
      */
-    public function process(\Silex\Controller $route);
+    public function process(Controller $route);
 }
