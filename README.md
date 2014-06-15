@@ -197,6 +197,7 @@ Silex\Controller::bind()
 The Modifier annotation is a catch-all to execute any method of the Controller or Route.  All methods should have an annotation, but this annotation is provided as a way to "future-proof" the annotation provider.  In case something is added in the future, users can use it right away instead of waiting for a new annotation to be added.
 
 Silex\Route::{method}()
+
 Silex\Controller::{method}()
 * method (name of the method to call on the Route object)
 * args (array of arguments to send the the method)
