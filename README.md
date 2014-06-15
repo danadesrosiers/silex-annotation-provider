@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/danadesrosiers/silex-annotation-provider.svg?branch=master)](https://travis-ci.org/danadesrosiers/silex-annotation-provider)
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/danadesrosiers/silex-annotation-provider/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/danadesrosiers/silex-annotation-provider/?branch=master)
 
 silex-annotation-provider
 =========================
@@ -19,20 +20,10 @@ Install the silex-annotation-provider using composer.
 }
 ```
 
-Service
-=======
-When registered, an instance of AnnotationService is available via $app['annot'];  The AnnotationService's process() method parses annotations in a class to configure controllers.  It is usually not necessary to use the service directly.
-AnnotationService->process() takes 3 arguments:
-* **controllerName**: The fully qualified class name of the controller to process.
-* **isServiceController**: This matters because Silex expects a different string representation of a controller method for ServiceControllers.  Default: false.
-* **newCollection**: If true, all routes found will be put into a new controller collection and that collection will be returned.  Default: false.
-
-
 Registration
 ============
 ```php
 $app->register(new DDesrosiers\SilexAnnotations\SilexAnnotationProvider(), array(
-    "annot.srcDir" => __DIR__ . "/vendor/ddesrosiers/silex-annotation-provider/src",
     "annot.cache" => new ApcCache(),
     "annot.controllers" => array("MyControllerNamespace\\MyController")
 ));
@@ -40,10 +31,6 @@ $app->register(new DDesrosiers\SilexAnnotations\SilexAnnotationProvider(), array
 
 Parameters
 ==========
-annot.srcDir
-------------
-The path to the silex-annotation-provider component.  This project uses Doctrine Annotations, provide this path to let silex-annotation-provider register the annotations for you.
-
 annot.cache
 -----------
 An instance of a class that implements Doctrine\Common\Cache\Cache.  This is the cache that will be used by the AnnotationReader to cache annotations so they don't have to be parsed every time.  Make sure to include Doctrine Cache as it is not a required dependency of this project.
@@ -138,6 +125,15 @@ class TestProviderController implements ControllerProviderInterface
 
 The ControllerProviderInterface's connect() requirement was satisfied by calling the annotation service's process() method.  
 
+Service
+=======
+When registered, an instance of AnnotationService is available via $app['annot'];  The AnnotationService's process() method parses annotations in a class to configure controllers.  It is usually not necessary to use the service directly.
+AnnotationService->process() takes 3 arguments:
+* **controllerName**: The fully qualified class name of the controller to process.
+* **isServiceController**: This matters because Silex expects a different string representation of a controller method for ServiceControllers.  Default: false.
+* **newCollection**: If true, all routes found will be put into a new controller collection and that collection will be returned.  Default: false.
+
+
 Annotations
 ===========
 **@Route**
@@ -200,7 +196,7 @@ Silex\Controller::bind()
 
 The Modifier annotation is a catch-all to execute any method of the Controller or Route.  All methods should have an annotation, but this annotation is provided as a way to "future-proof" the annotation provider.  In case something is added in the future, users can use it right away instead of waiting for a new annotation to be added.
 
-Silex\Route::*()
-Silex\Controller::*()
+Silex\Route::{method}()
+Silex\Controller::{method}()
 * method (name of the method to call on the Route object)
 * args (array of arguments to send the the method)
