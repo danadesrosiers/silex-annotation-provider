@@ -13,10 +13,11 @@ namespace DDesrosiers\Test\SilexAnnotations\Annotations;
 use DDesrosiers\SilexAnnotations\Annotations as SLX;
 use DDesrosiers\SilexAnnotations\AnnotationServiceProvider;
 use Silex\Application;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Client;
 
-class ConvertTest extends \PHPUnit_Framework_TestCase
+class RequireHttpTest extends \PHPUnit_Framework_TestCase
 {
     /** @var Application */
     protected $app;
@@ -32,36 +33,38 @@ class ConvertTest extends \PHPUnit_Framework_TestCase
         $this->app->register(
                   new AnnotationServiceProvider(),
                   array(
-                      "annot.srcDir"      => __DIR__ . "/../../../../../src",
-                      "annot.controllers" => array("DDesrosiers\\Test\\SilexAnnotations\\Annotations\\ConvertTestController")
+                      "annot.controllers" => array("DDesrosiers\\Test\\SilexAnnotations\\Annotations\\RequireHttpTestController")
                   )
         );
 
-        $this->client = new Client($this->app);
+        $this->client = new Client($this->app, array('REQUEST_SCHEME' => 'https'));
     }
 
-    public function testConvert()
+    public function testHttp()
     {
-        $this->client->request("GET", "/45");
+        $this->client->request("GET", "/test");
         $response = $this->client->getResponse();
         $this->assertEquals(200, $response->getStatusCode());
-        $this->assertEquals("50", $response->getContent());
+    }
+
+    public function testHttps()
+    {
+        // we make the request as http, but it should be redirected to a Http request
+        $request = Request::create('https://example.com/test');
+        $response = $this->app->handle($request);
+        $this->assertEquals(301, $response->getStatusCode());
+        $this->assertTrue($response->isRedirect('http://example.com/test'));
     }
 }
 
-class ConvertTestController
+class RequireHttpTestController
 {
     /**
-     * @SLX\Request(method="GET", uri="/{var}")
-     * @SLX\Convert(variable="var", callback="DDesrosiers\Test\SilexAnnotations\Annotations\ConvertTestController::convert")
+     * @SLX\Request(method="GET", uri="/test")
+     * @SLX\RequireHttp
      */
-    public function testMethod($var)
+    public function testRequireHttp()
     {
-        return new Response($var);
-    }
-
-    public static function convert($var)
-    {
-        return $var + 5;
+        return new Response();
     }
 }

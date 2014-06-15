@@ -13,12 +13,10 @@ namespace DDesrosiers\Test\SilexAnnotations\Annotations;
 use DDesrosiers\SilexAnnotations\Annotations as SLX;
 use DDesrosiers\SilexAnnotations\AnnotationServiceProvider;
 use Silex\Application;
-use Silex\Provider\UrlGeneratorServiceProvider;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Client;
-use Symfony\Component\Routing\Generator\UrlGenerator;
 
-class BindTest extends \PHPUnit_Framework_TestCase
+class HostTest extends \PHPUnit_Framework_TestCase
 {
     /** @var Application */
     protected $app;
@@ -34,34 +32,42 @@ class BindTest extends \PHPUnit_Framework_TestCase
         $this->app->register(
                   new AnnotationServiceProvider(),
                   array(
-                      "annot.srcDir"      => __DIR__ . "/../../../../../src",
-                      "annot.controllers" => array("DDesrosiers\\Test\\SilexAnnotations\\Annotations\\BindTestController")
+                      "annot.controllers" => array("DDesrosiers\\Test\\SilexAnnotations\\Annotations\\HostTestController")
                   )
         );
 
-        $this->app->register(new UrlGeneratorServiceProvider());
-
-        $this->client = new Client($this->app);
+        $this->client = new Client($this->app, array('HTTP_HOST' => 'www.test.com'));
     }
 
-    public function testBind()
+    public function testHost()
     {
-        $this->client->request("GET", "/test");
+        $this->client->request("GET", "/rightHost");
         $response = $this->client->getResponse();
-        $this->assertEquals('/test', $response->getContent());
+        $this->assertEquals(200, $response->getStatusCode());
+
+        $this->client->request("GET", "/wrongHost");
+        $response = $this->client->getResponse();
+        $this->assertEquals(404, $response->getStatusCode());
     }
 }
 
-class BindTestController
+class HostTestController
 {
     /**
-     * @SLX\Request(method="GET", uri="/test")
-     * @SLX\Bind(routeName="testRouteName")
+     * @SLX\Request(method="GET", uri="/rightHost")
+     * @SLX\Host("www.test.com")
      */
-    public function testMethod(Application $app)
+    public function testHost()
     {
-        /** @var UrlGenerator $urlGenerator */
-        $urlGenerator = $app['url_generator'];
-        return new Response($urlGenerator->generate('testRouteName'));
+        return new Response();
+    }
+
+    /**
+     * @SLX\Request(method="GET", uri="/wrongHost")
+     * @SLX\Host("www.wrong.com")
+     */
+    public function testWrongHost()
+    {
+        return new Response();
     }
 }

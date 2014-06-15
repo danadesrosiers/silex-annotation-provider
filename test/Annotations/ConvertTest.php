@@ -16,7 +16,7 @@ use Silex\Application;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Client;
 
-class ValueTest extends \PHPUnit_Framework_TestCase
+class ConvertTest extends \PHPUnit_Framework_TestCase
 {
     /** @var Application */
     protected $app;
@@ -32,35 +32,35 @@ class ValueTest extends \PHPUnit_Framework_TestCase
         $this->app->register(
                   new AnnotationServiceProvider(),
                   array(
-                      "annot.srcDir"      => __DIR__ . "/../../../../../src",
-                      "annot.controllers" => array("DDesrosiers\\Test\\SilexAnnotations\\Annotations\\ValueTestController")
+                      "annot.controllers" => array("DDesrosiers\\Test\\SilexAnnotations\\Annotations\\ConvertTestController")
                   )
         );
 
         $this->client = new Client($this->app);
     }
 
-    public function testDefaultValue()
+    public function testConvert()
     {
-        $this->client->request("GET", "/test");
+        $this->client->request("GET", "/45");
         $response = $this->client->getResponse();
         $this->assertEquals(200, $response->getStatusCode());
-
-        $this->client->request("GET", "/");
-        $response = $this->client->getResponse();
-        $this->assertEquals(200, $response->getStatusCode());
-        $this->assertEquals('default', $response->getContent());
+        $this->assertEquals("50", $response->getContent());
     }
 }
 
-class ValueTestController
+class ConvertTestController
 {
     /**
      * @SLX\Request(method="GET", uri="/{var}")
-     * @SLX\Value(variable="var", default="default")
+     * @SLX\Convert(variable="var", callback="DDesrosiers\Test\SilexAnnotations\Annotations\ConvertTestController::convert")
      */
     public function testMethod($var)
     {
         return new Response($var);
+    }
+
+    public static function convert($var)
+    {
+        return $var + 5;
     }
 }

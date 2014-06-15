@@ -23,8 +23,12 @@
         "symfony/security": "You will need this package to use the `Secure` annotation"
     },
     "autoload": {
-        "psr-0": {
-            "DDesrosiers\\SilexAnnotations\\": "src/",
+        "psr-4": {
+            "DDesrosiers\\SilexAnnotations\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
             "DDesrosiers\\Test\\SilexAnnotations\\": "test/"
         }
     },

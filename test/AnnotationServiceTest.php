@@ -35,7 +35,6 @@ class AnnotationServiceTest extends \PHPUnit_Framework_TestCase
         $this->app->register(
                   new AnnotationServiceProvider(),
                   array(
-                      "annot.srcDir"      => __DIR__ . "/../../../../src",
                       "annot.controllers" => array("DDesrosiers\\Test\\SilexAnnotations\\TestController")
                   )
         );
@@ -53,7 +52,6 @@ class AnnotationServiceTest extends \PHPUnit_Framework_TestCase
         $this->app->register(
                   new AnnotationServiceProvider(),
                   array(
-                      "annot.srcDir"      => __DIR__ . "/../../../../src",
                       "annot.controllers" => array("DDesrosiers\\Test\\SilexAnnotations\\TestControllerProvider")
                   )
         );
@@ -71,7 +69,6 @@ class AnnotationServiceTest extends \PHPUnit_Framework_TestCase
         $this->app->register(
                   new AnnotationServiceProvider(),
                   array(
-                      "annot.srcDir"      => __DIR__ . "/../../../../src",
                       "annot.cache"       => 'Array',
                       "annot.controllers" => array("DDesrosiers\\Test\\SilexAnnotations\\TestController")
                   )
@@ -87,7 +84,6 @@ class AnnotationServiceTest extends \PHPUnit_Framework_TestCase
         $this->app->register(
                   new AnnotationServiceProvider(),
                   array(
-                      "annot.srcDir"      => __DIR__ . "/../../../../src",
                       "annot.cache"       => new ApcCache(),
                       "annot.controllers" => array("DDesrosiers\\Test\\SilexAnnotations\\TestController")
                   )
@@ -106,7 +102,6 @@ class AnnotationServiceTest extends \PHPUnit_Framework_TestCase
         $this->app->register(
                   new AnnotationServiceProvider(),
                   array(
-                      "annot.srcDir"      => __DIR__ . "/../../../../src",
                       "annot.cache"       => 'Fake',
                       "annot.controllers" => array("DDesrosiers\\Test\\SilexAnnotations\\TestController")
                   )
@@ -122,7 +117,6 @@ class AnnotationServiceTest extends \PHPUnit_Framework_TestCase
         $this->app->register(
                   new AnnotationServiceProvider(),
                   array(
-                      "annot.srcDir"      => __DIR__ . "/../../../../src",
                       "annot.cache"       => new InvalidCache(),
                       "annot.controllers" => array("DDesrosiers\\Test\\SilexAnnotations\\TestController")
                   )

@@ -34,7 +34,6 @@ class RequestTest extends \PHPUnit_Framework_TestCase
         $this->app->register(
                   new AnnotationServiceProvider(),
                   array(
-                      "annot.srcDir"      => __DIR__ . "/../../../../../src",
                       "annot.controllers" => array("DDesrosiers\\Test\\SilexAnnotations\\Annotations\\RequestTestController")
                   )
         );

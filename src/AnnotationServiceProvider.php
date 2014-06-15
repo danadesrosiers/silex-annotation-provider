@@ -28,11 +28,6 @@ class AnnotationServiceProvider implements ServiceProviderInterface
      */
     public function boot(Application $app)
     {
-        AnnotationRegistry::registerAutoloadNamespace(
-                          "DDesrosiers\\SilexAnnotations\\Annotations",
-                          $app['annot.srcDir']
-        );
-
         // Process annotations for any given controllers
         if ($app->offsetExists('annot.controllers') && is_array($app['annot.controllers'])) {
             foreach ($app['annot.controllers'] as $groupName => $controllerGroup) {
@@ -64,13 +59,19 @@ class AnnotationServiceProvider implements ServiceProviderInterface
      */
     public function register(Application $app)
     {
-        // Need the ability to register annotation namespace early for ControllerProviders
-        if ($app->offsetExists('annot.srcDir')) {
-            AnnotationRegistry::registerAutoloadNamespace(
-                              "DDesrosiers\\SilexAnnotations\\Annotations",
-                              $app['annot.srcDir']
-            );
-        }
+        // A custom auto loader for Doctrine Annotations since it can't handle PSR-4 directory structure
+        AnnotationRegistry::registerLoader(function ($class) {
+            $annotationDir = __DIR__ . "/Annotations";
+            $fqcn_array = explode("\\", $class);
+            $class_name = array_pop($fqcn_array);
+            if (is_file("$annotationDir/$class_name.php"))
+            {
+                /** @noinspection PhpIncludeInspection */
+                require_once "$annotationDir/$class_name.php";
+                return true;
+            }
+            return false;
+        });
 
         // ServiceControllerServiceProvider is required, so register it here so the user doesn't have to.
         $app->register(new ServiceControllerServiceProvider());

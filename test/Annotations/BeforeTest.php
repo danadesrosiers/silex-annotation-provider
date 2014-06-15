@@ -12,12 +12,12 @@ namespace DDesrosiers\Test\SilexAnnotations\Annotations;
 
 use DDesrosiers\SilexAnnotations\Annotations as SLX;
 use DDesrosiers\SilexAnnotations\AnnotationServiceProvider;
+use Exception;
 use Silex\Application;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Client;
 
-class RequireHttpTest extends \PHPUnit_Framework_TestCase
+class BeforeTest extends \PHPUnit_Framework_TestCase
 {
     /** @var Application */
     protected $app;
@@ -33,39 +33,34 @@ class RequireHttpTest extends \PHPUnit_Framework_TestCase
         $this->app->register(
                   new AnnotationServiceProvider(),
                   array(
-                      "annot.srcDir"      => __DIR__ . "/../../../../../src",
-                      "annot.controllers" => array("DDesrosiers\\Test\\SilexAnnotations\\Annotations\\RequireHttpTestController")
+                      "annot.controllers" => array("DDesrosiers\\Test\\SilexAnnotations\\Annotations\\BeforeTestController")
                   )
         );
 
-        $this->client = new Client($this->app, array('REQUEST_SCHEME' => 'https'));
+        $this->client = new Client($this->app);
     }
 
-    public function testHttp()
+    public function testBefore()
     {
         $this->client->request("GET", "/test");
         $response = $this->client->getResponse();
-        $this->assertEquals(200, $response->getStatusCode());
-    }
-
-    public function testHttps()
-    {
-        // we make the request as http, but it should be redirected to a Http request
-        $request = Request::create('https://example.com/test');
-        $response = $this->app->handle($request);
-        $this->assertEquals(301, $response->getStatusCode());
-        $this->assertTrue($response->isRedirect('http://example.com/test'));
+        $this->assertEquals(500, $response->getStatusCode());
     }
 }
 
-class RequireHttpTestController
+class BeforeTestController
 {
     /**
      * @SLX\Request(method="GET", uri="/test")
-     * @SLX\RequireHttp
+     * @SLX\Before("DDesrosiers\SilexAnnotations\Test\Annotations\BeforeTestController::beforeCallback")
      */
-    public function testRequireHttp()
+    public function testMethod($var)
     {
-        return new Response();
+        return new Response($var);
+    }
+
+    public static function beforeCallback()
+    {
+        throw new Exception("before callback");
     }
 }

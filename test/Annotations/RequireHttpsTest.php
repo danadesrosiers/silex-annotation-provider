@@ -13,10 +13,11 @@ namespace DDesrosiers\Test\SilexAnnotations\Annotations;
 use DDesrosiers\SilexAnnotations\Annotations as SLX;
 use DDesrosiers\SilexAnnotations\AnnotationServiceProvider;
 use Silex\Application;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Client;
 
-class HostTest extends \PHPUnit_Framework_TestCase
+class RequireHttpsTest extends \PHPUnit_Framework_TestCase
 {
     /** @var Application */
     protected $app;
@@ -32,42 +33,35 @@ class HostTest extends \PHPUnit_Framework_TestCase
         $this->app->register(
                   new AnnotationServiceProvider(),
                   array(
-                      "annot.srcDir"      => __DIR__ . "/../../../../../src",
-                      "annot.controllers" => array("DDesrosiers\\Test\\SilexAnnotations\\Annotations\\HostTestController")
+                      "annot.controllers" => array("DDesrosiers\\Test\\SilexAnnotations\\Annotations\\RequireHttpsTestController")
                   )
         );
-
-        $this->client = new Client($this->app, array('HTTP_HOST' => 'www.test.com'));
     }
 
-    public function testHost()
+    public function testHttps()
     {
-        $this->client->request("GET", "/rightHost");
-        $response = $this->client->getResponse();
+        $request = Request::create('https://example.com/test');
+        $response = $this->app->handle($request);
         $this->assertEquals(200, $response->getStatusCode());
+    }
 
-        $this->client->request("GET", "/wrongHost");
-        $response = $this->client->getResponse();
-        $this->assertEquals(404, $response->getStatusCode());
+    public function testHttp()
+    {
+        // we make the request as http, but it should be redirected to a https request
+        $request = Request::create('http://example.com/test');
+        $response = $this->app->handle($request);
+        $this->assertEquals(301, $response->getStatusCode());
+        $this->assertTrue($response->isRedirect('https://example.com/test'));
     }
 }
 
-class HostTestController
+class RequireHttpsTestController
 {
     /**
-     * @SLX\Request(method="GET", uri="/rightHost")
-     * @SLX\Host("www.test.com")
+     * @SLX\Request(method="GET", uri="/test")
+     * @SLX\RequireHttps
      */
-    public function testHost()
-    {
-        return new Response();
-    }
-
-    /**
-     * @SLX\Request(method="GET", uri="/wrongHost")
-     * @SLX\Host("www.wrong.com")
-     */
-    public function testWrongHost()
+    public function testRequireHttps()
     {
         return new Response();
     }
