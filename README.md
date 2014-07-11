@@ -50,6 +50,16 @@ $app['annot.controllers'] = array(
 	)
 );
 ```
+annot.controller_factory
+------------------------
+Optional callback to customize the controller name/callable. The default is generating a simple string format:
+```php
+$app['annot.controller_factory'] = $app->protect(
+    function (Application $app, $controllerName, $methodName, $separator) {
+        return $controllerName . $separator . $methodName;
+    }
+);
+```
 
 Annotate Controllers
 ====================

@@ -81,5 +81,11 @@ class AnnotationServiceProvider implements ServiceProviderInterface
                                 return new AnnotationService($app);
                             }
         );
+        $app['annot.controller_factory'] = $app->protect(
+	    function (Application $app, $controllerName, $methodName, $separator) {
+                return $controllerName . $separator . $methodName;
+            }
+        );
+
     }
 }
