@@ -8,10 +8,11 @@
          processIsolation="false"
          stopOnFailure="false"
          syntaxCheck="false"
+         bootstrap="vendor/autoload.php"
         >
     <testsuites>
         <testsuite name="silex-annotation-provider Test Suite">
-            <directory>./tests/</directory>
+            <directory>./test/</directory>
         </testsuite>
     </testsuites>
     <filter>
