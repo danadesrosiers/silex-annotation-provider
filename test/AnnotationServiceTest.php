@@ -16,6 +16,7 @@ use DDesrosiers\SilexAnnotations\AnnotationServiceProvider;
 use Doctrine\Common\Cache\ApcCache;
 use RuntimeException;
 use Silex\Application;
+use Silex\ControllerProviderInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Client;
 
@@ -49,15 +50,11 @@ class AnnotationServiceTest extends \PHPUnit_Framework_TestCase
 
     public function testControllerProvider()
     {
-        $this->app->register(
-                  new AnnotationServiceProvider(),
-                  array(
-                      "annot.controllers" => array("DDesrosiers\\Test\\SilexAnnotations\\TestControllerProvider")
-                  )
-        );
+        $this->app->register(new AnnotationServiceProvider());
+        $this->app->mount('/cp', new TestControllerProvider());
 
         $client = new Client($this->app);
-        $client->request("GET", "/cptest");
+        $client->request("GET", "/cp/test");
 
         $response = $client->getResponse();
 
@@ -150,7 +147,7 @@ class TestController
     }
 }
 
-class TestControllerProvider
+class TestControllerProvider implements ControllerProviderInterface
 {
     function connect(Application $app)
     {
@@ -161,7 +158,7 @@ class TestControllerProvider
 
     /**
      * @SLX\Route(
-     *      @SLX\Request(method="GET", uri="cptest")
+     *      @SLX\Request(method="GET", uri="test")
      * )
      */
     public function testMethod()
