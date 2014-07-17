@@ -77,7 +77,7 @@ class AnnotationService
         foreach ($reflection_class->getMethods(ReflectionMethod::IS_PUBLIC) as $reflection_method) {
             if (!$reflection_method->isStatic()) {
                 $method_annotations = $this->reader->getMethodAnnotations($reflection_method);
-                $controllerMethodName = $controllerName . $separator . $reflection_method->getName();
+                $controllerMethodName = $this->app['annot.controller_factory']($this->app, $controllerName, $reflection_method->getName(), $separator);
                 foreach ($method_annotations as $annotation) {
                     if ($annotation instanceof Route) {
                         $annotation->process($controllerCollection, $controllerMethodName);

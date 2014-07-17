@@ -50,6 +50,16 @@ $app['annot.controllers'] = array(
 	)
 );
 ```
+annot.controller_factory
+------------------------
+Factory method to customize the controller name/callable. This is **optional** and you should hardly ever need to change this (unless you are really sure what you are doing).
+```php
+$app['annot.controller_factory'] = $app->protect(
+    function (Application $app, $controllerName, $methodName, $separator) {
+        return $controllerName . $separator . $methodName;
+    }
+);
+```
 
 Annotate Controllers
 ====================
