@@ -32,7 +32,10 @@ class ConvertTest extends \PHPUnit_Framework_TestCase
         $this->app->register(
                   new AnnotationServiceProvider(),
                   array(
-                      "annot.controllers" => array("DDesrosiers\\Test\\SilexAnnotations\\Annotations\\ConvertTestController")
+                      "annot.controllers" => array(
+                          "DDesrosiers\\Test\\SilexAnnotations\\Annotations\\ConvertTestController",
+                          "DDesrosiers\\Test\\SilexAnnotations\\Annotations\\ConvertCollectionTestController"
+                      )
                   )
         );
 
@@ -46,6 +49,14 @@ class ConvertTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(200, $response->getStatusCode());
         $this->assertEquals("50", $response->getContent());
     }
+
+    public function testConvertCollection()
+    {
+        $this->client->request("GET", "/test/45");
+        $response = $this->client->getResponse();
+        $this->assertEquals(200, $response->getStatusCode());
+        $this->assertEquals("50", $response->getContent());
+    }
 }
 
 class ConvertTestController
@@ -53,6 +64,26 @@ class ConvertTestController
     /**
      * @SLX\Request(method="GET", uri="/{var}")
      * @SLX\Convert(variable="var", callback="DDesrosiers\Test\SilexAnnotations\Annotations\ConvertTestController::convert")
+     */
+    public function testMethod($var)
+    {
+        return new Response($var);
+    }
+
+    public static function convert($var)
+    {
+        return $var + 5;
+    }
+}
+
+/**
+ * @SLX\Controller(prefix="test")
+ * @SLX\Convert(variable="var", callback="DDesrosiers\Test\SilexAnnotations\Annotations\ConvertTestController::convert")
+ */
+class ConvertCollectionTestController
+{
+    /**
+     * @SLX\Request(method="GET", uri="/{var}")
      */
     public function testMethod($var)
     {

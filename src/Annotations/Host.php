@@ -10,11 +10,9 @@
 
 namespace DDesrosiers\SilexAnnotations\Annotations;
 
-use Silex\Controller;
-
 /**
  * @Annotation
- * @Target({"METHOD", "ANNOTATION"})
+ * @Target({"CLASS", "METHOD", "ANNOTATION"})
  * @author Dana Desrosiers <dana.desrosiers@gmail.com>
  */
 class Host implements RouteAnnotation
@@ -23,9 +21,9 @@ class Host implements RouteAnnotation
     public $host;
 
     /**
-     * @param Controller $route
+     * @inheritdoc
      */
-    public function process(Controller $route)
+    public function process($route)
     {
         /** @var \Silex\Route $route */
         $route->host($this->host);

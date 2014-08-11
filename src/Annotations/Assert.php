@@ -10,11 +10,9 @@
 
 namespace DDesrosiers\SilexAnnotations\Annotations;
 
-use Silex\Controller;
-
 /**
  * @Annotation
- * @Target({"METHOD", "ANNOTATION"})
+ * @Target({"CLASS", "METHOD", "ANNOTATION"})
  */
 class Assert implements RouteAnnotation
 {
@@ -25,9 +23,9 @@ class Assert implements RouteAnnotation
     public $regex;
 
     /**
-     * @param Controller $route
+     * @inheritdoc
      */
-    public function process(Controller $route)
+    public function process($route)
     {
         $route->assert($this->variable, $this->regex);
     }

@@ -10,19 +10,17 @@
 
 namespace DDesrosiers\SilexAnnotations\Annotations;
 
-use Silex\Controller;
-
 /**
  * @Annotation
- * @Target({"METHOD", "ANNOTATION"})
+ * @Target({"CLASS", "METHOD", "ANNOTATION"})
  * @author Dana Desrosiers <dana.desrosiers@gmail.com>
  */
 class RequireHttp implements RouteAnnotation
 {
     /**
-     * @param Controller $route
+     * @inheritdoc
      */
-    public function process(Controller $route)
+    public function process($route)
     {
         $route->requireHttp();
     }

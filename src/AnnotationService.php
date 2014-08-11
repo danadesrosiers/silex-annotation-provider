@@ -10,6 +10,7 @@
 
 namespace DDesrosiers\SilexAnnotations;
 
+use DDesrosiers\SilexAnnotations\Annotations\Controller;
 use DDesrosiers\SilexAnnotations\Annotations\Request;
 use DDesrosiers\SilexAnnotations\Annotations\Route;
 use DDesrosiers\SilexAnnotations\Annotations\RouteAnnotation;
@@ -20,6 +21,7 @@ use ReflectionClass;
 use ReflectionMethod;
 use RuntimeException;
 use Silex\Application;
+use Silex\ControllerCollection;
 
 /**
  * Class AnnotationService parses annotations on classes and converts them to
@@ -47,12 +49,12 @@ class AnnotationService
             if ($app['annot.cache'] instanceof Cache) {
                 $cache = $app['annot.cache'];
             } else if (is_string($app['annot.cache']) && strlen($app['annot.cache']) > 0) {
-                $cache_class = "Doctrine\\Common\\Cache\\{$app['annot.cache']}Cache";
-                if (!class_exists($cache_class)) {
-                    throw new RuntimeException("Cache type: [$cache_class] does not exist.  Make sure you include Doctrine cache.");
+                $cacheClass = "Doctrine\\Common\\Cache\\{$app['annot.cache']}Cache";
+                if (!class_exists($cacheClass)) {
+                    throw new RuntimeException("Cache type: [$cacheClass] does not exist.  Make sure you include Doctrine cache.");
                 }
 
-                $cache = new $cache_class();
+                $cache = new $cacheClass();
             } else {
                 throw new RuntimeException("Cache object does not implement Doctrine\\Common\\Cache\\Cache");
             }
@@ -63,27 +65,103 @@ class AnnotationService
         }
     }
 
+    public function discoverControllers($dir)
+    {
+        if (!is_dir($dir)) {
+            throw new RuntimeException("Controller directory: {$dir} does not exist.");
+        }
+
+        $controllers = array();
+        $fileIterator = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($dir));
+        foreach ($fileIterator as $fileName => $file) {
+            list ($name, $extension) = explode('.', $fileName);
+            if (in_array($extension, array('php', 'phtml'))) {
+                $parser = new ClassParser($fileName);
+                foreach ($parser->parse() as $className) {
+                    $reflectionClass = new ReflectionClass($className);
+                    $classAnnotations = $this->reader->getClassAnnotations($reflectionClass);
+                    foreach ($classAnnotations as $annotation) {
+                        if ($annotation instanceof Controller) {
+                            $annotation->process($this->app, $reflectionClass);
+                        }
+                    }
+                }
+            }
+        }
+
+        return $controllers;
+    }
+
+    public function registerController($controllerName, $mountPrefix = null)
+    {
+        if ($this->app['annot.useServiceControllers']) {
+            $this->app["$controllerName"] = $this->app->share(
+                                                      function (Application $app) use ($controllerName) {
+                                                          return new $controllerName($app);
+                                                      }
+            );
+        }
+
+        $reflectionClass = new ReflectionClass($controllerName);
+        $controllerAnnotation = $this->reader->getClassAnnotation(
+                                             $reflectionClass,
+                                             "\\DDesrosiers\\SilexAnnotations\\Annotations\\Controller"
+        );
+        if (!($controllerAnnotation instanceof Controller)) {
+            $controllerAnnotation = new Controller();
+            if (!is_null($mountPrefix)) {
+                $controllerAnnotation->prefix = is_int($mountPrefix) ? null : $mountPrefix;
+            }
+        }
+
+        $controllerAnnotation->process($this->app, $reflectionClass);
+    }
+
     /**
-     * @param string  $controllerName
+     * @param string $controllerName
      * @param boolean $isServiceController
      * @param boolean $newCollection
      * @return \Silex\ControllerCollection
      */
     public function process($controllerName, $isServiceController = true, $newCollection = false)
     {
-        $separator = $isServiceController ? ":" : "::";
+        $this->app['annot.useServiceControllers'] = $isServiceController;
         $controllerCollection = $newCollection ? $this->app['controllers_factory'] : $this->app['controllers'];
-        $reflection_class = new ReflectionClass($controllerName);
-        foreach ($reflection_class->getMethods(ReflectionMethod::IS_PUBLIC) as $reflection_method) {
-            if (!$reflection_method->isStatic()) {
-                $method_annotations = $this->reader->getMethodAnnotations($reflection_method);
-                $controllerMethodName = $this->app['annot.controller_factory']($this->app, $controllerName, $reflection_method->getName(), $separator);
-                foreach ($method_annotations as $annotation) {
+        $reflectionClass = new ReflectionClass($controllerName);
+
+        $this->processMethodAnnotations($reflectionClass, $controllerCollection);
+
+        return $controllerCollection;
+    }
+
+    public function processClassAnnotations(ReflectionClass $reflectionClass, ControllerCollection $controllerCollection)
+    {
+        foreach ($this->reader->getClassAnnotations($reflectionClass) as $annotation) {
+            if ($annotation instanceof RouteAnnotation) {
+                $annotation->process($controllerCollection);
+            }
+        }
+    }
+
+    public function processMethodAnnotations(ReflectionClass $reflectionClass, ControllerCollection $controllerCollection)
+    {
+        $separator = $this->app['annot.useServiceControllers'] ? ":" : "::";
+
+        foreach ($reflectionClass->getMethods(ReflectionMethod::IS_PUBLIC) as $reflectionMethod) {
+            if (!$reflectionMethod->isStatic()) {
+                $controllerMethodName = $this->app['annot.controller_factory'](
+                    $this->app,
+                    $reflectionClass->getName(),
+                    $reflectionMethod->getName(),
+                    $separator
+                );
+                $methodAnnotations = $this->reader->getMethodAnnotations($reflectionMethod);
+                foreach ($methodAnnotations as $annotation) {
                     if ($annotation instanceof Route) {
                         $annotation->process($controllerCollection, $controllerMethodName);
                     } else if ($annotation instanceof Request) {
                         $controller = $annotation->process($controllerCollection, $controllerMethodName);
-                        foreach ($method_annotations as $routeAnnotation) {
+                        foreach ($methodAnnotations as $routeAnnotation) {
                             if ($routeAnnotation instanceof RouteAnnotation) {
                                 $routeAnnotation->process($controller);
                             }
@@ -92,12 +170,12 @@ class AnnotationService
                 }
             }
         }
-
-        return $controllerCollection;
     }
 
     public function getReader()
     {
         return $this->reader;
     }
+
+
 }

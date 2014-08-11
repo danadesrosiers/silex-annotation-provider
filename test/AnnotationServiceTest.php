@@ -31,6 +31,23 @@ class AnnotationServiceTest extends \PHPUnit_Framework_TestCase
         $this->app['debug'] = true;
     }
 
+    public function testRegisterController()
+    {
+        $this->app->register(
+                  new AnnotationServiceProvider(),
+                      array(
+                          "annot.controllers" => array("DDesrosiers\\Test\\SilexAnnotations\\TestControllerWithControllerAnnotation")
+                      )
+        );
+
+        $client = new Client($this->app);
+        $client->request('GET', '/test/test1');
+
+        $response = $client->getResponse();
+
+        $this->assertEquals('200', $response->getStatusCode());
+    }
+
     public function testServiceController()
     {
         $this->app->register(
@@ -42,9 +59,30 @@ class AnnotationServiceTest extends \PHPUnit_Framework_TestCase
 
         $client = new Client($this->app);
         $client->request("GET", "/test1");
-
         $response = $client->getResponse();
+        $this->assertEquals('200', $response->getStatusCode());
+    }
 
+    public function testIsolationOfControllerModifiers()
+    {
+        $this->app->register(
+                  new AnnotationServiceProvider(),
+                      array(
+                          "annot.controllers" => array(
+                              "DDesrosiers\\Test\\SilexAnnotations\\TestController",
+                              "DDesrosiers\\Test\\SilexAnnotations\\TestControllerWithNoPrefix"
+                          )
+                      )
+        );
+
+        $client = new Client($this->app);
+
+        $client->request("GET", "/test");
+        $response = $client->getResponse();
+        $this->assertEquals('500', $response->getStatusCode());
+
+        $client->request("GET", "/test1");
+        $response = $client->getResponse();
         $this->assertEquals('200', $response->getStatusCode());
     }
 
@@ -122,7 +160,6 @@ class AnnotationServiceTest extends \PHPUnit_Framework_TestCase
     }
 }
 
-
 class TestController
 {
     /**
@@ -144,6 +181,47 @@ class TestController
     public function testMethod($num)
     {
         return new Response("success $num");
+    }
+
+    public function beforeCallback()
+    {
+        throw new \Exception("before callback");
+    }
+}
+
+/**
+ * @SLX\Controller(prefix="/test")
+ */
+class TestControllerWithControllerAnnotation
+{
+    /**
+     * @SLX\Route(
+     *      @SLX\Request(method="GET", uri="test1")
+     * )
+     */
+    public function test1()
+    {
+        return new Response();
+    }
+}
+
+/**
+ * @SLX\Controller
+ * @SLX\Before("DDesrosiers\SilexAnnotations\Test\Annotations\BeforeTestController::beforeCallback")
+ */
+class TestControllerWithNoPrefix
+{
+    /**
+     * @SLX\Request(method="GET", uri="/test")
+     */
+    public function testMethod($var)
+    {
+        return new Response($var);
+    }
+
+    public static function beforeCallback()
+    {
+        throw new \Exception("before callback");
     }
 }
 

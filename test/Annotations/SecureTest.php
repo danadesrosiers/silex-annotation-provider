@@ -33,7 +33,10 @@ class SecureTest extends \PHPUnit_Framework_TestCase
         $this->app->register(
                   new AnnotationServiceProvider(),
                   array(
-                      "annot.controllers" => array("DDesrosiers\\Test\\SilexAnnotations\\Annotations\\SecureTestController")
+                      "annot.controllers" => array(
+                          "DDesrosiers\\Test\\SilexAnnotations\\Annotations\\SecureTestController",
+                          "DDesrosiers\\Test\\SilexAnnotations\\Annotations\\SecureCollectionTestController"
+                      )
                   )
         );
 
@@ -78,6 +81,26 @@ class SecureTest extends \PHPUnit_Framework_TestCase
         $response = $this->client->getResponse();
         $this->assertEquals('401', $response->getStatusCode());
     }
+
+    public function testAuthorizedUserCollection()
+    {
+        $this->client->request(
+                     "GET",
+                         "/test/test",
+                         array(),
+                         array(),
+                         array('PHP_AUTH_USER' => 'admin', 'PHP_AUTH_PW' => 'foo')
+        );
+        $response = $this->client->getResponse();
+        $this->assertEquals('200', $response->getStatusCode());
+    }
+
+    public function testUnauthorizedUserCollection()
+    {
+        $this->client->request("GET", "/test/test");
+        $response = $this->client->getResponse();
+        $this->assertEquals('401', $response->getStatusCode());
+    }
 }
 
 class SecureTestController
@@ -85,6 +108,21 @@ class SecureTestController
     /**
      * @SLX\Request(method="GET", uri="/test")
      * @SLX\Secure("ROLE_ADMIN")
+     */
+    public function testSecure()
+    {
+        return new Response();
+    }
+}
+
+/**
+ * @SLX\Controller(prefix="test")
+ * @SLX\Secure("ROLE_ADMIN")
+ */
+class SecureCollectionTestController
+{
+    /**
+     * @SLX\Request(method="GET", uri="/test")
      */
     public function testSecure()
     {

@@ -10,11 +10,9 @@
 
 namespace DDesrosiers\SilexAnnotations\Annotations;
 
-use Silex\Controller;
-
 /**
  * @Annotation
- * @Target({"METHOD", "ANNOTATION"})
+ * @Target({"CLASS", "METHOD", "ANNOTATION"})
  */
 class Bind implements RouteAnnotation
 {
@@ -22,9 +20,9 @@ class Bind implements RouteAnnotation
     public $routeName;
 
     /**
-     * @param Controller $route
+     * @inheritdoc
      */
-    public function process(Controller $route)
+    public function process($route)
     {
         $route->bind($this->routeName);
     }

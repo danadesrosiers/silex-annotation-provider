@@ -32,7 +32,10 @@ class ValueTest extends \PHPUnit_Framework_TestCase
         $this->app->register(
                   new AnnotationServiceProvider(),
                   array(
-                      "annot.controllers" => array("DDesrosiers\\Test\\SilexAnnotations\\Annotations\\ValueTestController")
+                      "annot.controllers" => array(
+                          "DDesrosiers\\Test\\SilexAnnotations\\Annotations\\ValueTestController",
+                          "DDesrosiers\\Test\\SilexAnnotations\\Annotations\\ValueCollectionTestController"
+                      )
                   )
         );
 
@@ -50,6 +53,14 @@ class ValueTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(200, $response->getStatusCode());
         $this->assertEquals('default', $response->getContent());
     }
+
+    public function testDefaultValueCollection()
+    {
+        $this->client->request("GET", "/test/test");
+        $response = $this->client->getResponse();
+        $this->assertEquals(200, $response->getStatusCode());
+        $this->assertEquals('test', $response->getContent());
+    }
 }
 
 class ValueTestController
@@ -57,6 +68,21 @@ class ValueTestController
     /**
      * @SLX\Request(method="GET", uri="/{var}")
      * @SLX\Value(variable="var", default="default")
+     */
+    public function testMethod($var)
+    {
+        return new Response($var);
+    }
+}
+
+/**
+ * @SLX\Controller(prefix="test")
+ * @SLX\Value(variable="var", default="default")
+ */
+class ValueCollectionTestController
+{
+    /**
+     * @SLX\Request(method="GET", uri="/{var}")
      */
     public function testMethod($var)
     {

@@ -33,7 +33,10 @@ class BeforeTest extends \PHPUnit_Framework_TestCase
         $this->app->register(
                   new AnnotationServiceProvider(),
                   array(
-                      "annot.controllers" => array("DDesrosiers\\Test\\SilexAnnotations\\Annotations\\BeforeTestController")
+                      "annot.controllers" => array(
+                          "DDesrosiers\\Test\\SilexAnnotations\\Annotations\\BeforeTestController",
+                          "DDesrosiers\\Test\\SilexAnnotations\\Annotations\\BeforeCollectionTestController"
+                      )
                   )
         );
 
@@ -46,6 +49,13 @@ class BeforeTest extends \PHPUnit_Framework_TestCase
         $response = $this->client->getResponse();
         $this->assertEquals(500, $response->getStatusCode());
     }
+
+    public function testBeforeCollection()
+    {
+        $this->client->request("GET", "/test/test");
+        $response = $this->client->getResponse();
+        $this->assertEquals(500, $response->getStatusCode());
+    }
 }
 
 class BeforeTestController
@@ -53,6 +63,26 @@ class BeforeTestController
     /**
      * @SLX\Request(method="GET", uri="/test")
      * @SLX\Before("DDesrosiers\SilexAnnotations\Test\Annotations\BeforeTestController::beforeCallback")
+     */
+    public function testMethod($var)
+    {
+        return new Response($var);
+    }
+
+    public static function beforeCallback()
+    {
+        throw new Exception("before callback");
+    }
+}
+
+/**
+ * @SLX\Controller(prefix="test")
+ * @SLX\Before("DDesrosiers\SilexAnnotations\Test\Annotations\BeforeTestController::beforeCallback")
+ */
+class BeforeCollectionTestController
+{
+    /**
+     * @SLX\Request(method="GET", uri="/test")
      */
     public function testMethod($var)
     {

@@ -32,20 +32,42 @@ class HostTest extends \PHPUnit_Framework_TestCase
         $this->app->register(
                   new AnnotationServiceProvider(),
                   array(
-                      "annot.controllers" => array("DDesrosiers\\Test\\SilexAnnotations\\Annotations\\HostTestController")
+                      "annot.controllers" => array(
+                          "DDesrosiers\\Test\\SilexAnnotations\\Annotations\\HostTestController",
+                          "DDesrosiers\\Test\\SilexAnnotations\\Annotations\\HostCollectionTestController"
+                      )
                   )
         );
-
-        $this->client = new Client($this->app, array('HTTP_HOST' => 'www.test.com'));
     }
 
-    public function testHost()
+    public function testCorrectHost()
     {
-        $this->client->request("GET", "/rightHost");
+        $this->client = new Client($this->app, array('HTTP_HOST' => 'www.test.com'));
+        $this->client->request("GET", "/hostTest");
         $response = $this->client->getResponse();
         $this->assertEquals(200, $response->getStatusCode());
+    }
 
-        $this->client->request("GET", "/wrongHost");
+    public function testWrongHost()
+    {
+        $this->client = new Client($this->app, array('HTTP_HOST' => 'www.wrong.com'));
+        $this->client->request("GET", "/hostTest");
+        $response = $this->client->getResponse();
+        $this->assertEquals(404, $response->getStatusCode());
+    }
+
+    public function testCorrectHostCollection()
+    {
+        $this->client = new Client($this->app, array('HTTP_HOST' => 'www.test.com'));
+        $this->client->request("GET", "/test/hostTest");
+        $response = $this->client->getResponse();
+        $this->assertEquals(200, $response->getStatusCode());
+    }
+
+    public function testWrongHostCollection()
+    {
+        $this->client = new Client($this->app, array('HTTP_HOST' => 'www.wrong.com'));
+        $this->client->request("GET", "/test/hostTest");
         $response = $this->client->getResponse();
         $this->assertEquals(404, $response->getStatusCode());
     }
@@ -54,19 +76,25 @@ class HostTest extends \PHPUnit_Framework_TestCase
 class HostTestController
 {
     /**
-     * @SLX\Request(method="GET", uri="/rightHost")
+     * @SLX\Request(method="GET", uri="/hostTest")
      * @SLX\Host("www.test.com")
      */
     public function testHost()
     {
         return new Response();
     }
+}
 
+/**
+ * @SLX\Controller(prefix="test")
+ * @SLX\Host("www.test.com")
+ */
+class HostCollectionTestController
+{
     /**
-     * @SLX\Request(method="GET", uri="/wrongHost")
-     * @SLX\Host("www.wrong.com")
+     * @SLX\Request(method="GET", uri="/hostTest")
      */
-    public function testWrongHost()
+    public function testHost()
     {
         return new Response();
     }
