@@ -10,11 +10,9 @@
 
 namespace DDesrosiers\SilexAnnotations\Annotations;
 
-use Silex\Controller;
-
 /**
  * @Annotation
- * @Target({"METHOD", "ANNOTATION"})
+ * @Target({"CLASS", "METHOD", "ANNOTATION"})
  */
 class Before implements RouteAnnotation
 {
@@ -22,9 +20,9 @@ class Before implements RouteAnnotation
     public $callback;
 
     /**
-     * @param Controller $route
+     * @inheritdoc
      */
-    public function process(Controller $route)
+    public function process($route)
     {
         $route->before($this->callback);
     }

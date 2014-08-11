@@ -32,9 +32,12 @@ class AfterTest extends \PHPUnit_Framework_TestCase
 
         $this->app->register(
                   new AnnotationServiceProvider(),
-                  array(
-                      "annot.controllers" => array("DDesrosiers\\Test\\SilexAnnotations\\Annotations\\AfterTestController")
-                  )
+                      array(
+                          "annot.controllers" => array(
+                              "DDesrosiers\\Test\\SilexAnnotations\\Annotations\\AfterTestController",
+                              "DDesrosiers\\Test\\SilexAnnotations\\Annotations\\AfterCollectionTestController"
+                          )
+                      )
         );
 
         $this->client = new Client($this->app);
@@ -46,6 +49,13 @@ class AfterTest extends \PHPUnit_Framework_TestCase
         $response = $this->client->getResponse();
         $this->assertEquals(500, $response->getStatusCode());
     }
+
+    public function testAfterOnCollection()
+    {
+        $this->client->request("GET", "/test/test");
+        $response = $this->client->getResponse();
+        $this->assertEquals(500, $response->getStatusCode());
+    }
 }
 
 class AfterTestController
@@ -53,6 +63,26 @@ class AfterTestController
     /**
      * @SLX\Request(method="GET", uri="/test")
      * @SLX\After("DDesrosiers\SilexAnnotations\Test\Annotations\AfterTestController::afterCallback")
+     */
+    public function testMethod($var)
+    {
+        return new Response($var);
+    }
+
+    public static function afterCallback()
+    {
+        throw new Exception("after callback");
+    }
+}
+
+/**
+ * @SLX\Controller(prefix="test")
+ * @SLX\After("DDesrosiers\SilexAnnotations\Test\Annotations\AfterTestController::afterCallback")
+ */
+class AfterCollectionTestController
+{
+    /**
+     * @SLX\Request(method="GET", uri="/test")
      */
     public function testMethod($var)
     {

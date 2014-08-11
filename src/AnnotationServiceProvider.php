@@ -28,6 +28,9 @@ class AnnotationServiceProvider implements ServiceProviderInterface
      */
     public function boot(Application $app)
     {
+        /** @var AnnotationService $annotationService */
+        $annotationService = $app['annot'];
+
         // Process annotations for any given controllers
         if ($app->offsetExists('annot.controllers') && is_array($app['annot.controllers'])) {
             foreach ($app['annot.controllers'] as $groupName => $controllerGroup) {
@@ -36,19 +39,7 @@ class AnnotationServiceProvider implements ServiceProviderInterface
                 }
 
                 foreach ($controllerGroup as $controllerName) {
-                    $app["$controllerName"] = $app->share(
-                                                  function (Application $app) use ($controllerName) {
-                                                      return new $controllerName($app);
-                                                  }
-                    );
-
-                    $isCollection = !is_numeric($groupName);
-                    /** @var AnnotationService $annotationService */
-                    $annotationService = $app['annot'];
-                    $collection = $annotationService->process($controllerName, true, $isCollection);
-                    if ($isCollection) {
-                        $app->mount($groupName, $collection);
-                    }
+                    $annotationService->registerController($controllerName, $groupName);
                 }
             }
         }
@@ -59,19 +50,16 @@ class AnnotationServiceProvider implements ServiceProviderInterface
      */
     public function register(Application $app)
     {
+        if (!$app->offsetExists('annot.useServiceControllers')) {
+            $app['annot.useServiceControllers'] = true;
+        }
+
         // A custom auto loader for Doctrine Annotations since it can't handle PSR-4 directory structure
-        AnnotationRegistry::registerLoader(function ($class) {
-            $annotationDir = __DIR__ . "/Annotations";
-            $fqcn_array = explode("\\", $class);
-            $class_name = array_pop($fqcn_array);
-            if (is_file("$annotationDir/$class_name.php"))
-            {
-                /** @noinspection PhpIncludeInspection */
-                require_once "$annotationDir/$class_name.php";
-                return true;
-            }
-            return false;
-        });
+        AnnotationRegistry::registerLoader(
+                          function ($class) {
+                              return class_exists($class);
+                          }
+        );
 
         // ServiceControllerServiceProvider is required, so register it here so the user doesn't have to.
         $app->register(new ServiceControllerServiceProvider());
@@ -81,10 +69,12 @@ class AnnotationServiceProvider implements ServiceProviderInterface
                                 return new AnnotationService($app);
                             }
         );
+
+        /** @noinspection PhpUnusedParameterInspection */
         $app['annot.controller_factory'] = $app->protect(
-	    function (Application $app, $controllerName, $methodName, $separator) {
-                return $controllerName . $separator . $methodName;
-            }
+                                               function (Application $app, $controllerName, $methodName, $separator) {
+                                                   return $controllerName . $separator . $methodName;
+                                               }
         );
 
     }

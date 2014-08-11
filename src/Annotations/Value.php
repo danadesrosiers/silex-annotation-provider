@@ -10,11 +10,9 @@
 
 namespace DDesrosiers\SilexAnnotations\Annotations;
 
-use Silex\Controller;
-
 /**
  * @Annotation
- * @Target({"METHOD", "ANNOTATION"})
+ * @Target({"CLASS", "METHOD", "ANNOTATION"})
  * @author Dana Desrosiers <dana.desrosiers@gmail.com>
  */
 class Value implements RouteAnnotation
@@ -26,9 +24,9 @@ class Value implements RouteAnnotation
     public $default;
 
     /**
-     * @param Controller $route
+     * @inheritdoc
      */
-    public function process(Controller $route)
+    public function process($route)
     {
         $route->value($this->variable, $this->default);
     }

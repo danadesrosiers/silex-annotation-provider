@@ -12,14 +12,13 @@
 namespace DDesrosiers\SilexAnnotations\Annotations;
 
 use Silex\Application;
-use Silex\Controller;
 use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Component\Security\Core\SecurityContext;
 
 /**
  * @Annotation
- * @Target({"METHOD", "ANNOTATION"})
+ * @Target({"CLASS", "METHOD", "ANNOTATION"})
  */
 class Secure implements RouteAnnotation
 {
@@ -27,9 +26,9 @@ class Secure implements RouteAnnotation
     public $role;
 
     /**
-     * @param Controller $route
+     * @inheritdoc
      */
-    public function process(Controller $route)
+    public function process($route)
     {
         if (method_exists($route, "secure")) {
             $route->secure($this->role);

@@ -33,7 +33,10 @@ class RequireHttpsTest extends \PHPUnit_Framework_TestCase
         $this->app->register(
                   new AnnotationServiceProvider(),
                   array(
-                      "annot.controllers" => array("DDesrosiers\\Test\\SilexAnnotations\\Annotations\\RequireHttpsTestController")
+                      "annot.controllers" => array(
+                          "DDesrosiers\\Test\\SilexAnnotations\\Annotations\\RequireHttpsTestController",
+                          "DDesrosiers\\Test\\SilexAnnotations\\Annotations\\RequireHttpsCollectionTestController"
+                      )
                   )
         );
     }
@@ -53,6 +56,22 @@ class RequireHttpsTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(301, $response->getStatusCode());
         $this->assertTrue($response->isRedirect('https://example.com/test'));
     }
+
+    public function testHttpsCollection()
+    {
+        $request = Request::create('https://example.com/test/test');
+        $response = $this->app->handle($request);
+        $this->assertEquals(200, $response->getStatusCode());
+    }
+
+    public function testHttpCollection()
+    {
+        // we make the request as http, but it should be redirected to a https request
+        $request = Request::create('http://example.com/test/test');
+        $response = $this->app->handle($request);
+        $this->assertEquals(301, $response->getStatusCode());
+        $this->assertTrue($response->isRedirect('https://example.com/test/test'));
+    }
 }
 
 class RequireHttpsTestController
@@ -60,6 +79,21 @@ class RequireHttpsTestController
     /**
      * @SLX\Request(method="GET", uri="/test")
      * @SLX\RequireHttps
+     */
+    public function testRequireHttps()
+    {
+        return new Response();
+    }
+}
+
+/**
+ * @SLX\Controller(prefix="test")
+ * @SLX\RequireHttps
+ */
+class RequireHttpsCollectionTestController
+{
+    /**
+     * @SLX\Request(method="GET", uri="/test")
      */
     public function testRequireHttps()
     {

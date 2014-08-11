@@ -32,7 +32,10 @@ class AssertTest extends \PHPUnit_Framework_TestCase
         $this->app->register(
                   new AnnotationServiceProvider(),
                   array(
-                      "annot.controllers" => array("DDesrosiers\\Test\\SilexAnnotations\\Annotations\\AssertTestController")
+                      "annot.controllers" => array(
+                          "DDesrosiers\\Test\\SilexAnnotations\\Annotations\\AssertTestController",
+                          "DDesrosiers\\Test\\SilexAnnotations\\Annotations\\AssertCollectionTestController"
+                      )
                   )
         );
 
@@ -49,6 +52,17 @@ class AssertTest extends \PHPUnit_Framework_TestCase
         $response = $this->client->getResponse();
         $this->assertEquals('404', $response->getStatusCode());
     }
+
+    public function testAssertCollection()
+    {
+        $this->client->request("GET", "/test/test/45");
+        $response = $this->client->getResponse();
+        $this->assertEquals('200', $response->getStatusCode());
+
+        $this->client->request("GET", "/test/test/fail");
+        $response = $this->client->getResponse();
+        $this->assertEquals('404', $response->getStatusCode());
+    }
 }
 
 class AssertTestController
@@ -56,6 +70,21 @@ class AssertTestController
     /**
      * @SLX\Request(method="GET", uri="test/{var}")
      * @SLX\Assert(variable="var", regex="\d+")
+     */
+    public function testMethod($var)
+    {
+        return new Response($var);
+    }
+}
+
+/**
+ * @SLX\Controller(prefix="test")
+ * @SLX\Assert(variable="var", regex="\d+")
+ */
+class AssertCollectionTestController
+{
+    /**
+     * @SLX\Request(method="GET", uri="test/{var}")
      */
     public function testMethod($var)
     {
