@@ -71,10 +71,11 @@ class AnnotationService
             throw new RuntimeException("Controller directory: {$dir} does not exist.");
         }
 
-        foreach ($this->app['fileIterator'] as $fileName => $file) {
-            $name = array_shift(explode('.', $fileName));
-            if (class_exists($name)) {
-                $this->registerController($name);
+        foreach ($this->app['annot.fileIterator']($dir) as $fileName => $file) {
+            preg_match('/namespace(.*);/', file_get_contents($fileName), $result);
+            $fqcn = trim($result[1] . "\\" . basename($fileName, ".php"));
+            if (class_exists($fqcn)) {
+                $this->registerController($fqcn);
             }
         }
     }

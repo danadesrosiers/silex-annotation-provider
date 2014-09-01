@@ -87,7 +87,7 @@ class AnnotationServiceProvider implements ServiceProviderInterface
             }
         );
 
-        $app['annot.fileIterator'] = $app->share(function ($dir) {
+        $app['annot.fileIterator'] = $app->protect(function ($dir) {
             $iterator = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($dir));
             return new \RegexIterator($iterator, '/^.+\.php$/i', \RecursiveRegexIterator::GET_MATCH);
         });

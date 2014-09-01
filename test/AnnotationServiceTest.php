@@ -33,12 +33,7 @@ class AnnotationServiceTest extends \PHPUnit_Framework_TestCase
 
     public function testRegisterController()
     {
-        $this->app->register(
-                  new AnnotationServiceProvider(),
-                      array(
-                          "annot.controllers" => array("DDesrosiers\\Test\\SilexAnnotations\\TestControllerWithControllerAnnotation")
-                      )
-        );
+        $this->app->register( new AnnotationServiceProvider(), array("annot.controllerDir" => __DIR__."/Controller"));
 
         $client = new Client($this->app);
         $client->request('GET', '/test/test1');
