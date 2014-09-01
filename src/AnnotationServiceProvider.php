@@ -10,6 +10,7 @@
 
 namespace DDesrosiers\SilexAnnotations;
 
+use DDesrosiers\SilexAnnotations\Annotations\Controller;
 use Doctrine\Common\Annotations\AnnotationRegistry;
 use Silex\Application;
 use Silex\Provider\ServiceControllerServiceProvider;
@@ -31,6 +32,11 @@ class AnnotationServiceProvider implements ServiceProviderInterface
         /** @var AnnotationService $annotationService */
         $annotationService = $app['annot'];
 
+        // Process annotations for all controllers in given directory
+        if ($app->offsetExists('annot.controllerDir') && strlen($app['annot.controllerDir']) > 0) {
+            $annotationService->discoverControllers($app['annot.controllerDir']);
+        }
+
         // Process annotations for any given controllers
         if ($app->offsetExists('annot.controllers') && is_array($app['annot.controllers'])) {
             foreach ($app['annot.controllers'] as $groupName => $controllerGroup) {
@@ -39,7 +45,11 @@ class AnnotationServiceProvider implements ServiceProviderInterface
                 }
 
                 foreach ($controllerGroup as $controllerName) {
-                    $annotationService->registerController($controllerName, $groupName);
+                    $controllerAnnotation = new Controller();
+                    if (!is_int($groupName)) {
+                        $controllerAnnotation->prefix = $groupName;
+                    }
+                    $annotationService->registerController($controllerName, $controllerAnnotation);
                 }
             }
         }
@@ -54,21 +64,33 @@ class AnnotationServiceProvider implements ServiceProviderInterface
             $app['annot.useServiceControllers'] = true;
         }
 
+        $app["annot"] = $app->share(function (Application $app) { return new AnnotationService($app); });
+
         // A custom auto loader for Doctrine Annotations since it can't handle PSR-4 directory structure
-        AnnotationRegistry::registerLoader(
-                          function ($class) {
-                              return class_exists($class);
-                          }
+        AnnotationRegistry::registerLoader(function ($class) { return class_exists($class); });
+
+        // Register ServiceControllerServiceProvider here so the user doesn't have to.
+        if ($app['annot.useServiceControllers']) {
+            $app->register(new ServiceControllerServiceProvider());
+        }
+
+        // this service registers that service controller and can be overridden by the user
+        $app['annot.registerServiceController'] = $app->protect(
+            function ($controllerName) use ($app) {
+                if ($app['annot.useServiceControllers']) {
+                    $app["$controllerName"] = $app->share(
+                        function (Application $app) use ($controllerName) {
+                            return new $controllerName($app);
+                        }
+                    );
+                }
+            }
         );
 
-        // ServiceControllerServiceProvider is required, so register it here so the user doesn't have to.
-        $app->register(new ServiceControllerServiceProvider());
-
-        $app["annot"] = $app->share(
-                            function (Application $app) {
-                                return new AnnotationService($app);
-                            }
-        );
+        $app['annot.fileIterator'] = $app->share(function ($dir) {
+            $iterator = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($dir));
+            return new \RegexIterator($iterator, '/^.+\.php$/i', \RecursiveRegexIterator::GET_MATCH);
+        });
 
         /** @noinspection PhpUnusedParameterInspection */
         $app['annot.controller_factory'] = $app->protect(
@@ -76,6 +98,5 @@ class AnnotationServiceProvider implements ServiceProviderInterface
                                                    return $controllerName . $separator . $methodName;
                                                }
         );
-
     }
 }

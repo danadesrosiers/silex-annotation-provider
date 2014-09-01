@@ -71,50 +71,34 @@ class AnnotationService
             throw new RuntimeException("Controller directory: {$dir} does not exist.");
         }
 
-        $controllers = array();
-        $fileIterator = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($dir));
-        foreach ($fileIterator as $fileName => $file) {
-            list ($name, $extension) = explode('.', $fileName);
-            if (in_array($extension, array('php', 'phtml'))) {
-                $parser = new ClassParser($fileName);
-                foreach ($parser->parse() as $className) {
-                    $reflectionClass = new ReflectionClass($className);
-                    $classAnnotations = $this->reader->getClassAnnotations($reflectionClass);
-                    foreach ($classAnnotations as $annotation) {
-                        if ($annotation instanceof Controller) {
-                            $annotation->process($this->app, $reflectionClass);
-                        }
-                    }
-                }
+        foreach ($this->app['fileIterator'] as $fileName => $file) {
+            $name = array_shift(explode('.', $fileName));
+            if (class_exists($name)) {
+                $this->registerController($name);
             }
         }
-
-        return $controllers;
     }
 
-    public function registerController($controllerName, $mountPrefix = null)
+    /**
+     * Register the controller if a Controller annotation exists in the class doc block or $controllerAnnotation is provided.
+     *
+     * @param string     $controllerName
+     * @param Controller $defaultControllerAnnotation (optional) - For legacy controller classes that don't have a Controller Annotation
+     */
+    public function registerController($controllerName, Controller $defaultControllerAnnotation = null)
     {
-        if ($this->app['annot.useServiceControllers']) {
-            $this->app["$controllerName"] = $this->app->share(
-                                                      function (Application $app) use ($controllerName) {
-                                                          return new $controllerName($app);
-                                                      }
-            );
-        }
-
         $reflectionClass = new ReflectionClass($controllerName);
-        $controllerAnnotation = $this->reader->getClassAnnotation(
-                                             $reflectionClass,
-                                             "\\DDesrosiers\\SilexAnnotations\\Annotations\\Controller"
-        );
+        $annotationClassName = "\\DDesrosiers\\SilexAnnotations\\Annotations\\Controller";
+        $controllerAnnotation = $this->reader->getClassAnnotation($reflectionClass, $annotationClassName);
+
         if (!($controllerAnnotation instanceof Controller)) {
-            $controllerAnnotation = new Controller();
-            if (!is_null($mountPrefix)) {
-                $controllerAnnotation->prefix = is_int($mountPrefix) ? null : $mountPrefix;
-            }
+            $controllerAnnotation = $defaultControllerAnnotation;
         }
 
-        $controllerAnnotation->process($this->app, $reflectionClass);
+        if ($controllerAnnotation instanceof Controller) {
+            $this->app['annot.registerServiceController']($controllerName);
+            $controllerAnnotation->process($this->app, $reflectionClass);
+        }
     }
 
     /**
@@ -176,6 +160,4 @@ class AnnotationService
     {
         return $this->reader;
     }
-
-
 }
