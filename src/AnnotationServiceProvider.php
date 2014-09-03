@@ -94,9 +94,15 @@ class AnnotationServiceProvider implements ServiceProviderInterface
 
         /** @noinspection PhpUnusedParameterInspection */
         $app['annot.controller_factory'] = $app->protect(
-                                               function (Application $app, $controllerName, $methodName, $separator) {
-                                                   return $controllerName . $separator . $methodName;
-                                               }
+            function (Application $app, $controllerName, $methodName, $separator) {
+                return $controllerName . $separator . $methodName;
+            }
+        );
+
+        $app['annot.context'] = $app->share(
+            function () {
+                return null;
+            }
         );
     }
 }

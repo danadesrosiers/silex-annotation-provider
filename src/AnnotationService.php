@@ -122,6 +122,10 @@ class AnnotationService
     public function processClassAnnotations(ReflectionClass $reflectionClass, ControllerCollection $controllerCollection)
     {
         foreach ($this->reader->getClassAnnotations($reflectionClass) as $annotation) {
+            if ($annotation instanceof AnnotationContextAwareInterface) {
+                $annotation->setContext($this->app['annot.context']);
+            }
+
             if ($annotation instanceof RouteAnnotation) {
                 $annotation->process($controllerCollection);
             }
@@ -142,11 +146,19 @@ class AnnotationService
                 );
                 $methodAnnotations = $this->reader->getMethodAnnotations($reflectionMethod);
                 foreach ($methodAnnotations as $annotation) {
+                    if ($annotation instanceof AnnotationContextAwareInterface) {
+                        $annotation->setContext($this->app['annot.context']);
+                    }
+
                     if ($annotation instanceof Route) {
                         $annotation->process($controllerCollection, $controllerMethodName);
                     } else if ($annotation instanceof Request) {
                         $controller = $annotation->process($controllerCollection, $controllerMethodName);
                         foreach ($methodAnnotations as $routeAnnotation) {
+                            if ($routeAnnotation instanceof AnnotationContextAwareInterface) {
+                                $routeAnnotation->setContext($this->app['annot.context']);
+                            }
+
                             if ($routeAnnotation instanceof RouteAnnotation) {
                                 $routeAnnotation->process($controller);
                             }
