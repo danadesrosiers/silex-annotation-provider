@@ -60,6 +60,16 @@ $app['annot.controller_factory'] = $app->protect(
     }
 );
 ```
+annot.context
+------------------------
+An optional context that will be set for each annotation implementing the AnnotationContextAwareInterface.
+```php
+$app['annot.context'] = $app->share(
+    function () {
+        return null;
+    }
+);
+```
 
 Annotate Controllers
 ====================
