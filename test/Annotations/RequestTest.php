@@ -69,6 +69,17 @@ class RequestTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('200', $response->getStatusCode());
     }
 
+    public function testMultiMethod()
+    {
+        $this->client->request("GET", "/multi-method");
+        $response = $this->client->getResponse();
+        $this->assertEquals('200', $response->getStatusCode());
+
+        $this->client->request("POST", "/multi-method");
+        $response = $this->client->getResponse();
+        $this->assertEquals('200', $response->getStatusCode());
+    }
+
     public function testMatch()
     {
         $this->client->request("GET", "/match");
@@ -181,6 +192,15 @@ class RequestTestController
         return new Response();
     }
 
+    /**
+     * @SLX\Request(method="GET|POST", uri="/multi-method")
+     */
+    public function testMultiMethodRequest()
+    {
+        return new Response();
+    }
+
+    /**
     /**
      * @SLX\Request(method="MATCH", uri="/match")
      */

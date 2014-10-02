@@ -34,6 +34,13 @@ class Request
      */
     public function process(ControllerCollection $cc, $controllerName)
     {
-        return $cc->{strtolower($this->method)}($this->uri, $controllerName);
+        $controller = $cc->match($this->uri, $controllerName);
+
+        if ('MATCH' != ($method = strtoupper($this->method))) {
+	    // limit to configured method(s)
+            $controller = $controller->method($method);
+        }
+
+        return $controller;
     }
 }
