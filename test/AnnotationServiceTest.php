@@ -22,7 +22,7 @@ class AnnotationServiceTest extends AnnotationTestBase
 
     public function testIsolationOfControllerModifiers()
     {
-        $this->assertEndPointStatus(self::GET_METHOD, '/test', self::STATUS_ERROR);
+        $this->assertEndPointStatus(self::GET_METHOD, '/before/test', self::STATUS_ERROR);
         $this->assertEndPointStatus(self::GET_METHOD, '/test/test1', self::STATUS_OK);
     }
 
