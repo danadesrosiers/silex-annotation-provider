@@ -10,92 +10,31 @@
 
 namespace DDesrosiers\Test\SilexAnnotations\Annotations;
 
-use DDesrosiers\SilexAnnotations\Annotations as SLX;
-use DDesrosiers\SilexAnnotations\AnnotationServiceProvider;
-use Silex\Application;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Client;
+use DDesrosiers\Test\SilexAnnotations\AnnotationTestBase;
 
-class HostTest extends \PHPUnit_Framework_TestCase
+class HostTest extends AnnotationTestBase
 {
-    /** @var Application */
-    protected $app;
-
-    /** @var Client */
-    protected $client;
-
-    public function setUp()
-    {
-        $this->app = new Application();
-        $this->app['debug'] = true;
-
-        $this->app->register(
-                  new AnnotationServiceProvider(),
-                  array(
-                      "annot.controllers" => array(
-                          "DDesrosiers\\Test\\SilexAnnotations\\Annotations\\HostTestController",
-                          "DDesrosiers\\Test\\SilexAnnotations\\Annotations\\HostCollectionTestController"
-                      )
-                  )
-        );
-    }
-
     public function testCorrectHost()
     {
-        $this->client = new Client($this->app, array('HTTP_HOST' => 'www.test.com'));
-        $this->client->request("GET", "/hostTest");
-        $response = $this->client->getResponse();
-        $this->assertEquals(200, $response->getStatusCode());
+        $this->clientOptions = array('HTTP_HOST' => 'www.test.com');
+        $this->assertEndPointStatus(self::GET_METHOD, "/test/hostTest", self::STATUS_OK);
     }
 
     public function testWrongHost()
     {
-        $this->client = new Client($this->app, array('HTTP_HOST' => 'www.wrong.com'));
-        $this->client->request("GET", "/hostTest");
-        $response = $this->client->getResponse();
-        $this->assertEquals(404, $response->getStatusCode());
+        $this->clientOptions = array('HTTP_HOST' => 'www.wrong.com');
+        $this->assertEndPointStatus(self::GET_METHOD, "/test/hostTest", self::STATUS_NOT_FOUND);
     }
 
     public function testCorrectHostCollection()
     {
-        $this->client = new Client($this->app, array('HTTP_HOST' => 'www.test.com'));
-        $this->client->request("GET", "/test/hostTest");
-        $response = $this->client->getResponse();
-        $this->assertEquals(200, $response->getStatusCode());
+        $this->clientOptions = array('HTTP_HOST' => 'www.test.com');
+        $this->assertEndPointStatus(self::GET_METHOD, "/hostTest/test", self::STATUS_OK);
     }
 
     public function testWrongHostCollection()
     {
-        $this->client = new Client($this->app, array('HTTP_HOST' => 'www.wrong.com'));
-        $this->client->request("GET", "/test/hostTest");
-        $response = $this->client->getResponse();
-        $this->assertEquals(404, $response->getStatusCode());
-    }
-}
-
-class HostTestController
-{
-    /**
-     * @SLX\Request(method="GET", uri="/hostTest")
-     * @SLX\Host("www.test.com")
-     */
-    public function testHost()
-    {
-        return new Response();
-    }
-}
-
-/**
- * @SLX\Controller(prefix="test")
- * @SLX\Host("www.test.com")
- */
-class HostCollectionTestController
-{
-    /**
-     * @SLX\Request(method="GET", uri="/hostTest")
-     */
-    public function testHost()
-    {
-        return new Response();
+        $this->clientOptions = array('HTTP_HOST' => 'www.wrong.com');
+        $this->assertEndPointStatus(self::GET_METHOD, "/hostTest/test", self::STATUS_NOT_FOUND);
     }
 }

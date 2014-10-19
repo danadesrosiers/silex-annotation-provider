@@ -10,84 +10,19 @@
 
 namespace DDesrosiers\Test\SilexAnnotations\Annotations;
 
-use DDesrosiers\SilexAnnotations\Annotations as SLX;
-use DDesrosiers\SilexAnnotations\AnnotationServiceProvider;
-use Silex\Application;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Client;
+use DDesrosiers\Test\SilexAnnotations\AnnotationTestBase;
 
-class AssertTest extends \PHPUnit_Framework_TestCase
+class AssertTest extends AnnotationTestBase
 {
-    /** @var Application */
-    protected $app;
-
-    /** @var Client */
-    protected $client;
-
-    public function setUp()
-    {
-        $this->app = new Application();
-        $this->app['debug'] = true;
-
-        $this->app->register(
-                  new AnnotationServiceProvider(),
-                  array(
-                      "annot.controllers" => array(
-                          "DDesrosiers\\Test\\SilexAnnotations\\Annotations\\AssertTestController",
-                          "DDesrosiers\\Test\\SilexAnnotations\\Annotations\\AssertCollectionTestController"
-                      )
-                  )
-        );
-
-        $this->client = new Client($this->app);
-    }
-
     public function testAssert()
     {
-        $this->client->request("GET", "/test/45");
-        $response = $this->client->getResponse();
-        $this->assertEquals('200', $response->getStatusCode());
-
-        $this->client->request("GET", "/test/fail");
-        $response = $this->client->getResponse();
-        $this->assertEquals('404', $response->getStatusCode());
+        $this->assertEndPointStatus(self::GET_METHOD, '/test/assert/45', self::STATUS_OK);
+        $this->assertEndPointStatus(self::GET_METHOD, '/test/assert/fail', self::STATUS_NOT_FOUND);
     }
 
     public function testAssertCollection()
     {
-        $this->client->request("GET", "/test/test/45");
-        $response = $this->client->getResponse();
-        $this->assertEquals('200', $response->getStatusCode());
-
-        $this->client->request("GET", "/test/test/fail");
-        $response = $this->client->getResponse();
-        $this->assertEquals('404', $response->getStatusCode());
-    }
-}
-
-class AssertTestController
-{
-    /**
-     * @SLX\Request(method="GET", uri="test/{var}")
-     * @SLX\Assert(variable="var", regex="\d+")
-     */
-    public function testMethod($var)
-    {
-        return new Response($var);
-    }
-}
-
-/**
- * @SLX\Controller(prefix="test")
- * @SLX\Assert(variable="var", regex="\d+")
- */
-class AssertCollectionTestController
-{
-    /**
-     * @SLX\Request(method="GET", uri="test/{var}")
-     */
-    public function testMethod($var)
-    {
-        return new Response($var);
+        $this->assertEndPointStatus(self::GET_METHOD, '/assert/test/45', self::STATUS_OK);
+        $this->assertEndPointStatus(self::GET_METHOD, '/assert/test/fail', self::STATUS_NOT_FOUND);
     }
 }

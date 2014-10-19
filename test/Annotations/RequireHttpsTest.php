@@ -10,93 +10,38 @@
 
 namespace DDesrosiers\Test\SilexAnnotations\Annotations;
 
-use DDesrosiers\SilexAnnotations\Annotations as SLX;
-use DDesrosiers\SilexAnnotations\AnnotationServiceProvider;
-use Silex\Application;
+use DDesrosiers\Test\SilexAnnotations\AnnotationTestBase;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Client;
 
-class RequireHttpsTest extends \PHPUnit_Framework_TestCase
+class RequireHttpsTest extends AnnotationTestBase
 {
-    /** @var Application */
-    protected $app;
-
-    /** @var Client */
-    protected $client;
-
-    public function setUp()
-    {
-        $this->app = new Application();
-        $this->app['debug'] = true;
-
-        $this->app->register(
-                  new AnnotationServiceProvider(),
-                  array(
-                      "annot.controllers" => array(
-                          "DDesrosiers\\Test\\SilexAnnotations\\Annotations\\RequireHttpsTestController",
-                          "DDesrosiers\\Test\\SilexAnnotations\\Annotations\\RequireHttpsCollectionTestController"
-                      )
-                  )
-        );
-    }
-
     public function testHttps()
     {
-        $request = Request::create('https://example.com/test');
-        $response = $this->app->handle($request);
-        $this->assertEquals(200, $response->getStatusCode());
+        $this->assertEndPointStatus(self::GET_METHOD, "/test/requirehttps", self::STATUS_OK);
     }
 
     public function testHttp()
     {
         // we make the request as http, but it should be redirected to a https request
-        $request = Request::create('http://example.com/test');
+        $this->registerAnnotations();
+        $request = Request::create('https://test.com/test/requirehttps');
         $response = $this->app->handle($request);
         $this->assertEquals(301, $response->getStatusCode());
-        $this->assertTrue($response->isRedirect('https://example.com/test'));
+        $this->assertTrue($response->isRedirect('http://test.com/test/requirehttps'));
     }
 
     public function testHttpsCollection()
     {
-        $request = Request::create('https://example.com/test/test');
-        $response = $this->app->handle($request);
-        $this->assertEquals(200, $response->getStatusCode());
+        $this->assertEndPointStatus(self::GET_METHOD, "/test/requirehttps", self::STATUS_OK);
     }
 
     public function testHttpCollection()
     {
         // we make the request as http, but it should be redirected to a https request
-        $request = Request::create('http://example.com/test/test');
+        $this->registerAnnotations();
+        $request = Request::create('https://test.com/test/requirehttps');
         $response = $this->app->handle($request);
         $this->assertEquals(301, $response->getStatusCode());
-        $this->assertTrue($response->isRedirect('https://example.com/test/test'));
-    }
-}
-
-class RequireHttpsTestController
-{
-    /**
-     * @SLX\Request(method="GET", uri="/test")
-     * @SLX\RequireHttps
-     */
-    public function testRequireHttps()
-    {
-        return new Response();
-    }
-}
-
-/**
- * @SLX\Controller(prefix="test")
- * @SLX\RequireHttps
- */
-class RequireHttpsCollectionTestController
-{
-    /**
-     * @SLX\Request(method="GET", uri="/test")
-     */
-    public function testRequireHttps()
-    {
-        return new Response();
+        $this->assertTrue($response->isRedirect('http://test.com/test/requirehttps'));
     }
 }

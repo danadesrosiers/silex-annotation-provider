@@ -10,82 +10,16 @@
 
 namespace DDesrosiers\Test\SilexAnnotations\Annotations;
 
-use DDesrosiers\SilexAnnotations\Annotations as SLX;
-use DDesrosiers\SilexAnnotations\AnnotationServiceProvider;
-use Silex\Application;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Client;
+use DDesrosiers\Test\SilexAnnotations\AnnotationTestBase;
 
-class ValueTest extends \PHPUnit_Framework_TestCase
+class ValueTest extends AnnotationTestBase
 {
-    /** @var Application */
-    protected $app;
-
-    /** @var Client */
-    protected $client;
-
-    public function setUp()
-    {
-        $this->app = new Application();
-        $this->app['debug'] = true;
-
-        $this->app->register(
-                  new AnnotationServiceProvider(),
-                  array(
-                      "annot.controllers" => array(
-                          "DDesrosiers\\Test\\SilexAnnotations\\Annotations\\ValueTestController",
-                          "DDesrosiers\\Test\\SilexAnnotations\\Annotations\\ValueCollectionTestController"
-                      )
-                  )
-        );
-
-        $this->client = new Client($this->app);
-    }
-
     public function testDefaultValue()
     {
-        $this->client->request("GET", "/test");
-        $response = $this->client->getResponse();
-        $this->assertEquals(200, $response->getStatusCode());
+        $this->assertEndPointStatus(self::GET_METHOD, "/foo", self::STATUS_OK);
 
-        $this->client->request("GET", "/");
-        $response = $this->client->getResponse();
-        $this->assertEquals(200, $response->getStatusCode());
+        $response = $this->makeRequest(self::GET_METHOD, "/");
+        $this->assertStatus($response, self::STATUS_OK);
         $this->assertEquals('default', $response->getContent());
-    }
-
-    public function testDefaultValueCollection()
-    {
-        $this->client->request("GET", "/test/test");
-        $response = $this->client->getResponse();
-        $this->assertEquals(200, $response->getStatusCode());
-        $this->assertEquals('test', $response->getContent());
-    }
-}
-
-class ValueTestController
-{
-    /**
-     * @SLX\Request(method="GET", uri="/{var}")
-     * @SLX\Value(variable="var", default="default")
-     */
-    public function testMethod($var)
-    {
-        return new Response($var);
-    }
-}
-
-/**
- * @SLX\Controller(prefix="test")
- * @SLX\Value(variable="var", default="default")
- */
-class ValueCollectionTestController
-{
-    /**
-     * @SLX\Request(method="GET", uri="/{var}")
-     */
-    public function testMethod($var)
-    {
-        return new Response($var);
     }
 }

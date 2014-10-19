@@ -10,87 +10,17 @@
 
 namespace DDesrosiers\Test\SilexAnnotations\Annotations;
 
-use DDesrosiers\SilexAnnotations\Annotations as SLX;
-use DDesrosiers\SilexAnnotations\AnnotationServiceProvider;
-use Exception;
-use Silex\Application;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Client;
+use DDesrosiers\Test\SilexAnnotations\AnnotationTestBase;
 
-class AfterTest extends \PHPUnit_Framework_TestCase
+class AfterTest extends AnnotationTestBase
 {
-    /** @var Application */
-    protected $app;
-
-    /** @var Client */
-    protected $client;
-
-    public function setUp()
-    {
-        $this->app = new Application();
-        $this->app['debug'] = true;
-
-        $this->app->register(
-                  new AnnotationServiceProvider(),
-                      array(
-                          "annot.controllers" => array(
-                              "DDesrosiers\\Test\\SilexAnnotations\\Annotations\\AfterTestController",
-                              "DDesrosiers\\Test\\SilexAnnotations\\Annotations\\AfterCollectionTestController"
-                          )
-                      )
-        );
-
-        $this->client = new Client($this->app);
-    }
-
     public function testAfter()
     {
-        $this->client->request("GET", "/test");
-        $response = $this->client->getResponse();
-        $this->assertEquals(500, $response->getStatusCode());
+        $this->assertEndPointStatus(self::GET_METHOD, '/test/after', self::STATUS_ERROR);
     }
 
     public function testAfterOnCollection()
     {
-        $this->client->request("GET", "/test/test");
-        $response = $this->client->getResponse();
-        $this->assertEquals(500, $response->getStatusCode());
-    }
-}
-
-class AfterTestController
-{
-    /**
-     * @SLX\Request(method="GET", uri="/test")
-     * @SLX\After("DDesrosiers\SilexAnnotations\Test\Annotations\AfterTestController::afterCallback")
-     */
-    public function testMethod($var)
-    {
-        return new Response($var);
-    }
-
-    public static function afterCallback()
-    {
-        throw new Exception("after callback");
-    }
-}
-
-/**
- * @SLX\Controller(prefix="test")
- * @SLX\After("DDesrosiers\SilexAnnotations\Test\Annotations\AfterTestController::afterCallback")
- */
-class AfterCollectionTestController
-{
-    /**
-     * @SLX\Request(method="GET", uri="/test")
-     */
-    public function testMethod($var)
-    {
-        return new Response($var);
-    }
-
-    public static function afterCallback()
-    {
-        throw new Exception("after callback");
+        $this->assertEndPointStatus(self::GET_METHOD, '/after/test', self::STATUS_ERROR);
     }
 }

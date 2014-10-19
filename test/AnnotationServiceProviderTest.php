@@ -11,63 +11,66 @@
 namespace DDesrosiers\Test\SilexAnnotations;
 
 use DDesrosiers\SilexAnnotations\Annotations as SLX;
-use DDesrosiers\SilexAnnotations\AnnotationServiceProvider;
-use Silex\Application;
+use DDesrosiers\SilexAnnotations\AnnotationService;
+use Doctrine\Common\Cache\ApcCache;
+use RuntimeException;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Client;
 
-class AnnotationServiceProviderTest extends \PHPUnit_Framework_TestCase
+class AnnotationServiceProviderTest extends AnnotationTestBase
 {
-    /** @var Application */
-    protected $app;
-
-    /** @var Client */
-    protected $client;
-
-    public function testRegisterControllers()
-    {
-        $this->app = new Application();
-        $this->app['debug'] = true;
-
-        $this->app->register(
-                  new AnnotationServiceProvider(),
-                  array(
-                      "annot.controllers" => array("DDesrosiers\\Test\\SilexAnnotations\\TestControllerOne")
-                  )
-        );
-
-        $this->client = new Client($this->app);
-
-        $this->client->request("GET", "/test1");
-        $response = $this->client->getResponse();
-        $this->assertEquals('200', $response->getStatusCode());
-    }
-
     public function testRegisterControllersWithGroups()
     {
-        $this->app = new Application();
-        $this->app['debug'] = true;
-
-        $this->app->register(
-                  new AnnotationServiceProvider(),
-                  array(
-                      "annot.controllers" => array(
-                          'group1' => array("DDesrosiers\\Test\\SilexAnnotations\\TestControllerOne"),
-                          'group2' => array("DDesrosiers\\Test\\SilexAnnotations\\TestControllerTwo")
-                      )
-                  )
+        $options = array(
+            "annot.controllers" => array(
+                'group1' => array("DDesrosiers\\Test\\SilexAnnotations\\TestControllerOne"),
+                'group2' => array("DDesrosiers\\Test\\SilexAnnotations\\TestControllerTwo")
+            )
         );
 
-        $this->client = new Client($this->app);
-
-        $this->client->request("GET", "/group1/test1");
-        $response = $this->client->getResponse();
-        $this->assertEquals('200', $response->getStatusCode());
-
-        $this->client->request("GET", "/group2/test2");
-        $response = $this->client->getResponse();
-        $this->assertEquals('200', $response->getStatusCode());
+        $this->assertEndPointStatus(self::GET_METHOD, '/group1/test1', self::STATUS_OK, $options);
+        $this->assertEndPointStatus(self::GET_METHOD, '/group2/test2', self::STATUS_OK, $options);
     }
+
+    public function testCacheUsingStringIdentifier()
+    {
+        $this->getClient(array('annot.cache' => 'Array'));
+
+        /** @var AnnotationService $service */
+        $service = $this->app['annot'];
+        $this->assertInstanceOf("Doctrine\\Common\\Annotations\\CachedReader", $service->getReader());
+    }
+
+    public function testCacheUsingImplementationOfCache()
+    {
+        $this->getClient(array('annot.cache' => new ApcCache()));
+
+        /** @var AnnotationService $service */
+        $service = $this->app['annot'];
+        $this->assertInstanceOf("Doctrine\\Common\\Annotations\\CachedReader", $service->getReader());
+    }
+
+    /**
+     * @expectedException RuntimeException
+     */
+    public function testInvalidCacheString()
+    {
+        $this->getClient(array('annot.cache' => 'Fake'));
+        $this->app['annot'];
+    }
+
+    /**
+     * @expectedException RuntimeException
+     */
+    public function testInvalidCacheClass()
+    {
+        $this->getClient(array('annot.cache' => new InvalidCache()));
+        $this->app['annot'];
+    }
+}
+
+class InvalidCache
+{
+
 }
 
 class TestControllerOne
