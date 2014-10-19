@@ -33,13 +33,8 @@ class RequestTest extends AnnotationTestBase
 
     public function testMultiMethod()
     {
-        $this->client->request("GET", "/multi-method");
-        $response = $this->client->getResponse();
-        $this->assertEquals('200', $response->getStatusCode());
-
-        $this->client->request("POST", "/multi-method");
-        $response = $this->client->getResponse();
-        $this->assertEquals('200', $response->getStatusCode());
+        $this->assertEndPointStatus(self::GET_METHOD, "/test/multi-method", self::STATUS_OK);
+        $this->assertEndPointStatus(self::POST_METHOD, "/test/multi-method", self::STATUS_OK);
     }
 
     public function testMatch()

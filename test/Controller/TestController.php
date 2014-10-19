@@ -56,6 +56,14 @@ class TestController
     }
 
     /**
+     * @SLX\Request(method="GET|POST", uri="/multi-method")
+     */
+    public function testMultiMethodRequest()
+    {
+        return new Response();
+    }
+
+    /**
      * @SLX\Request(method="GET", uri="firstRequest")
      * @SLX\Request(method="GET", uri="secondRequest")
      * @return Response
