@@ -10,6 +10,7 @@
 
 namespace DDesrosiers\SilexAnnotations\Annotations;
 
+use Silex\Application;
 use Silex\ControllerCollection;
 
 /**
@@ -64,8 +65,9 @@ class Route
      *
      * @param \Silex\ControllerCollection $controllerCollection the controller collection to add the route to
      * @param string                      $controllerName       fully qualified method name of the controller
+     * @param Application                 $app
      */
-    public function process(ControllerCollection $controllerCollection, $controllerName)
+    public function process(ControllerCollection $controllerCollection, $controllerName, Application $app=null)
     {
         foreach ($this->request as $request) {
             $controller = $request->process($controllerCollection, $controllerName);

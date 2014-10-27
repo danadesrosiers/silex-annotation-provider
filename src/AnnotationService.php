@@ -143,7 +143,7 @@ class AnnotationService
                 $methodAnnotations = $this->reader->getMethodAnnotations($reflectionMethod);
                 foreach ($methodAnnotations as $annotation) {
                     if ($annotation instanceof Route) {
-                        $annotation->process($controllerCollection, $controllerMethodName);
+                        $annotation->process($controllerCollection, $controllerMethodName, $this->app);
                     } else if ($annotation instanceof Request) {
                         $controller = $annotation->process($controllerCollection, $controllerMethodName);
                         foreach ($methodAnnotations as $routeAnnotation) {

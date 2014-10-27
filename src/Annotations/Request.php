@@ -37,7 +37,7 @@ class Request
         $controller = $cc->match($this->uri, $controllerName);
 
         if ('MATCH' != ($method = strtoupper($this->method))) {
-	    // limit to configured method(s)
+            // limit to configured method(s)
             $controller = $controller->method($method);
         }
 
