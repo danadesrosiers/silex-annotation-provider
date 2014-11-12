@@ -37,6 +37,10 @@ class AnnotationService
     /** @var AnnotationReader */
     protected $reader;
 
+    /** @var Cache */
+    protected $cache;
+
+    const CONTROLLER_CACHE_INDEX = 'annot.controllerFiles';
     /**
      * @param \Silex\Application $app
      * @throws RuntimeException
@@ -47,37 +51,90 @@ class AnnotationService
 
         if ($app->offsetExists('annot.cache')) {
             if ($app['annot.cache'] instanceof Cache) {
-                $cache = $app['annot.cache'];
+                $this->cache = $app['annot.cache'];
             } else if (is_string($app['annot.cache']) && strlen($app['annot.cache']) > 0) {
                 $cacheClass = "Doctrine\\Common\\Cache\\{$app['annot.cache']}Cache";
                 if (!class_exists($cacheClass)) {
                     throw new RuntimeException("Cache type: [$cacheClass] does not exist.  Make sure you include Doctrine cache.");
                 }
 
-                $cache = new $cacheClass();
+                $this->cache = new $cacheClass();
             } else {
                 throw new RuntimeException("Cache object does not implement Doctrine\\Common\\Cache\\Cache");
             }
 
-            $this->reader = new CachedReader(new AnnotationReader(), $cache, $app['debug']);
+            $this->reader = new CachedReader(new AnnotationReader(), $this->cache, $app['debug']);
         } else {
             $this->reader = new AnnotationReader();
         }
     }
 
-    public function discoverControllers($dir)
+    public function discoverControllers($dir, $baseNamespace=null)
     {
         if (!is_dir($dir)) {
             throw new RuntimeException("Controller directory: {$dir} does not exist.");
         }
 
-        foreach ($this->app['annot.fileIterator']($dir) as $fileName => $file) {
-            preg_match('/namespace(.*);/', file_get_contents($fileName), $result);
-            $fqcn = trim($result[1] . "\\" . basename($fileName, ".php"));
-            if (class_exists($fqcn)) {
-                $this->registerController($fqcn);
+        if (!$this->app['debug'] && $this->cache instanceof Cache && $this->cache->contains(self::CONTROLLER_CACHE_INDEX)) {
+            $controllerFiles = $this->cache->fetch('annot.controllerFiles');
+        } else {
+            if ($this->app->offsetExists('annot.controllerIterator')) {
+                $files = $this->app['annot.controllerIterator']($dir);
+            } else {
+                $files = $this->getFiles($dir);
+            }
+
+            $controllerFiles = array();
+            foreach ($files as $fileName => $file) {
+                $pathInfo = pathinfo($fileName);
+                if ($baseNamespace) {
+                    $subDir = str_replace($dir, '', $pathInfo['dirname']);
+                    if (strlen($subDir)) {
+                        $subDir .= "\\";
+                    }
+                    $namespace = "$baseNamespace\\$subDir";
+                } else {
+                    // we weren't given a namespace, so we have to parse the file to find it
+                    preg_match('/namespace(.*);/', file_get_contents($fileName), $result);
+                    $namespace = isset($result[1]) ? $result[1] . "\\" : '';
+                }
+
+                $fqcn = trim($namespace . $pathInfo['filename']);
+                if (class_exists($fqcn)) {
+                    $controllerFiles[] = $fqcn;
+                }
+            }
+
+            if (!$this->app['debug'] && $this->cache instanceof Cache) {
+                $this->cache->save(self::CONTROLLER_CACHE_INDEX, $controllerFiles);
             }
         }
+
+        return $controllerFiles;
+    }
+
+    public function registerControllers($controllers) {
+        foreach ($controllers as $fqcn) {
+            $this->registerController($fqcn);
+        }
+    }
+
+    protected function getFiles($dir, $files=array())
+    {
+        if ($handle = opendir($dir)) {
+            while (false !== ($entry = readdir($handle))) {
+                if (!in_array($entry, array('.', '..'))) {
+                    if (is_dir("$dir/$entry")) {
+                        $files = $this->getFiles("$dir/$entry", $files);
+                    } else {
+                        $files["$dir/$entry"] = $entry;
+                    }
+                }
+            }
+            closedir($handle);
+        }
+
+        return $files;
     }
 
     /**

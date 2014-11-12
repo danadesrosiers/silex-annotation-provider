@@ -34,7 +34,8 @@ class AnnotationServiceProvider implements ServiceProviderInterface
 
         // Process annotations for all controllers in given directory
         if ($app->offsetExists('annot.controllerDir') && strlen($app['annot.controllerDir']) > 0) {
-            $annotationService->discoverControllers($app['annot.controllerDir']);
+            $controllers = $annotationService->discoverControllers($app['annot.controllerDir'], $app['annot.controllerNamespace']);
+            $annotationService->registerControllers($controllers);
         }
 
         // Process annotations for any given controllers
@@ -87,16 +88,13 @@ class AnnotationServiceProvider implements ServiceProviderInterface
             }
         );
 
-        $app['annot.fileIterator'] = $app->protect(function ($dir) {
-            $iterator = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($dir));
-            return new \RegexIterator($iterator, '/^.+\.php$/i', \RecursiveRegexIterator::GET_MATCH);
-        });
-
         /** @noinspection PhpUnusedParameterInspection */
         $app['annot.controller_factory'] = $app->protect(
                                                function (Application $app, $controllerName, $methodName, $separator) {
                                                    return $controllerName . $separator . $methodName;
                                                }
         );
+
+        $app['annot.controllerNamespace'] = null;
     }
 }

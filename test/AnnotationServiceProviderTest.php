@@ -12,9 +12,11 @@ namespace DDesrosiers\Test\SilexAnnotations;
 
 use DDesrosiers\SilexAnnotations\Annotations as SLX;
 use DDesrosiers\SilexAnnotations\AnnotationService;
-use Doctrine\Common\Cache\ApcCache;
-use RuntimeException;
+use Doctrine\Common\Cache\ArrayCache;
+use Silex\Application;
 use Symfony\Component\HttpFoundation\Response;
+
+include __DIR__ . "/Controller/NoNamespace/TestControllerNoNamespace.php";
 
 class AnnotationServiceProviderTest extends AnnotationTestBase
 {
@@ -31,46 +33,74 @@ class AnnotationServiceProviderTest extends AnnotationTestBase
         $this->assertEndPointStatus(self::GET_METHOD, '/group2/test2', self::STATUS_OK, $options);
     }
 
-    public function testCacheUsingStringIdentifier()
+    public function testRegisterControllersByDirectoryProvider()
     {
-        $this->getClient(array('annot.cache' => 'Array'));
-
-        /** @var AnnotationService $service */
-        $service = $this->app['annot'];
-        $this->assertInstanceOf("Doctrine\\Common\\Annotations\\CachedReader", $service->getReader());
-    }
-
-    public function testCacheUsingImplementationOfCache()
-    {
-        $this->getClient(array('annot.cache' => new ApcCache()));
-
-        /** @var AnnotationService $service */
-        $service = $this->app['annot'];
-        $this->assertInstanceOf("Doctrine\\Common\\Annotations\\CachedReader", $service->getReader());
+        $subDirFqcn = self::CONTROLLER_NAMESPACE."\\SubDir\\SubDirTestController";
+        return array(
+            array("/SubDir", self::CONTROLLER_NAMESPACE."\\SubDir", $subDirFqcn),
+            array("/SubDir", null, $subDirFqcn),
+            array('', null, $subDirFqcn),
+            array("/NoNamespace", null, "TestControllerNoNamespace")
+        );
     }
 
     /**
-     * @expectedException RuntimeException
+     * @dataProvider testRegisterControllersByDirectoryProvider
      */
-    public function testInvalidCacheString()
+    public function testRegisterControllersByDirectory($dir, $namespace, $result)
     {
-        $this->getClient(array('annot.cache' => 'Fake'));
-        $this->app['annot'];
+        $service = new AnnotationService($this->app);
+        $files = $service->discoverControllers(self::$CONTROLLER_DIR.$dir, $namespace);
+        if (is_array($result)) {
+            $this->assertEquals($result, $files);
+        } else {
+            $this->assertContains($result, $files);
+        }
     }
 
-    /**
-     * @expectedException RuntimeException
-     */
-    public function testInvalidCacheClass()
+    public function testCustomControllerIterator()
     {
-        $this->getClient(array('annot.cache' => new InvalidCache()));
-        $this->app['annot'];
+        $this->app['annot.controllerIterator'] = $this->app->protect(function ($dir) {
+            $regex = '/^.+\CollectionTestController.php$/i';
+            return new \RegexIterator(new \RecursiveDirectoryIterator($dir), $regex, \RecursiveRegexIterator::GET_MATCH);
+        });
+        $service = new AnnotationService($this->app);
+
+        $files = $service->discoverControllers(self::$CONTROLLER_DIR);
+        $this->assertCount(8, $files);
+    }
+
+    public function testControllerCache()
+    {
+        $cache = new TestArrayCache();
+        $this->app['annot.cache'] = $cache;
+        $this->app['debug'] = false;
+        $service = new AnnotationService($this->app);
+        $service->discoverControllers(self::$CONTROLLER_DIR);
+        $this->assertCount(14, $cache->fetch(AnnotationService::CONTROLLER_CACHE_INDEX));
+
+        $files = $service->discoverControllers(self::$CONTROLLER_DIR);
+        $this->assertTrue($cache->wasFetched(AnnotationService::CONTROLLER_CACHE_INDEX));
+        $this->assertContains(self::CONTROLLER_NAMESPACE."\\SubDir\\SubDirTestController", $files);
+        $this->assertContains(self::CONTROLLER_NAMESPACE."\\TestController", $files);
+        $this->assertCount(14, $files);
     }
 }
 
-class InvalidCache
+class TestArrayCache extends ArrayCache
 {
+    protected $fetchedIDs;
 
+    public function wasFetched($id)
+    {
+        return isset($this->fetchedIDs[$id]);
+    }
+
+    public function fetch($id)
+    {
+        $this->fetchedIDs[$id] = true;
+        return parent::fetch($id);
+    }
 }
 
 class TestControllerOne

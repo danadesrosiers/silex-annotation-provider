@@ -28,6 +28,10 @@ class AnnotationTestBase extends \PHPUnit_Framework_TestCase
     const STATUS_NOT_FOUND = 404;
     const STATUS_ERROR = 500;
 
+    const CONTROLLER_NAMESPACE = 'DDesrosiers\Test\SilexAnnotations\Controller';
+
+    protected static $CONTROLLER_DIR;
+
     /** @var Application */
     protected $app;
 
@@ -39,6 +43,7 @@ class AnnotationTestBase extends \PHPUnit_Framework_TestCase
 
     public function setup()
     {
+        self::$CONTROLLER_DIR = __DIR__ . "/Controller";
         $this->app = new Application();
         $this->app['debug'] = true;
     }
@@ -46,10 +51,10 @@ class AnnotationTestBase extends \PHPUnit_Framework_TestCase
     protected function registerAnnotations($options = array())
     {
         if (!isset($options['annot.controllers'])) {
-            $options['annot.controllerDir'] = __DIR__."/Controller";
+            $options['annot.controllerDir'] = self::$CONTROLLER_DIR;
         }
 
-        $this->app->register( new AnnotationServiceProvider(), $options);
+        $this->app->register(new AnnotationServiceProvider(), $options);
     }
 
     protected function getClient($annotationOptions = array())

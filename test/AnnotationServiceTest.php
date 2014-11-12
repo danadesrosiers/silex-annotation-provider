@@ -10,8 +10,11 @@
 
 namespace DDesrosiers\Test\SilexAnnotations;
 
+use DDesrosiers\SilexAnnotations\AnnotationService;
 use DDesrosiers\SilexAnnotations\AnnotationServiceProvider;
 use DDesrosiers\Test\SilexAnnotations\Controller\TestControllerProvider;
+use Doctrine\Common\Cache\ApcCache;
+use Silex\Application;
 
 class AnnotationServiceTest extends AnnotationTestBase
 {
@@ -33,4 +36,34 @@ class AnnotationServiceTest extends AnnotationTestBase
 
         $this->assertEndPointStatus(self::GET_METHOD, '/cp/test', self::STATUS_OK);
     }
+
+    public function cacheTestProvider()
+    {
+        return array(
+            array('Array'),                                // string identifier
+            array(new ApcCache()),                         // proper implementation of Cache
+            array('Fake', 'RuntimeException'),             // invalid cache string
+            array(new InvalidCache(), 'RuntimeException')  // class that does not implement Cache
+        );
+    }
+
+    /**
+     * @dataProvider cacheTestProvider
+     */
+    public function testCache($cache, $exception=null)
+    {
+        $app = new Application();
+        $app['annot.cache'] = $cache;
+        try {
+            $service = new AnnotationService($app);
+            $this->assertInstanceOf("Doctrine\\Common\\Annotations\\CachedReader", $service->getReader());
+        } catch (\Exception $e) {
+            $this->assertEquals($exception, get_class($e));
+        }
+    }
+}
+
+class InvalidCache
+{
+
 }
