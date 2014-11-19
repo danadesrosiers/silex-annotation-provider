@@ -10,6 +10,7 @@
 
 namespace DDesrosiers\Test\SilexAnnotations;
 
+use DDesrosiers\SilexAnnotations\AnnotationService;
 use DDesrosiers\SilexAnnotations\AnnotationServiceProvider;
 use Silex\Application;
 use Symfony\Component\HttpFoundation\Response;
@@ -28,7 +29,7 @@ class AnnotationTestBase extends \PHPUnit_Framework_TestCase
     const STATUS_NOT_FOUND = 404;
     const STATUS_ERROR = 500;
 
-    const CONTROLLER_NAMESPACE = 'DDesrosiers\Test\SilexAnnotations\Controller';
+    const CONTROLLER_NAMESPACE = "DDesrosiers\\Test\\SilexAnnotations\\Controller\\";
 
     protected static $CONTROLLER_DIR;
 
@@ -48,6 +49,10 @@ class AnnotationTestBase extends \PHPUnit_Framework_TestCase
         $this->app['debug'] = true;
     }
 
+    /**
+     * @param array $options
+     * @return AnnotationService
+     */
     protected function registerAnnotations($options = array())
     {
         if (!isset($options['annot.controllers'])) {
@@ -55,6 +60,8 @@ class AnnotationTestBase extends \PHPUnit_Framework_TestCase
         }
 
         $this->app->register(new AnnotationServiceProvider(), $options);
+
+        return $this->app['annot'];
     }
 
     protected function getClient($annotationOptions = array())

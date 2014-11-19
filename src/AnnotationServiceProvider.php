@@ -12,6 +12,7 @@ namespace DDesrosiers\SilexAnnotations;
 
 use DDesrosiers\SilexAnnotations\Annotations\Controller;
 use Doctrine\Common\Annotations\AnnotationRegistry;
+use RuntimeException;
 use Silex\Application;
 use Silex\Provider\ServiceControllerServiceProvider;
 use Silex\ServiceProviderInterface;
@@ -34,6 +35,9 @@ class AnnotationServiceProvider implements ServiceProviderInterface
 
         // Process annotations for all controllers in given directory
         if ($app->offsetExists('annot.controllerDir') && strlen($app['annot.controllerDir']) > 0) {
+            if (!is_dir($app['annot.controllerDir'])) {
+                throw new RuntimeException("Controller directory: {$app['annot.controllerDir']} does not exist.");
+            }
             $controllers = $annotationService->discoverControllers($app['annot.controllerDir'], $app['annot.controllerNamespace']);
             $annotationService->registerControllers($controllers);
         }
@@ -75,7 +79,7 @@ class AnnotationServiceProvider implements ServiceProviderInterface
             $app->register(new ServiceControllerServiceProvider());
         }
 
-        // this service registers that service controller and can be overridden by the user
+        // this service registers the service controller and can be overridden by the user
         $app['annot.registerServiceController'] = $app->protect(
             function ($controllerName) use ($app) {
                 if ($app['annot.useServiceControllers']) {
@@ -88,6 +92,12 @@ class AnnotationServiceProvider implements ServiceProviderInterface
             }
         );
 
+        $app['annot.controllerFinder'] = $app->protect(
+            function (Application $app, $dir) {
+                return $app['annot']->getFiles($dir, $app['annot.controllerNamespace']);
+            }
+        );
+
         /** @noinspection PhpUnusedParameterInspection */
         $app['annot.controller_factory'] = $app->protect(
                                                function (Application $app, $controllerName, $methodName, $separator) {
@@ -95,6 +105,6 @@ class AnnotationServiceProvider implements ServiceProviderInterface
                                                }
         );
 
-        $app['annot.controllerNamespace'] = null;
+        $app['annot.controllerNamespace'] = '';
     }
 }

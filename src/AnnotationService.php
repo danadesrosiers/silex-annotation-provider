@@ -40,6 +40,9 @@ class AnnotationService
     /** @var Cache */
     protected $cache;
 
+    /** @var bool */
+    protected $useCache;
+
     const CONTROLLER_CACHE_INDEX = 'annot.controllerFiles';
     /**
      * @param \Silex\Application $app
@@ -67,45 +70,22 @@ class AnnotationService
         } else {
             $this->reader = new AnnotationReader();
         }
+
+        $this->useCache = !$this->app['debug'] && $this->cache instanceof Cache;
     }
 
-    public function discoverControllers($dir, $baseNamespace=null)
+    /**
+     * @param $dir
+     * @return array
+     */
+    public function discoverControllers($dir)
     {
-        if (!is_dir($dir)) {
-            throw new RuntimeException("Controller directory: {$dir} does not exist.");
-        }
-
-        if (!$this->app['debug'] && $this->cache instanceof Cache && $this->cache->contains(self::CONTROLLER_CACHE_INDEX)) {
+        if ($this->useCache && $this->cache->contains(self::CONTROLLER_CACHE_INDEX)) {
             $controllerFiles = $this->cache->fetch('annot.controllerFiles');
         } else {
-            if ($this->app->offsetExists('annot.controllerIterator')) {
-                $files = $this->app['annot.controllerIterator']($dir);
-            } else {
-                $files = $this->getFiles($dir);
-            }
+            $controllerFiles = $this->app['annot.controllerFinder']($this->app, $dir);
 
-            $controllerFiles = array();
-            foreach ($files as $fileName => $file) {
-                $pathInfo = pathinfo($fileName);
-                if ($baseNamespace) {
-                    $subDir = str_replace($dir, '', $pathInfo['dirname']);
-                    if (strlen($subDir)) {
-                        $subDir .= "\\";
-                    }
-                    $namespace = "$baseNamespace\\$subDir";
-                } else {
-                    // we weren't given a namespace, so we have to parse the file to find it
-                    preg_match('/namespace(.*);/', file_get_contents($fileName), $result);
-                    $namespace = isset($result[1]) ? $result[1] . "\\" : '';
-                }
-
-                $fqcn = trim($namespace . $pathInfo['filename']);
-                if (class_exists($fqcn)) {
-                    $controllerFiles[] = $fqcn;
-                }
-            }
-
-            if (!$this->app['debug'] && $this->cache instanceof Cache) {
+            if ($this->useCache) {
                 $this->cache->save(self::CONTROLLER_CACHE_INDEX, $controllerFiles);
             }
         }
@@ -113,21 +93,44 @@ class AnnotationService
         return $controllerFiles;
     }
 
-    public function registerControllers($controllers) {
+    /**
+     * @param $controllers
+     */
+    public function registerControllers($controllers)
+    {
         foreach ($controllers as $fqcn) {
             $this->registerController($fqcn);
         }
     }
 
-    protected function getFiles($dir, $files=array())
+    /**
+     * Recursively walk the file tree starting from $dir to find potential controller class files.
+     * Returns array of fully qualified class names.
+     * Namespace detection works with PSR-0 or PSR-4 autoloading.
+     *
+     * @param string  $dir
+     * @param string  $namespace
+     * @param array   $files
+     * @return array
+     */
+    public function getFiles($dir, $namespace='', $files=array())
     {
         if ($handle = opendir($dir)) {
             while (false !== ($entry = readdir($handle))) {
                 if (!in_array($entry, array('.', '..'))) {
-                    if (is_dir("$dir/$entry")) {
-                        $files = $this->getFiles("$dir/$entry", $files);
+                    $filePath = "$dir/$entry";
+                    if (is_dir($filePath)) {
+                        $subNamespace = $namespace ? $namespace."$entry\\" : '';
+                        $files = $this->getFiles($filePath, $subNamespace, $files);
                     } else {
-                        $files["$dir/$entry"] = $entry;
+                        if (!$namespace) {
+                            $namespace = $this->parseNamespace($filePath);
+                        }
+                        $pathInfo = pathinfo($entry);
+                        $className = trim($namespace.$pathInfo['filename']);
+                        if (class_exists($className)) {
+                            $files[] = $className;
+                        }
                     }
                 }
             }
@@ -176,6 +179,10 @@ class AnnotationService
         return $controllerCollection;
     }
 
+    /**
+     * @param ReflectionClass      $reflectionClass
+     * @param ControllerCollection $controllerCollection
+     */
     public function processClassAnnotations(ReflectionClass $reflectionClass, ControllerCollection $controllerCollection)
     {
         foreach ($this->reader->getClassAnnotations($reflectionClass) as $annotation) {
@@ -185,6 +192,10 @@ class AnnotationService
         }
     }
 
+    /**
+     * @param ReflectionClass      $reflectionClass
+     * @param ControllerCollection $controllerCollection
+     */
     public function processMethodAnnotations(ReflectionClass $reflectionClass, ControllerCollection $controllerCollection)
     {
         $separator = $this->app['annot.useServiceControllers'] ? ":" : "::";
@@ -214,8 +225,23 @@ class AnnotationService
         }
     }
 
+    /**
+     * @return AnnotationReader
+     */
     public function getReader()
     {
         return $this->reader;
+    }
+
+    /**
+     * Parse the given file to find the namespace.
+     *
+     * @param $filePath
+     * @return string
+     */
+    protected function parseNamespace($filePath)
+    {
+        preg_match('/namespace(.*);/', file_get_contents($filePath), $result);
+        return isset($result[1]) ? $result[1] . "\\" : '';
     }
 }
