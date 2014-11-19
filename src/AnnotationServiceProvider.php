@@ -38,7 +38,7 @@ class AnnotationServiceProvider implements ServiceProviderInterface
             if (!is_dir($app['annot.controllerDir'])) {
                 throw new RuntimeException("Controller directory: {$app['annot.controllerDir']} does not exist.");
             }
-            $controllers = $annotationService->discoverControllers($app['annot.controllerDir'], $app['annot.controllerNamespace']);
+            $controllers = $annotationService->discoverControllers($app['annot.controllerDir']);
             $annotationService->registerControllers($controllers);
         }
 

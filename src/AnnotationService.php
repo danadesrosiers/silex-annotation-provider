@@ -204,8 +204,8 @@ class AnnotationService
             if (!$reflectionMethod->isStatic()) {
                 $controllerMethodName = $this->app['annot.controller_factory'](
                     $this->app,
-                    $reflectionClass->getName(),
-                    $reflectionMethod->getName(),
+                    $reflectionClass->name,
+                    $reflectionMethod->name,
                     $separator
                 );
                 $methodAnnotations = $this->reader->getMethodAnnotations($reflectionMethod);

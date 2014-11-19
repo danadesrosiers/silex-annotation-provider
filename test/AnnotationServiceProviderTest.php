@@ -68,7 +68,7 @@ class AnnotationServiceProviderTest extends AnnotationTestBase
             $files = array();
             foreach ($iterator as $filePath => $file) {
                 $pathInfo = pathinfo($filePath);
-                $files[] = self::CONTROLLER_NAMESPACE.$pathInfo['filename'];
+                $files[] = AnnotationTestBase::CONTROLLER_NAMESPACE.$pathInfo['filename'];
             }
 
             return $files;
