@@ -157,7 +157,7 @@ class AnnotationService
         }
 
         if ($controllerAnnotation instanceof Controller) {
-            $this->app['annot.registerServiceController']($controllerName);
+            $this->app['annot.registerServiceController'](trim($controllerName, "\\"));
             $controllerAnnotation->process($this->app, $reflectionClass);
         }
     }

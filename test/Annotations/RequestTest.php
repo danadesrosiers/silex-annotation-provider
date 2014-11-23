@@ -16,37 +16,29 @@ use Symfony\Component\Routing\RouteCollection;
 
 class RequestTest extends AnnotationTestBase
 {
-    public function testPost()
+    public function requestTestDataProvider()
     {
-        $this->assertEndPointStatus(self::POST_METHOD, "/test/post", self::STATUS_OK);
+        return array(
+            array(self::POST_METHOD, "/test/post", self::STATUS_OK),
+            array(self::PUT_METHOD, "/test/put", self::STATUS_OK),
+            array(self::DELETE_METHOD, "/test/delete", self::STATUS_OK),
+            // match tests
+            array(self::GET_METHOD, "/test/multi-method", self::STATUS_OK),
+            array(self::POST_METHOD, "/test/multi-method", self::STATUS_OK),
+            array(self::GET_METHOD, "/test/match", self::STATUS_OK),
+            array(self::POST_METHOD, "/test/match", self::STATUS_OK),
+            // multiple requests
+            array(self::GET_METHOD, "/test/firstRequest", self::STATUS_OK),
+            array(self::GET_METHOD, "/test/secondRequest", self::STATUS_OK),
+        );
     }
 
-    public function testPut()
+    /**
+     * @dataProvider requestTestDataProvider
+     */
+    public function testRequests($method, $uri, $status=self::STATUS_OK)
     {
-        $this->assertEndPointStatus(self::PUT_METHOD, "/test/put", self::STATUS_OK);
-    }
-
-    public function testDelete()
-    {
-        $this->assertEndPointStatus(self::DELETE_METHOD, "/test/delete", self::STATUS_OK);
-    }
-
-    public function testMultiMethod()
-    {
-        $this->assertEndPointStatus(self::GET_METHOD, "/test/multi-method", self::STATUS_OK);
-        $this->assertEndPointStatus(self::POST_METHOD, "/test/multi-method", self::STATUS_OK);
-    }
-
-    public function testMatch()
-    {
-        $this->assertEndPointStatus(self::GET_METHOD, "/test/match", self::STATUS_OK);
-        $this->assertEndPointStatus(self::POST_METHOD, "/test/match", self::STATUS_OK);
-    }
-
-    public function testMultipleRequests()
-    {
-        $this->assertEndPointStatus(self::GET_METHOD, "/test/firstRequest", self::STATUS_OK);
-        $this->assertEndPointStatus(self::GET_METHOD, "/test/secondRequest", self::STATUS_OK);
+        $this->assertEndPointStatus($method, $uri, $status);
     }
 
     public function testMultipleRequestsShareModifiers()

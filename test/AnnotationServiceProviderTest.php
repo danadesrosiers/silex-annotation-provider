@@ -25,7 +25,7 @@ class AnnotationServiceProviderTest extends AnnotationTestBase
         $options = array(
             "annot.controllers" => array(
                 'group1' => array("DDesrosiers\\Test\\SilexAnnotations\\TestControllerOne"),
-                'group2' => array("DDesrosiers\\Test\\SilexAnnotations\\TestControllerTwo")
+                'group2' => array("\\DDesrosiers\\Test\\SilexAnnotations\\TestControllerTwo")
             )
         );
 
