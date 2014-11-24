@@ -15,7 +15,7 @@ Install the silex-annotation-provider using composer.
 ```
 {
     "require": {
-        "ddesrosiers/silex-annotation-provider": "dev-master"
+        "ddesrosiers/silex-annotation-provider": "~1.1"
     }
 }
 ```
@@ -25,15 +25,20 @@ Registration
 ```php
 $app->register(new DDesrosiers\SilexAnnotations\SilexAnnotationProvider(), array(
     "annot.cache" => new ApcCache(),
-    "annot.controllers" => array("MyControllerNamespace\\MyController")
+    "annot.controllerDir" => "$srcDir/Controller",
+    "annot.controllerNamespace" => "Company\\Controller\\"
 ));
 ```
 
 Parameters
 ==========
-annot.cache
------------
-An instance of a class that implements Doctrine\Common\Cache\Cache.  This is the cache that will be used by the AnnotationReader to cache annotations so they don't have to be parsed every time.  Make sure to include Doctrine Cache as it is not a required dependency of this project.
+annot.controllerDir
+-------------------
+Specify the diretory in which to search for controllers.  This directory will be searched recursively for classes with the `@Controller` annotation.  Found controller classes will be processed for route annotations.  Either this or annot.controllers is required to locate controllers.  If a cache object is given using the 'annot.cache' option and the 'debug' option is true, the list of controller classes will be cached to improve performance.
+
+annot.controllerNamespace
+-------------------------
+The base namespace of the controllerDir.  This option works with the annot.controllerDir option.  It is not required, but saves the service from having to do the work of figuring out the namespace of the controller classes.
 
 annot.controllers
 -----------------
@@ -50,16 +55,9 @@ $app['annot.controllers'] = array(
 	)
 );
 ```
-annot.controller_factory
-------------------------
-Factory method to customize the controller name/callable. This is **optional** and you should hardly ever need to change this (unless you are really sure what you are doing).
-```php
-$app['annot.controller_factory'] = $app->protect(
-    function (Application $app, $controllerName, $methodName, $separator) {
-        return $controllerName . $separator . $methodName;
-    }
-);
-```
+annot.cache
+-----------
+An instance of a class that implements Doctrine\Common\Cache\Cache.  This is the cache that will be used by the AnnotationReader to cache annotations so they don't have to be parsed every time.  Make sure to include Doctrine Cache as it is not a required dependency of this project.
 
 Annotate Controllers
 ====================
@@ -70,13 +68,16 @@ namespace DDesrosiers\Controller;
 use DDesrosiers\SilexAnnotations\Annotations as SLX;
 use Symfony\Component\HttpFoundation\Response;
 
+/**
+ * @SLX\Controller(prefix="/prefix")
+ * @SLX\RequireHttps
+ */
 class TestController 
 {
 	/**
 	 * @SLX\Route(
 	 *		@SLX\Request(method="GET", uri="test/{var}"),
 	 *		@SLX\Assert(variable="var", regex="\d+"),
-	 *		@SLX\RequireHttp,
 	 *		@SLX\Convert(variable="var", callback="\DDesrosiers\Controller\TestController::converter")
 	 * )
 	 */
@@ -94,10 +95,12 @@ class TestController
 
 The annotations in our TestController are interpreted as follows:
 ```
-$app->get("test/{var}", "\\DDesrosiers\\Controller\\TestController:testMethod")
+$controllerCollection = $app['controller_factory'];
+$controllerCollection->requireHttps();
+$controller->get("test/{var}", "\\DDesrosiers\\Controller\\TestController:testMethod")
 	->assert('var', '\d+')
-	->requireHttp()
 	->convert('var', "\\DDesrosiers\\Controller\\TestController::converter");
+$app->mount('/prefix', $controllerCollection);
 ```
 
 Controller Providers
@@ -143,9 +146,26 @@ AnnotationService->process() takes 3 arguments:
 * **isServiceController**: This matters because Silex expects a different string representation of a controller method for ServiceControllers.  Default: false.
 * **newCollection**: If true, all routes found will be put into a new controller collection and that collection will be returned.  Default: false.
 
+Advanced Options
+================
+annot.useServiceControllers
+---------------------------
+Controllers are registered as service controllers by default.  This option can be used to override this default.
+
+annot.controllerFinder
+----------------------
+Define your own callback to search for controllers.
+
+annot.registerServiceController
+-------------------------------
+This callback registers the service controller.  Override it if you need to do anything special to register your controllers.
 
 Annotations
 ===========
+**Controller**
+
+The @Controller annotation marks a class as a controller.  The 'prefix' option defines the mount point for the controller collection.
+
 **@Route**
 
 The @Route annotation groups annotations into an isolated endpoint definition.  This is required if you have multiple aliases for your controller method with different modifiers.  All other annotations can be included as sub-annotations of @Route or stand on their own.
