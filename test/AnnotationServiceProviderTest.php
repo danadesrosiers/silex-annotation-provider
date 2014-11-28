@@ -33,6 +33,18 @@ class AnnotationServiceProviderTest extends AnnotationTestBase
         $this->assertEndPointStatus(self::GET_METHOD, '/group2/test2', self::STATUS_OK, $options);
     }
 
+    public function testGroupAndControllerPrefix()
+    {
+        $options = array(
+            "annot.controllers" => array(
+                'group' => array("DDesrosiers\\Test\\SilexAnnotations\\Controller\\TestController")
+            )
+        );
+
+        // both the annot.controller prefix and the Controller annotation prefix should be respected
+        $this->assertEndPointStatus(self::GET_METHOD, '/group/test/test1', self::STATUS_OK, $options);
+    }
+
     public function testRegisterControllersByDirectoryProvider()
     {
         $subDirFqcn = self::CONTROLLER_NAMESPACE."SubDir\\SubDirTestController";

@@ -154,6 +154,8 @@ class AnnotationService
 
         if (!($controllerAnnotation instanceof Controller)) {
             $controllerAnnotation = $defaultControllerAnnotation;
+        } else if ($defaultControllerAnnotation instanceof Controller) {
+            $controllerAnnotation->prefix = $defaultControllerAnnotation->prefix . $controllerAnnotation->prefix;
         }
 
         if ($controllerAnnotation instanceof Controller) {
