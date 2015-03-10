@@ -6,8 +6,8 @@ env:
   - SILEX_VERSION="1.2.*"
 
 before_script:
-  - composer require silex/silex:${SILEX_VERSION}
-  - composer install --dev --prefer-source
+  - travis_retry composer require silex/silex:${SILEX_VERSION}
+  - travis_retry composer install --dev --prefer-source
 
 script: vendor/bin/phpunit
 
@@ -15,3 +15,8 @@ php:
   - 5.3
   - 5.4
   - 5.5
+  - hhvm
+  
+matrix:
+  allow_failures:
+      - php: hhvm
