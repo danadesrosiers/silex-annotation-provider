@@ -10,7 +10,7 @@ A Silex ServiceProvider that defines annotations that can be used in a Silex con
 Installation
 ============
 
-Install the silex-annotation-provider using composer. 
+Install the silex-annotation-provider using composer.
 
 ```
 {
@@ -23,7 +23,7 @@ Install the silex-annotation-provider using composer.
 Registration
 ============
 ```php
-$app->register(new DDesrosiers\SilexAnnotations\SilexAnnotationProvider(), array(
+$app->register(new DDesrosiers\SilexAnnotations\AnnotationServiceProvider(), array(
     "annot.cache" => new ApcCache(),
     "annot.controllerDir" => "$srcDir/Controller",
     "annot.controllerNamespace" => "Company\\Controller\\"
@@ -72,7 +72,7 @@ use Symfony\Component\HttpFoundation\Response;
  * @SLX\Controller(prefix="/prefix")
  * @SLX\RequireHttps
  */
-class TestController 
+class TestController
 {
 	/**
 	 * @SLX\Route(
@@ -85,7 +85,7 @@ class TestController
 	{
 		return new Response("test Method: $var");
 	}
-	
+
 	public static function converter($var)
 	{
 		return $var;
@@ -136,7 +136,7 @@ class TestProviderController implements ControllerProviderInterface
 }
 ```
 
-The ControllerProviderInterface's connect() requirement was satisfied by calling the annotation service's process() method.  
+The ControllerProviderInterface's connect() requirement was satisfied by calling the annotation service's process() method.
 
 Service
 =======
