@@ -4,8 +4,8 @@ namespace DDesrosiers\Test\SilexAnnotations\Controller;
 
 use DDesrosiers\SilexAnnotations\Annotations as SLX;
 use DDesrosiers\SilexAnnotations\AnnotationService;
+use Silex\Api\ControllerProviderInterface;
 use Silex\Application;
-use Silex\ControllerProviderInterface;
 use Symfony\Component\HttpFoundation\Response;
 
 class TestControllerProvider implements ControllerProviderInterface

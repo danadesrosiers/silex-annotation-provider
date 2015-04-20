@@ -66,7 +66,9 @@ class AnnotationTestBase extends \PHPUnit_Framework_TestCase
 
     protected function getClient($annotationOptions = array())
     {
-        $this->registerAnnotations($annotationOptions);
+        if (!$this->app->offsetExists('annot')) {
+            $this->registerAnnotations($annotationOptions);
+        }
         $this->client = new Client($this->app, $this->clientOptions);
     }
 

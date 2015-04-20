@@ -13,9 +13,11 @@ namespace DDesrosiers\SilexAnnotations;
 use DDesrosiers\SilexAnnotations\Annotations\Controller;
 use Doctrine\Common\Annotations\AnnotationRegistry;
 use RuntimeException;
+use Pimple\Container;
+use Pimple\ServiceProviderInterface;
+use Silex\Api\BootableProviderInterface;
 use Silex\Application;
 use Silex\Provider\ServiceControllerServiceProvider;
-use Silex\ServiceProviderInterface;
 
 /**
  * Class AnnotationServiceProvider provides the 'annot' service, an instance of
@@ -23,7 +25,7 @@ use Silex\ServiceProviderInterface;
  *
  * @author Dana Desrosiers <dana.desrosiers@gmail.com>
  */
-class AnnotationServiceProvider implements ServiceProviderInterface
+class AnnotationServiceProvider implements ServiceProviderInterface, BootableProviderInterface
 {
     /**
      * @param \Silex\Application $app
@@ -61,15 +63,15 @@ class AnnotationServiceProvider implements ServiceProviderInterface
     }
 
     /**
-     * @param \Silex\Application $app
+     * @param Container|Application $app
      */
-    public function register(Application $app)
+    public function register(Container $app)
     {
         if (!$app->offsetExists('annot.useServiceControllers')) {
             $app['annot.useServiceControllers'] = true;
         }
 
-        $app["annot"] = $app->share(function (Application $app) { return new AnnotationService($app); });
+        $app["annot"] = function (Container $app) { return new AnnotationService($app); };
 
         // A custom auto loader for Doctrine Annotations since it can't handle PSR-4 directory structure
         AnnotationRegistry::registerLoader(function ($class) { return class_exists($class); });
@@ -83,11 +85,9 @@ class AnnotationServiceProvider implements ServiceProviderInterface
         $app['annot.registerServiceController'] = $app->protect(
             function ($controllerName) use ($app) {
                 if ($app['annot.useServiceControllers']) {
-                    $app["$controllerName"] = $app->share(
-                        function (Application $app) use ($controllerName) {
-                            return new $controllerName($app);
-                        }
-                    );
+                    $app["$controllerName"] = function (Application $app) use ($controllerName) {
+                        return new $controllerName($app);
+                    };
                 }
             }
         );

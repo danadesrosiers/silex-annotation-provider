@@ -11,13 +11,11 @@
 namespace DDesrosiers\Test\SilexAnnotations\Annotations;
 
 use DDesrosiers\Test\SilexAnnotations\AnnotationTestBase;
-use Silex\Provider\UrlGeneratorServiceProvider;
 
 class BindTest extends AnnotationTestBase
 {
     public function testBind()
     {
-        $this->app->register(new UrlGeneratorServiceProvider());
         $response = $this->makeRequest(self::GET_METHOD, '/test/bind');
         $this->assertEquals('/test/bind', $response->getContent());
     }

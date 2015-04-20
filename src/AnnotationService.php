@@ -17,6 +17,7 @@ use DDesrosiers\SilexAnnotations\Annotations\RouteAnnotation;
 use Doctrine\Common\Annotations\AnnotationReader;
 use Doctrine\Common\Annotations\CachedReader;
 use Doctrine\Common\Cache\Cache;
+use Pimple\Container;
 use ReflectionClass;
 use ReflectionMethod;
 use RuntimeException;
@@ -45,10 +46,9 @@ class AnnotationService
 
     const CONTROLLER_CACHE_INDEX = 'annot.controllerFiles';
     /**
-     * @param \Silex\Application $app
-     * @throws RuntimeException
+     * @param Container|Application $app
      */
-    public function __construct(Application $app)
+    public function __construct(Container $app)
     {
         $this->app = $app;
 
@@ -56,7 +56,7 @@ class AnnotationService
             if ($app['annot.cache'] instanceof Cache) {
                 $this->cache = $app['annot.cache'];
             } else if (is_string($app['annot.cache']) && strlen($app['annot.cache']) > 0) {
-                $cacheClass = "Doctrine\\Common\\Cache\\{$app['annot.cache']}Cache";
+                $cacheClass = "Doctrine\\Common\\Cache\\".$app['annot.cache']."Cache";
                 if (!class_exists($cacheClass)) {
                     throw new RuntimeException("Cache type: [$cacheClass] does not exist.  Make sure you include Doctrine cache.");
                 }

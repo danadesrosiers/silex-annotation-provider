@@ -4,6 +4,8 @@
 silex-annotation-provider
 =========================
 
+**This is the Silex 2.0 compatible version.  It is in development and NOT STABLE.  See 1.1 branch for stable version.**
+
 A Silex ServiceProvider that defines annotations that can be used in a Silex controller.  Define your controllers in a class and use annotations to setup routes and define modifiers.
 
 
@@ -15,7 +17,7 @@ Install the silex-annotation-provider using composer.
 ```
 {
     "require": {
-        "ddesrosiers/silex-annotation-provider": "~1.1"
+        "ddesrosiers/silex-annotation-provider": "~2.0@dev"
     }
 }
 ```
@@ -34,7 +36,7 @@ Parameters
 ==========
 annot.controllerDir
 -------------------
-Specify the diretory in which to search for controllers.  This directory will be searched recursively for classes with the `@Controller` annotation.  Found controller classes will be processed for route annotations.  Either this or annot.controllers is required to locate controllers.  If a cache object is given using the 'annot.cache' option and the 'debug' option is true, the list of controller classes will be cached to improve performance.
+Specify the directory in which to search for controllers.  This directory will be searched recursively for classes with the `@Controller` annotation.  Found controller classes will be processed for route annotations.  Either this or annot.controllers is required to locate controllers.  If a cache object is given using the 'annot.cache' option and the 'debug' option is true, the list of controller classes will be cached to improve performance.
 
 annot.controllerNamespace
 -------------------------
