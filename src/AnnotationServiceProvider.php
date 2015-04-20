@@ -46,18 +46,8 @@ class AnnotationServiceProvider implements ServiceProviderInterface, BootablePro
 
         // Process annotations for any given controllers
         if ($app->offsetExists('annot.controllers') && is_array($app['annot.controllers'])) {
-            foreach ($app['annot.controllers'] as $groupName => $controllerGroup) {
-                if (!is_array($controllerGroup)) {
-                    $controllerGroup = array($controllerGroup);
-                }
-
-                foreach ($controllerGroup as $controllerName) {
-                    $controllerAnnotation = new Controller();
-                    if (!is_int($groupName)) {
-                        $controllerAnnotation->prefix = $groupName;
-                    }
-                    $annotationService->registerController($controllerName, $controllerAnnotation);
-                }
+            foreach ($app['annot.controllers'] as $controllerName) {
+                $annotationService->registerController($controllerName);
             }
         }
     }

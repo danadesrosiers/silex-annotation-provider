@@ -46,7 +46,7 @@ class AnnotationService
 
     const CONTROLLER_CACHE_INDEX = 'annot.controllerFiles';
     /**
-     * @param Container|Application $app
+     * @param Container $app
      */
     public function __construct(Container $app)
     {
@@ -144,19 +144,12 @@ class AnnotationService
      * Register the controller if a Controller annotation exists in the class doc block or $controllerAnnotation is provided.
      *
      * @param string     $controllerName
-     * @param Controller $defaultControllerAnnotation (optional) - For legacy controller classes that don't have a Controller Annotation
      */
-    public function registerController($controllerName, Controller $defaultControllerAnnotation = null)
+    public function registerController($controllerName)
     {
         $reflectionClass = new ReflectionClass($controllerName);
         $annotationClassName = "\\DDesrosiers\\SilexAnnotations\\Annotations\\Controller";
         $controllerAnnotation = $this->reader->getClassAnnotation($reflectionClass, $annotationClassName);
-
-        if (!($controllerAnnotation instanceof Controller)) {
-            $controllerAnnotation = $defaultControllerAnnotation;
-        } else if ($defaultControllerAnnotation instanceof Controller) {
-            $controllerAnnotation->prefix = $defaultControllerAnnotation->prefix . $controllerAnnotation->prefix;
-        }
 
         if ($controllerAnnotation instanceof Controller) {
             $this->app['annot.registerServiceController'](trim($controllerName, "\\"));
