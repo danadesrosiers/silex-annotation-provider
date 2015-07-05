@@ -13,8 +13,8 @@ namespace DDesrosiers\SilexAnnotations\Annotations;
 
 use Silex\Application;
 use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
+use Symfony\Component\Security\Core\Authorization\AuthorizationChecker;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
-use Symfony\Component\Security\Core\SecurityContext;
 
 /**
  * @Annotation
@@ -37,8 +37,8 @@ class Secure implements RouteAnnotation
             /** @noinspection PhpUnusedParameterInspection */
             $route->before(
                   function (SymfonyRequest $request, Application $app) use ($roles) {
-                      /** @var SecurityContext $security */
-                      $security = $app['security'];
+                      /** @var AuthorizationChecker $security */
+                      $security = $app['security.authorization_checker'];
                       if (!$security->isGranted($roles)) {
                           throw new AccessDeniedException();
                       }
