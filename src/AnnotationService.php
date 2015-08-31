@@ -136,7 +136,9 @@ class AnnotationService
             }
             closedir($handle);
         }
-
+        usort($files, function ($a, $b) {
+            return (string) $a > (string) $b ? 1 : -1;
+        });
         return $files;
     }
 
