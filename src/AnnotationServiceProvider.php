@@ -45,8 +45,8 @@ class AnnotationServiceProvider implements ServiceProviderInterface, BootablePro
                 }
                 $tmp_controllers = $annotationService->discoverControllers($controller_dir);
                 if(is_array($tmp_controllers) && count($tmp_controllers)) {
-                    $controllers = array_merge($tmp_controllers);
-                }
+                    $controllers = array_merge($controllers, $tmp_controllers);
+                }                
             }            
             $annotationService->registerControllers($controllers);
             
@@ -57,7 +57,7 @@ class AnnotationServiceProvider implements ServiceProviderInterface, BootablePro
             $controllers = $annotationService->discoverControllers($app['annot.controllerDir']);            
             $annotationService->registerControllers($controllers);
         }
-
+        
         // Process annotations for any given controllers
         if ($app->offsetExists('annot.controllers') && is_array($app['annot.controllers'])) {
             foreach ($app['annot.controllers'] as $controllerName) {

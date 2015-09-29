@@ -1,6 +1,6 @@
 <?php
 
-namespace DDesrosiers\Test\SilexAnnotations\Controller;
+namespace DDesrosiers\Test\SilexAnnotations\Controller2;
 
 use DDesrosiers\SilexAnnotations\Annotations as SLX;
 use Symfony\Component\HttpFoundation\Response;

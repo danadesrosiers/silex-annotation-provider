@@ -1,13 +1,13 @@
 <?php
 
-namespace DDesrosiers\Test\SilexAnnotations\Controller;
+namespace DDesrosiers\Test\SilexAnnotations\Controller2;
 
 use DDesrosiers\SilexAnnotations\Annotations as SLX;
 use Exception;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * @SLX\Controller(prefix="before")
+ * @SLX\Controller(prefix="before2")
  * @SLX\Before("DDesrosiers\Test\SilexAnnotations\Controller\BeforeTestController::beforeCallback")
  */
 class BeforeCollectionTestController

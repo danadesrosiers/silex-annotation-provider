@@ -1,6 +1,6 @@
 <?php
 
-namespace DDesrosiers\Test\SilexAnnotations\Controller;
+namespace DDesrosiers\Test\SilexAnnotations\Controller2;
 
 use DDesrosiers\SilexAnnotations\Annotations as SLX;
 use Exception;
@@ -9,7 +9,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Generator\UrlGenerator;
 
 /**
- * @SLX\Controller(prefix="/test")
+ * @SLX\Controller(prefix="/test2")
  */
 class TestController
 {

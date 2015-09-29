@@ -1,6 +1,6 @@
 <?php
 
-namespace DDesrosiers\Test\SilexAnnotations\Controller\SubDir;
+namespace DDesrosiers\Test\SilexAnnotations\Controller2\SubDir;
 
 use DDesrosiers\SilexAnnotations\Annotations as SLX;
 

@@ -20,12 +20,14 @@ class AnnotationServiceDirArrayTest extends AnnotationDirArrayTestBase
 {
     public function testServiceControllerDirArray()
     {        
-        $this->assertEndPointStatus(self::GET_METHOD, '/test/test1', self::STATUS_OK);
+        $this->assertEndPointStatus(self::GET_METHOD, '/test2/test1', self::STATUS_OK);
     }
 
     public function testIsolationOfControllerModifiersDirArray()
-    {
+    {        
         $this->assertEndPointStatus(self::GET_METHOD, '/before/test', self::STATUS_ERROR);
+        $this->assertEndPointStatus(self::GET_METHOD, '/before2/test', self::STATUS_ERROR);
+        $this->assertEndPointStatus(self::GET_METHOD, '/test2/test1', self::STATUS_OK);
         $this->assertEndPointStatus(self::GET_METHOD, '/test/test1', self::STATUS_OK);
     }
 
