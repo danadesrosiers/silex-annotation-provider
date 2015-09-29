@@ -16,20 +16,20 @@ use DDesrosiers\Test\SilexAnnotations\Controller\TestControllerProvider;
 use Doctrine\Common\Cache\ApcCache;
 use Silex\Application;
 
-class AnnotationServiceTest extends AnnotationTestBase
+class AnnotationServiceDirArrayTest extends AnnotationDirArrayTestBase
 {
-    public function testServiceController()
-    {
+    public function testServiceControllerDirArray()
+    {        
         $this->assertEndPointStatus(self::GET_METHOD, '/test/test1', self::STATUS_OK);
     }
 
-    public function testIsolationOfControllerModifiers()
+    public function testIsolationOfControllerModifiersDirArray()
     {
         $this->assertEndPointStatus(self::GET_METHOD, '/before/test', self::STATUS_ERROR);
         $this->assertEndPointStatus(self::GET_METHOD, '/test/test1', self::STATUS_OK);
     }
 
-    public function testControllerProvider()
+    public function testControllerProviderDirArray()
     {
         $this->app->register(new AnnotationServiceProvider());
         $this->app->mount('/cp', new TestControllerProvider());
@@ -50,7 +50,7 @@ class AnnotationServiceTest extends AnnotationTestBase
     /**
      * @dataProvider cacheTestProvider
      */
-    public function testCache($cache, $exception=null)
+    public function testCacheDirArray($cache, $exception=null)
     {
         $app = new Application();
         $app['annot.cache'] = $cache;
@@ -61,4 +61,9 @@ class AnnotationServiceTest extends AnnotationTestBase
             $this->assertEquals($exception, get_class($e));
         }
     }
+}
+
+class InvalidCache
+{
+
 }
