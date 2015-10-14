@@ -35,12 +35,24 @@ class AnnotationServiceProvider implements ServiceProviderInterface, BootablePro
         /** @var AnnotationService $annotationService */
         $annotationService = $app['annot'];
 
-        // Process annotations for all controllers in given directory
-        if ($app->offsetExists('annot.controllerDir') && strlen($app['annot.controllerDir']) > 0) {
-            if (!is_dir($app['annot.controllerDir'])) {
-                throw new RuntimeException("Controller directory: {$app['annot.controllerDir']} does not exist.");
+        // Process annotations for all controllers in given directory/directories
+        if ($app->offsetExists('annot.controllerDir') && !empty($app['annot.controllerDir'])) {
+            
+            $controllerDir = $app['annot.controllerDir'];            
+            if (!is_array($controllerDir)) {
+                $controllerDir = array($controllerDir);
             }
-            $controllers = $annotationService->discoverControllers($app['annot.controllerDir']);
+            
+            $controllers = array();
+            foreach ($controllerDir as $dir) {
+                if (!is_dir($dir)) {
+                    throw new RuntimeException("Controller directory: {$dir} does not exist.");
+                }
+                $tmp_controllers = $annotationService->discoverControllers($dir);
+                if (is_array($tmp_controllers) && count($tmp_controllers)) {
+                    $controllers = array_merge($controllers, $tmp_controllers);
+                }
+            }
             $annotationService->registerControllers($controllers);
         }
 
