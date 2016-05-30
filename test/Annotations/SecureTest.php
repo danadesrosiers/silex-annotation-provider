@@ -32,7 +32,7 @@ class SecureTest extends AnnotationTestBase
                                       // raw password is foo
                                       'admin' => array(
                                           'ROLE_ADMIN',
-                                          '5FZ2Z8QIkA7UTZ4BYkoC+GsReLf569mSKDsfods6LYQ8t+a8EW9oaircfMpmaLbPBh4FOBiiFyLfuZmTSUwzZg=='
+                                          '$2y$15$lzUNsTegNXvZW3qtfucV0erYBcEqWVeyOmjolB7R1uodsAVJ95vvu'
                                       ),
                                   ),
                               ),

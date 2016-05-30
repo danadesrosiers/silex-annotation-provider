@@ -1,7 +1,7 @@
 language: php
 
 env:
-  - SILEX_VERSION="~2.0@dev"
+  - SILEX_VERSION="~2.0"
 
 before_script:
   - travis_retry composer require silex/silex:${SILEX_VERSION}
