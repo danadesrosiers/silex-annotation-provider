@@ -4,8 +4,6 @@
 silex-annotation-provider
 =========================
 
-**This is the Silex 2.0 compatible version.  It is in development and NOT STABLE.  See 1.1 branch for stable version.**
-
 A Silex ServiceProvider that defines annotations that can be used in a Silex controller.  Define your controllers in a class and use annotations to setup routes and define modifiers.
 
 
@@ -17,7 +15,7 @@ Install the silex-annotation-provider using composer.
 ```
 {
     "require": {
-        "ddesrosiers/silex-annotation-provider": "~2.0@dev"
+        "ddesrosiers/silex-annotation-provider": "~2.0"
     }
 }
 ```
