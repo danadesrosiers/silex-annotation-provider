@@ -12,7 +12,7 @@ Installation
 
 Install the silex-annotation-provider using composer.
 
-```
+```json
 {
     "require": {
         "ddesrosiers/silex-annotation-provider": "~2.0"
@@ -62,7 +62,7 @@ An instance of a class that implements Doctrine\Common\Cache\Cache.  This is the
 Annotate Controllers
 ====================
 Create your controller.  The following is an example demonstrating the use of annotations to register an endpoint.
-```
+```php
 namespace DDesrosiers\Controller;
 
 use DDesrosiers\SilexAnnotations\Annotations as SLX;
@@ -94,7 +94,7 @@ class TestController
 ```
 
 The annotations in our TestController are interpreted as follows:
-```
+```php
 $controllerCollection = $app['controller_factory'];
 $controllerCollection->requireHttps();
 $controller->get("test/{var}", "\\DDesrosiers\\Controller\\TestController:testMethod")
@@ -107,7 +107,7 @@ Controller Providers
 ====================
 If we want to use a ControllerProvider, we can use the annotations service's process() method directly.
 
-```
+```php
 namespace DDesrosiers\Controller;
 
 use DDesrosiers\SilexAnnotations\Annotations as SLX;
