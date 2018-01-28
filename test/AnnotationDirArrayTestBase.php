@@ -60,7 +60,7 @@ class AnnotationDirArrayTestBase extends \PHPUnit_Framework_TestCase
             $options['annot.controllerDir'] = self::$CONTROLLER_DIR;
         }
 
-        $this->app->register(new AnnotationServiceProvider(), $options);        
+        $this->app->register(new AnnotationServiceProvider(), $options);
         return $this->app['annot'];
     }
 
