@@ -80,13 +80,15 @@ class AnnotationService
      */
     public function discoverControllers($dir)
     {
-        if ($this->useCache && $this->cache->contains(self::CONTROLLER_CACHE_INDEX)) {
-            $controllerFiles = $this->cache->fetch('annot.controllerFiles');
+        $cacheKey = self::CONTROLLER_CACHE_INDEX . ".$dir";
+
+        if ($this->useCache && $this->cache->contains($cacheKey)) {
+            $controllerFiles = $this->cache->fetch($cacheKey);
         } else {
             $controllerFiles = $this->app['annot.controllerFinder']($this->app, $dir);
 
             if ($this->useCache) {
-                $this->cache->save(self::CONTROLLER_CACHE_INDEX, $controllerFiles);
+                $this->cache->save($cacheKey, $controllerFiles);
             }
         }
 

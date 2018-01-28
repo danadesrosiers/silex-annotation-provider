@@ -38,7 +38,7 @@ class AnnotationServiceProvider implements ServiceProviderInterface, BootablePro
         // Process annotations for all controllers in given directory/directories
         if ($app->offsetExists('annot.controllerDir') && !empty($app['annot.controllerDir'])) {
             
-            $controllerDir = $app['annot.controllerDir'];            
+            $controllerDir = $app['annot.controllerDir'];
             if (!is_array($controllerDir)) {
                 $controllerDir = array($controllerDir);
             }

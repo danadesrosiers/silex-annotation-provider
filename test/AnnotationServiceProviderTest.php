@@ -67,15 +67,16 @@ class AnnotationServiceProviderTest extends AnnotationTestBase
 
     public function testControllerCache()
     {
+        $cacheKey = AnnotationService::CONTROLLER_CACHE_INDEX . "." . self::$CONTROLLER_DIR;
         $cache = new TestArrayCache();
         $this->app['annot.cache'] = $cache;
         $this->app['debug'] = false;
         $service = $this->registerAnnotations();
         $service->discoverControllers(self::$CONTROLLER_DIR);
-        $this->assertCount(13, $cache->fetch(AnnotationService::CONTROLLER_CACHE_INDEX));
+        $this->assertCount(13, $cache->fetch($cacheKey));
 
         $files = $service->discoverControllers(self::$CONTROLLER_DIR);
-        $this->assertTrue($cache->wasFetched(AnnotationService::CONTROLLER_CACHE_INDEX));
+        $this->assertTrue($cache->wasFetched($cacheKey));
         $this->assertContains(self::CONTROLLER_NAMESPACE."SubDir\\SubDirTestController", $files);
         $this->assertContains(self::CONTROLLER_NAMESPACE."TestController", $files);
         $this->assertCount(13, $files);
@@ -95,6 +96,11 @@ class TestArrayCache extends ArrayCache
     {
         $this->fetchedIDs[$id] = true;
         return parent::fetch($id);
+    }
+
+    public function clearWasFetched()
+    {
+        $this->fetchedIDs = [];
     }
 }
 
