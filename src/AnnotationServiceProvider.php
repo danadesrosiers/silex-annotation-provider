@@ -108,5 +108,7 @@ class AnnotationServiceProvider implements ServiceProviderInterface, BootablePro
         );
 
         $app['annot.controllerNamespace'] = '';
+
+        $app['annot.base_uri'] = '';
     }
 }

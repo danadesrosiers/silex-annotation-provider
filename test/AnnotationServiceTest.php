@@ -43,7 +43,7 @@ class AnnotationServiceTest extends AnnotationTestBase
             array('Array'),                                // string identifier
             array(new ApcCache()),                         // proper implementation of Cache
             array('Fake', 'RuntimeException'),             // invalid cache string
-            array(new InvalidCache(), 'RuntimeException')  // class that does not implement Cache
+            array(new NotCache(), 'RuntimeException')  // class that does not implement Cache
         );
     }
 
@@ -61,4 +61,15 @@ class AnnotationServiceTest extends AnnotationTestBase
             $this->assertEquals($exception, get_class($e));
         }
     }
+
+    public function testFastLoad()
+    {
+        $this->assertEndPointStatus(self::GET_METHOD, '/two/test', self::STATUS_OK);
+        $this->assertEquals(35, count($this->app['routes']->all()));
+    }
+}
+
+class NotCache
+{
+
 }

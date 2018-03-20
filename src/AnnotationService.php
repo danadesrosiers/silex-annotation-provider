@@ -100,8 +100,15 @@ class AnnotationService
      */
     public function registerControllers($controllers)
     {
-        foreach ($controllers as $fqcn) {
-            $this->registerController($fqcn);
+        foreach ($controllers as $prefix => $controllerNames) {
+            if (!is_array($controllerNames)) {
+                $controllerNames = [$controllerNames];
+            }
+            foreach ($controllerNames as $fqcn) {
+                if (strlen($prefix) == 0 || strpos($_SERVER['REQUEST_URI'], $this->app['annot.base_uri'].$prefix) === 0) {
+                    $this->registerController($fqcn);
+                }
+            }
         }
     }
 
@@ -131,16 +138,25 @@ class AnnotationService
                         $pathInfo = pathinfo($entry);
                         $className = trim($namespace.$pathInfo['filename']);
                         if (class_exists($className)) {
-                            $files[] = $className;
+                            $reflectionClass = new ReflectionClass($className);
+                            $annotationClassName = "\\DDesrosiers\\SilexAnnotations\\Annotations\\Controller";
+                            $controllerAnnotation = $this->reader->getClassAnnotation($reflectionClass, $annotationClassName);
+
+                            if ($controllerAnnotation instanceof Controller && strlen($controllerAnnotation->prefix) > 0) {
+                                $files[$controllerAnnotation->prefix][] = $className;
+                            } else {
+                                $files[] = $className;
+                            }
                         }
                     }
                 }
             }
             closedir($handle);
         }
-        usort($files, function ($a, $b) {
-            return (string) $a > (string) $b ? 1 : -1;
-        });
+        // TODO: is there a reason to sort?  Maybe it was to get predictable results in unit tests?  if so, sort each prefix section
+//        uasort($files, function ($a, $b) {
+//            return (string) $a > (string) $b ? 1 : -1;
+//        });
         return $files;
     }
 

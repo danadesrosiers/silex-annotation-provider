@@ -79,6 +79,7 @@ class AnnotationDirArrayTestBase extends \PHPUnit_Framework_TestCase
 
     protected function makeRequest($method, $uri, $annotationOptions = array())
     {
+        $_SERVER['REQUEST_URI'] = $uri;
         $this->getClient($annotationOptions);
         $this->client->request($method, $uri, array(), array(), $this->requestOptions);
         $response = $this->client->getResponse();
