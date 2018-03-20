@@ -45,14 +45,10 @@ annot.controllers
 An array of fully qualified controller names.  If set, the provider will automatically register each controller as a ServiceController and set up routes and modifiers based on annotations found.  Controllers can be grouped into controller collections by grouping them with an associative array using the array key as the mount point.
 ```php
 $app['annot.controllers'] = array(
-	'group1' => array(
-		"MyControllerNamespace\\Controller1",
-		"MyControllerNamespace\\Controller2"
-	),
-	'group2' => array(
-		"MyControllerNamespace\\Controller3",
-		"MyControllerNamespace\\Controller4"
-	)
+	"MyControllerNamespace\\Controller1",
+	"MyControllerNamespace\\Controller2",
+	"MyControllerNamespace\\Controller3",
+	"MyControllerNamespace\\Controller4"
 );
 ```
 annot.cache
