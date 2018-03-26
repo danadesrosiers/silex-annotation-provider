@@ -73,13 +73,13 @@ class AnnotationServiceProviderTest extends AnnotationTestBase
         $this->app['debug'] = false;
         $service = $this->registerAnnotations();
         $service->discoverControllers(self::$CONTROLLER_DIR);
-        $this->assertCount(13, $cache->fetch($cacheKey));
+        $this->assertCount(14, $cache->fetch($cacheKey));
 
         $files = $service->discoverControllers(self::$CONTROLLER_DIR);
         $this->assertTrue($cache->wasFetched($cacheKey));
         $this->assertContains(self::CONTROLLER_NAMESPACE."SubDir\\SubDirTestController", $files);
-        $this->assertContains(self::CONTROLLER_NAMESPACE."TestController", $files);
-        $this->assertCount(13, $files);
+        $this->assertContains(self::CONTROLLER_NAMESPACE."TestController", $files['/test']);
+        $this->assertCount(14, $files);
     }
 }
 

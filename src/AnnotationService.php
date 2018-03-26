@@ -143,7 +143,12 @@ class AnnotationService
                             $controllerAnnotation = $this->reader->getClassAnnotation($reflectionClass, $annotationClassName);
 
                             if ($controllerAnnotation instanceof Controller && strlen($controllerAnnotation->prefix) > 0) {
-                                $files[$controllerAnnotation->prefix][] = $className;
+                                // the prefix might not start with a forward slash, but the REQUEST_URI always will
+                                $prefix = $controllerAnnotation->prefix;
+                                if ($prefix[0] != '/') {
+                                    $prefix = "/$prefix";
+                                }
+                                $files[$prefix][] = $className;
                             } else {
                                 $files[] = $className;
                             }

@@ -25,7 +25,8 @@ class AnnotationServiceTest extends AnnotationTestBase
 
     public function testIsolationOfControllerModifiers()
     {
-        $this->assertEndPointStatus(self::GET_METHOD, '/before/test', self::STATUS_ERROR);
+        $this->assertEndPointStatus(self::GET_METHOD, '/test/before', self::STATUS_ERROR);
+        $this->setup();
         $this->assertEndPointStatus(self::GET_METHOD, '/test/test1', self::STATUS_OK);
     }
 
@@ -62,10 +63,11 @@ class AnnotationServiceTest extends AnnotationTestBase
         }
     }
 
-    public function testFastLoad()
+    public function testFastRegister()
     {
         $this->assertEndPointStatus(self::GET_METHOD, '/two/test', self::STATUS_OK);
-        $this->assertEquals(35, count($this->app['routes']->all()));
+        // there are 35 routes, but only 2 are registered (the ones with prefix '/' and '/two')
+        $this->assertEquals(2, count($this->app['routes']->all()));
     }
 }
 
