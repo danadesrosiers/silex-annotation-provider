@@ -105,11 +105,17 @@ class AnnotationService
                 $controllerNames = [$controllerNames];
             }
             foreach ($controllerNames as $fqcn) {
-                if (strlen($prefix) == 0 || strpos($_SERVER['REQUEST_URI'], $this->app['annot.base_uri'].$prefix) === 0) {
+                if (strlen($prefix) == 0 || $this->prefixMatchesUri($prefix)) {
                     $this->registerController($fqcn);
                 }
             }
         }
+    }
+
+    public function prefixMatchesUri($prefix)
+    {
+        return ($this->app->offsetExists('annot.base_uri')
+            && strpos($_SERVER['REQUEST_URI'], $this->app['annot.base_uri'].$prefix) === 0);
     }
 
     /**
@@ -142,13 +148,8 @@ class AnnotationService
                             $annotationClassName = "\\DDesrosiers\\SilexAnnotations\\Annotations\\Controller";
                             $controllerAnnotation = $this->reader->getClassAnnotation($reflectionClass, $annotationClassName);
 
-                            if ($controllerAnnotation instanceof Controller && strlen($controllerAnnotation->prefix) > 0) {
-                                // the prefix might not start with a forward slash, but the REQUEST_URI always will
-                                $prefix = $controllerAnnotation->prefix;
-                                if ($prefix[0] != '/') {
-                                    $prefix = "/$prefix";
-                                }
-                                $files[$prefix][] = $className;
+                            if ($this->hasPrefix($controllerAnnotation)) {
+                                $files[$controllerAnnotation->getPrefix()][] = $className;
                             } else {
                                 $files[] = $className;
                             }
@@ -158,11 +159,15 @@ class AnnotationService
             }
             closedir($handle);
         }
-        // TODO: is there a reason to sort?  Maybe it was to get predictable results in unit tests?  if so, sort each prefix section
-//        uasort($files, function ($a, $b) {
-//            return (string) $a > (string) $b ? 1 : -1;
-//        });
+
         return $files;
+    }
+
+    public function hasPrefix(Controller $controllerAnnotation = null)
+    {
+        $hasPrefix = $controllerAnnotation instanceof Controller && strlen($controllerAnnotation->prefix) > 0;
+
+        return $this->app->offsetExists('annot.base_uri') && $hasPrefix;
     }
 
     /**
