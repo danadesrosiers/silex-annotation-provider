@@ -32,6 +32,7 @@ class ModifierTest extends AnnotationTestBase
         // testing a modifier that has no arguments
         // we make the request as http, but it should be redirected to a Http request
         $this->registerAnnotations();
+        $_SERVER['REQUEST_URI'] = '/test/requirehttps/modifier';
         $request = Request::create('http://test.com/test/requirehttps/modifier');
         $response = $this->app->handle($request);
         $this->assertEquals(301, $response->getStatusCode());

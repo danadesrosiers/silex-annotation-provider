@@ -10,7 +10,6 @@
 
 namespace DDesrosiers\SilexAnnotations;
 
-use DDesrosiers\SilexAnnotations\Annotations\Controller;
 use Doctrine\Common\Annotations\AnnotationRegistry;
 use RuntimeException;
 use Pimple\Container;
@@ -108,5 +107,7 @@ class AnnotationServiceProvider implements ServiceProviderInterface, BootablePro
         );
 
         $app['annot.controllerNamespace'] = '';
+
+        $app['annot.base_uri'] = '';
     }
 }

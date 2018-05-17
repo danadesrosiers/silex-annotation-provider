@@ -21,14 +21,18 @@ class AnnotationServiceDirArrayTest extends AnnotationDirArrayTestBase
     public function testServiceControllerDirArray()
     {
         $this->assertEndPointStatus(self::GET_METHOD, '/test/test1', self::STATUS_OK);
+        $this->setup();
         $this->assertEndPointStatus(self::GET_METHOD, '/test2/test1', self::STATUS_OK);
     }
 
     public function testIsolationOfControllerModifiersDirArray()
     {        
         $this->assertEndPointStatus(self::GET_METHOD, '/before/test', self::STATUS_ERROR);
+        $this->setup();
         $this->assertEndPointStatus(self::GET_METHOD, '/before2/test', self::STATUS_ERROR);
+        $this->setup();
         $this->assertEndPointStatus(self::GET_METHOD, '/test2/test1', self::STATUS_OK);
+        $this->setup();
         $this->assertEndPointStatus(self::GET_METHOD, '/test/test1', self::STATUS_OK);
     }
 
@@ -86,13 +90,14 @@ class AnnotationServiceDirArrayTest extends AnnotationDirArrayTestBase
 
         // spot check a URI from each directory
         $this->assertEndPointStatus(self::GET_METHOD, '/test/test1', self::STATUS_OK);
+        $this->setup();
         $this->assertEndPointStatus(self::GET_METHOD, '/test2/test1', self::STATUS_OK);
 
         // check that we got the controllers from cache
         $this->assertTrue($cache->wasFetched($cacheKey1));
         $this->assertTrue($cache->wasFetched($cacheKey2));
 
-        $this->assertCount(13, $cache->fetch($cacheKey1));
+        $this->assertCount(14, $cache->fetch($cacheKey1));
         $this->assertCount(13, $cache->fetch($cacheKey2));
     }
 }

@@ -25,7 +25,8 @@ class AnnotationServiceTest extends AnnotationTestBase
 
     public function testIsolationOfControllerModifiers()
     {
-        $this->assertEndPointStatus(self::GET_METHOD, '/before/test', self::STATUS_ERROR);
+        $this->assertEndPointStatus(self::GET_METHOD, '/test/before', self::STATUS_ERROR);
+        $this->setup();
         $this->assertEndPointStatus(self::GET_METHOD, '/test/test1', self::STATUS_OK);
     }
 
@@ -43,7 +44,7 @@ class AnnotationServiceTest extends AnnotationTestBase
             array('Array'),                                // string identifier
             array(new ApcCache()),                         // proper implementation of Cache
             array('Fake', 'RuntimeException'),             // invalid cache string
-            array(new InvalidCache(), 'RuntimeException')  // class that does not implement Cache
+            array(new NotCache(), 'RuntimeException')  // class that does not implement Cache
         );
     }
 
@@ -61,4 +62,16 @@ class AnnotationServiceTest extends AnnotationTestBase
             $this->assertEquals($exception, get_class($e));
         }
     }
+
+    public function testFastRegister()
+    {
+        $this->assertEndPointStatus(self::GET_METHOD, '/two/test', self::STATUS_OK);
+        // there are 35 routes, but only 2 are registered (the ones with prefix '/' and '/two')
+        $this->assertEquals(2, count($this->app['routes']->all()));
+    }
+}
+
+class NotCache
+{
+
 }

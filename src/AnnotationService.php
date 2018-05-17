@@ -100,9 +100,22 @@ class AnnotationService
      */
     public function registerControllers($controllers)
     {
-        foreach ($controllers as $fqcn) {
-            $this->registerController($fqcn);
+        foreach ($controllers as $prefix => $controllerNames) {
+            if (!is_array($controllerNames)) {
+                $controllerNames = [$controllerNames];
+            }
+            foreach ($controllerNames as $fqcn) {
+                if (strlen($prefix) == 0 || $this->prefixMatchesUri($prefix)) {
+                    $this->registerController($fqcn);
+                }
+            }
         }
+    }
+
+    public function prefixMatchesUri($prefix)
+    {
+        return ($this->app->offsetExists('annot.base_uri')
+            && strpos($_SERVER['REQUEST_URI'], $this->app['annot.base_uri'].$prefix) === 0);
     }
 
     /**
@@ -131,17 +144,30 @@ class AnnotationService
                         $pathInfo = pathinfo($entry);
                         $className = trim($namespace.$pathInfo['filename']);
                         if (class_exists($className)) {
-                            $files[] = $className;
+                            $reflectionClass = new ReflectionClass($className);
+                            $annotationClassName = "\\DDesrosiers\\SilexAnnotations\\Annotations\\Controller";
+                            $controllerAnnotation = $this->reader->getClassAnnotation($reflectionClass, $annotationClassName);
+
+                            if ($this->hasPrefix($controllerAnnotation)) {
+                                $files[$controllerAnnotation->getPrefix()][] = $className;
+                            } else {
+                                $files[] = $className;
+                            }
                         }
                     }
                 }
             }
             closedir($handle);
         }
-        usort($files, function ($a, $b) {
-            return (string) $a > (string) $b ? 1 : -1;
-        });
+
         return $files;
+    }
+
+    public function hasPrefix(Controller $controllerAnnotation = null)
+    {
+        $hasPrefix = $controllerAnnotation instanceof Controller && strlen($controllerAnnotation->prefix) > 0;
+
+        return $this->app->offsetExists('annot.base_uri') && $hasPrefix;
     }
 
     /**
