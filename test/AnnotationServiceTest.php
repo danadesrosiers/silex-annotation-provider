@@ -11,8 +11,6 @@
 namespace DDesrosiers\Test\SilexAnnotations;
 
 use DDesrosiers\SilexAnnotations\AnnotationService;
-use DDesrosiers\SilexAnnotations\AnnotationServiceProvider;
-use DDesrosiers\Test\SilexAnnotations\Controller\TestControllerProvider;
 use Doctrine\Common\Cache\ApcCache;
 use Silex\Application;
 
@@ -30,21 +28,11 @@ class AnnotationServiceTest extends AnnotationTestBase
         $this->assertEndPointStatus(self::GET_METHOD, '/test/test1', self::STATUS_OK);
     }
 
-    public function testControllerProvider()
-    {
-        $this->app->register(new AnnotationServiceProvider());
-        $this->app->mount('/cp', new TestControllerProvider());
-
-        $this->assertEndPointStatus(self::GET_METHOD, '/cp/test', self::STATUS_OK);
-    }
-
     public function cacheTestProvider()
     {
         return array(
-            array('Array'),                                // string identifier
             array(new ApcCache()),                         // proper implementation of Cache
-            array('Fake', 'RuntimeException'),             // invalid cache string
-            array(new NotCache(), 'RuntimeException')  // class that does not implement Cache
+            array(new NotCache(), 'TypeError')  // class that does not implement Cache
         );
     }
 
@@ -56,9 +44,9 @@ class AnnotationServiceTest extends AnnotationTestBase
         $app = new Application();
         $app['annot.cache'] = $cache;
         try {
-            $service = new AnnotationService($app);
+            $service = new AnnotationService($app, $cache);
             $this->assertInstanceOf("Doctrine\\Common\\Annotations\\CachedReader", $service->getReader());
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->assertEquals($exception, get_class($e));
         }
     }
@@ -66,8 +54,8 @@ class AnnotationServiceTest extends AnnotationTestBase
     public function testFastRegister()
     {
         $this->assertEndPointStatus(self::GET_METHOD, '/two/test', self::STATUS_OK);
-        // there are 35 routes, but only 2 are registered (the ones with prefix '/' and '/two')
-        $this->assertEquals(2, count($this->app['routes']->all()));
+        // there are 35 routes, but only 3 are registered (the ones with prefix '/' and '/two')
+        $this->assertEquals(3, count($this->app['routes']->all()));
     }
 }
 

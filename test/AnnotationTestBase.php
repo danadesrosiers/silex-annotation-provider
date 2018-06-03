@@ -12,11 +12,12 @@ namespace DDesrosiers\Test\SilexAnnotations;
 
 use DDesrosiers\SilexAnnotations\AnnotationService;
 use DDesrosiers\SilexAnnotations\AnnotationServiceProvider;
+use PHPUnit\Framework\TestCase;
 use Silex\Application;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Client;
 
-class AnnotationTestBase extends \PHPUnit_Framework_TestCase
+class AnnotationTestBase extends TestCase
 {
     const GET_METHOD = 'GET';
     const POST_METHOD = 'POST';
@@ -53,7 +54,7 @@ class AnnotationTestBase extends \PHPUnit_Framework_TestCase
      * @param array $options
      * @return AnnotationService
      */
-    protected function registerAnnotations($options = array())
+    protected function registerAnnotations($options = [])
     {
         if (!isset($options['annot.controllers'])) {
             $options['annot.controllerDir'] = self::$CONTROLLER_DIR;
@@ -89,5 +90,12 @@ class AnnotationTestBase extends \PHPUnit_Framework_TestCase
     protected function assertStatus(Response $response, $status)
     {
         $this->assertEquals($status, $response->getStatusCode());
+    }
+
+    protected function flattenControllerArray($controllers)
+    {
+        array_walk_recursive($controllers, function($a) use (&$flattened) { $flattened[] = $a; });
+
+        return $flattened;
     }
 } 

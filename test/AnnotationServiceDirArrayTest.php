@@ -11,8 +11,6 @@
 namespace DDesrosiers\Test\SilexAnnotations;
 
 use DDesrosiers\SilexAnnotations\AnnotationService;
-use DDesrosiers\SilexAnnotations\AnnotationServiceProvider;
-use DDesrosiers\Test\SilexAnnotations\Controller\TestControllerProvider;
 use Doctrine\Common\Cache\ApcCache;
 use Silex\Application;
 
@@ -36,21 +34,11 @@ class AnnotationServiceDirArrayTest extends AnnotationDirArrayTestBase
         $this->assertEndPointStatus(self::GET_METHOD, '/test/test1', self::STATUS_OK);
     }
 
-    public function testControllerProviderDirArray()
-    {
-        $this->app->register(new AnnotationServiceProvider());
-        $this->app->mount('/cp', new TestControllerProvider());
-
-        $this->assertEndPointStatus(self::GET_METHOD, '/cp/test', self::STATUS_OK);
-    }
-
     public function cacheTestProvider()
     {
         return array(
-            array('Array'),                                // string identifier
             array(new ApcCache()),                         // proper implementation of Cache
-            array('Fake', 'RuntimeException'),             // invalid cache string
-            array(new InvalidCache(), 'RuntimeException')  // class that does not implement Cache
+            array(new InvalidCache(), 'TypeError')  // class that does not implement Cache
         );
     }
 
@@ -62,9 +50,9 @@ class AnnotationServiceDirArrayTest extends AnnotationDirArrayTestBase
         $app = new Application();
         $app['annot.cache'] = $cache;
         try {
-            $service = new AnnotationService($app);
+            $service = new AnnotationService($app, $cache);
             $this->assertInstanceOf("Doctrine\\Common\\Annotations\\CachedReader", $service->getReader());
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->assertEquals($exception, get_class($e));
         }
     }
@@ -78,8 +66,7 @@ class AnnotationServiceDirArrayTest extends AnnotationDirArrayTestBase
         $this->assertEndPointStatus(self::GET_METHOD, '/test/test1', self::STATUS_OK);
 
         // all controllers should be loaded and cached now
-        $cacheKey1 = AnnotationService::CONTROLLER_CACHE_INDEX . "." . self::$CONTROLLER_DIR[0];
-        $cacheKey2 = AnnotationService::CONTROLLER_CACHE_INDEX . "." . self::$CONTROLLER_DIR[1];
+        $cacheKey = AnnotationService::CONTROLLER_CACHE_INDEX;
 
         // create new instance, now controllers should load from cache
         $cache->clearWasFetched();
@@ -94,11 +81,11 @@ class AnnotationServiceDirArrayTest extends AnnotationDirArrayTestBase
         $this->assertEndPointStatus(self::GET_METHOD, '/test2/test1', self::STATUS_OK);
 
         // check that we got the controllers from cache
-        $this->assertTrue($cache->wasFetched($cacheKey1));
-        $this->assertTrue($cache->wasFetched($cacheKey2));
+        $this->assertTrue($cache->wasFetched($cacheKey));
 
-        $this->assertCount(14, $cache->fetch($cacheKey1));
-        $this->assertCount(13, $cache->fetch($cacheKey2));
+        $controllers = $cache->fetch($cacheKey);
+        $this->assertCount(13, $controllers);
+        $this->assertCount(25, $this->flattenControllerArray($controllers));
     }
 }
 

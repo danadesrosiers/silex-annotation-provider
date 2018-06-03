@@ -25,8 +25,7 @@ Registration
 ```php
 $app->register(new DDesrosiers\SilexAnnotations\AnnotationServiceProvider(), array(
     "annot.cache" => new ApcCache(),
-    "annot.controllerDir" => "$srcDir/Controller",
-    "annot.controllerNamespace" => "Company\\Controller\\"
+    "annot.controllerDir" => "$srcDir/Controller"
 ));
 ```
 
@@ -36,19 +35,15 @@ annot.controllerDir
 -------------------
 Specify the directory in which to search for controllers.  This directory will be searched recursively for classes with the `@Controller` annotation.  Found controller classes will be processed for route annotations.  Either this or annot.controllers is required to locate controllers.  If a cache object is given using the 'annot.cache' option and the 'debug' option is true, the list of controller classes will be cached to improve performance.
 
-annot.controllerNamespace
--------------------------
-The base namespace of the controllerDir.  This option works with the annot.controllerDir option.  It is not required, but saves the service from having to do the work of figuring out the namespace of the controller classes.
-
 annot.controllers
 -----------------
 An array of fully qualified controller names.  If set, the provider will automatically register each controller as a ServiceController and set up routes and modifiers based on annotations found.  Controllers can be grouped into controller collections by grouping them with an associative array using the array key as the mount point.
 ```php
 $app['annot.controllers'] = array(
-	"MyControllerNamespace\\Controller1",
-	"MyControllerNamespace\\Controller2",
-	"MyControllerNamespace\\Controller3",
-	"MyControllerNamespace\\Controller4"
+	Controller1::class,
+	Controller2::class,
+	Controller3::class,
+	Controller4::class
 );
 ```
 annot.cache
@@ -104,63 +99,6 @@ $controller->get("test/{var}", "\\DDesrosiers\\Controller\\TestController:testMe
 	->convert('var', "\\DDesrosiers\\Controller\\TestController::converter");
 $app->mount('/prefix', $controllerCollection);
 ```
-
-Controller Providers
-====================
-If we want to use a ControllerProvider, we can use the annotations service's process() method directly.
-
-```php
-namespace DDesrosiers\Controller;
-
-use DDesrosiers\SilexAnnotations\Annotations as SLX;
-use Silex\Application;
-use Silex\ControllerProviderInterface;
-use Symfony\Component\HttpFoundation\Response;
-
-class TestProviderController implements ControllerProviderInterface
-{
-
-	function connect(Application $app)
-	{
-		return $app['annot']->process(get_class($this), false, true);
-	}
-
-	/**
-	 * @SLX\Route(
-	 *		@SLX\Request(method="GET", uri="test/{var}"),
-	 *		@SLX\Assert(variable="var", regex="\d+"),
-	 * )
-	 */
-	public function testMethod()
-	{
-		return new Response("test Method");
-	}
-}
-```
-
-The ControllerProviderInterface's connect() requirement was satisfied by calling the annotation service's process() method.
-
-Service
-=======
-When registered, an instance of AnnotationService is available via $app['annot'];  The AnnotationService's process() method parses annotations in a class to configure controllers.  It is usually not necessary to use the service directly.
-AnnotationService->process() takes 3 arguments:
-* **controllerName**: The fully qualified class name of the controller to process.
-* **isServiceController**: This matters because Silex expects a different string representation of a controller method for ServiceControllers.  Default: false.
-* **newCollection**: If true, all routes found will be put into a new controller collection and that collection will be returned.  Default: false.
-
-Advanced Options
-================
-annot.useServiceControllers
----------------------------
-Controllers are registered as service controllers by default.  This option can be used to override this default.
-
-annot.controllerFinder
-----------------------
-Define your own callback to search for controllers.
-
-annot.registerServiceController
--------------------------------
-This callback registers the service controller.  Override it if you need to do anything special to register your controllers.
 
 Annotations
 ===========

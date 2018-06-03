@@ -45,54 +45,52 @@ class AnnotationService
     protected $useCache;
 
     const CONTROLLER_CACHE_INDEX = 'annot.controllerFiles';
+
     /**
-     * @param Container $app
+     * @param Container  $app
+     * @param Cache|null $cache
+     * @param bool       $debug
      */
-    public function __construct(Container $app)
+    public function __construct(Container $app, Cache $cache = null, bool $debug = false)
     {
         $this->app = $app;
+        $this->cache = $cache;
+        $this->reader = new AnnotationReader();
 
-        if ($app->offsetExists('annot.cache')) {
-            if ($app['annot.cache'] instanceof Cache) {
-                $this->cache = $app['annot.cache'];
-            } else if (is_string($app['annot.cache']) && strlen($app['annot.cache']) > 0) {
-                $cacheClass = "Doctrine\\Common\\Cache\\".$app['annot.cache']."Cache";
-                if (!class_exists($cacheClass)) {
-                    throw new RuntimeException("Cache type: [$cacheClass] does not exist.  Make sure you include Doctrine cache.");
-                }
-
-                $this->cache = new $cacheClass();
-            } else {
-                throw new RuntimeException("Cache object does not implement Doctrine\\Common\\Cache\\Cache");
-            }
-
-            $this->reader = new CachedReader(new AnnotationReader(), $this->cache, $app['debug']);
-        } else {
-            $this->reader = new AnnotationReader();
+        if ($this->cache !== null) {
+            $this->reader = new CachedReader($this->reader, $this->cache, $debug);
         }
 
-        $this->useCache = !$this->app['debug'] && $this->cache instanceof Cache;
+        $this->useCache = !$debug && $this->cache instanceof Cache;
     }
 
     /**
-     * @param $dir
-     * @return array
+     * @param string[] $controllerDirs
+     * @return string[][]
      */
-    public function discoverControllers($dir)
+    public function discoverControllers(array $controllerDirs): array
     {
-        $cacheKey = self::CONTROLLER_CACHE_INDEX . ".$dir";
-
-        if ($this->useCache && $this->cache->contains($cacheKey)) {
-            $controllerFiles = $this->cache->fetch($cacheKey);
+        if ($this->useCache && $this->cache->contains(self::CONTROLLER_CACHE_INDEX)) {
+            $controllers = $this->cache->fetch(self::CONTROLLER_CACHE_INDEX);
         } else {
-            $controllerFiles = $this->app['annot.controllerFinder']($this->app, $dir);
+            $controllers = [];
+            foreach ($controllerDirs as $dir) {
+                foreach ($this->getFiles($dir) as $className) {
+                    if (class_exists($className)) {
+                        $controllerAnnotation = $this->getControllerAnnotation($className);
+                        if ($controllerAnnotation instanceof Controller) {
+                            $controllers[$controllerAnnotation->getPrefix()][] = $className;
+                        }
+                    }
+                }
+            }
 
             if ($this->useCache) {
-                $this->cache->save($cacheKey, $controllerFiles);
+                $this->cache->save(self::CONTROLLER_CACHE_INDEX, $controllers);
             }
         }
 
-        return $controllerFiles;
+        return $controllers;
     }
 
     /**
@@ -128,8 +126,12 @@ class AnnotationService
      * @param array   $files
      * @return array
      */
-    public function getFiles($dir, $namespace='', $files=array())
+    public function getFiles(string $dir, string $namespace='', $files=[]): array
     {
+        if (!is_dir($dir)) {
+            throw new RuntimeException("Controller directory: {$dir} does not exist.");
+        }
+
         if ($handle = opendir($dir)) {
             while (false !== ($entry = readdir($handle))) {
                 if (!in_array($entry, array('.', '..'))) {
@@ -141,19 +143,7 @@ class AnnotationService
                         if (!$namespace) {
                             $namespace = $this->parseNamespace($filePath);
                         }
-                        $pathInfo = pathinfo($entry);
-                        $className = trim($namespace.$pathInfo['filename']);
-                        if (class_exists($className)) {
-                            $reflectionClass = new ReflectionClass($className);
-                            $annotationClassName = "\\DDesrosiers\\SilexAnnotations\\Annotations\\Controller";
-                            $controllerAnnotation = $this->reader->getClassAnnotation($reflectionClass, $annotationClassName);
-
-                            if ($this->hasPrefix($controllerAnnotation)) {
-                                $files[$controllerAnnotation->getPrefix()][] = $className;
-                            } else {
-                                $files[] = $className;
-                            }
-                        }
+                        $files[] = trim($namespace.pathinfo($entry)['filename']);
                     }
                 }
             }
@@ -161,13 +151,6 @@ class AnnotationService
         }
 
         return $files;
-    }
-
-    public function hasPrefix(Controller $controllerAnnotation = null)
-    {
-        $hasPrefix = $controllerAnnotation instanceof Controller && strlen($controllerAnnotation->prefix) > 0;
-
-        return $this->app->offsetExists('annot.base_uri') && $hasPrefix;
     }
 
     /**
@@ -182,26 +165,12 @@ class AnnotationService
         $controllerAnnotation = $this->reader->getClassAnnotation($reflectionClass, $annotationClassName);
 
         if ($controllerAnnotation instanceof Controller) {
-            $this->app['annot.registerServiceController'](trim($controllerName, "\\"));
+            $controllerName = trim($controllerName, "\\");
+            $this->app["$controllerName"] = function (Application $app) use ($controllerName) {
+                return new $controllerName($app);
+            };
             $controllerAnnotation->process($this->app, $reflectionClass);
         }
-    }
-
-    /**
-     * @param string $controllerName
-     * @param boolean $isServiceController
-     * @param boolean $newCollection
-     * @return \Silex\ControllerCollection
-     */
-    public function process($controllerName, $isServiceController = true, $newCollection = false)
-    {
-        $this->app['annot.useServiceControllers'] = $isServiceController;
-        $controllerCollection = $newCollection ? $this->app['controllers_factory'] : $this->app['controllers'];
-        $reflectionClass = new ReflectionClass($controllerName);
-
-        $this->processMethodAnnotations($reflectionClass, $controllerCollection);
-
-        return $controllerCollection;
     }
 
     /**
@@ -223,16 +192,9 @@ class AnnotationService
      */
     public function processMethodAnnotations(ReflectionClass $reflectionClass, ControllerCollection $controllerCollection)
     {
-        $separator = $this->app['annot.useServiceControllers'] ? ":" : "::";
-
         foreach ($reflectionClass->getMethods(ReflectionMethod::IS_PUBLIC) as $reflectionMethod) {
             if (!$reflectionMethod->isStatic()) {
-                $controllerMethodName = $this->app['annot.controller_factory'](
-                    $this->app,
-                    $reflectionClass->name,
-                    $reflectionMethod->name,
-                    $separator
-                );
+                $controllerMethodName = "$reflectionClass->name:$reflectionMethod->name";
                 $methodAnnotations = $this->reader->getMethodAnnotations($reflectionMethod);
                 foreach ($methodAnnotations as $annotation) {
                     if ($annotation instanceof Route) {
@@ -268,5 +230,19 @@ class AnnotationService
     {
         preg_match('/namespace(.*);/', file_get_contents($filePath), $result);
         return isset($result[1]) ? $result[1] . "\\" : '';
+    }
+
+    /**
+     * @param $className
+     * @return null|object
+     * @throws \ReflectionException
+     */
+    private function getControllerAnnotation($className): ?Controller
+    {
+        $reflectionClass = new ReflectionClass($className);
+        $annotationClassName = "\\DDesrosiers\\SilexAnnotations\\Annotations\\Controller";
+        $controllerAnnotation = $this->reader->getClassAnnotation($reflectionClass, $annotationClassName);
+
+        return $controllerAnnotation;
     }
 }

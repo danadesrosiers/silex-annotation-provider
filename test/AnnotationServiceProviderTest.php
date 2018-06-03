@@ -10,76 +10,55 @@
 
 namespace DDesrosiers\Test\SilexAnnotations;
 
-use DDesrosiers\SilexAnnotations\Annotations as SLX;
 use DDesrosiers\SilexAnnotations\AnnotationService;
 use Doctrine\Common\Cache\ArrayCache;
-use Silex\Application;
 use Symfony\Component\HttpFoundation\Response;
 
 include __DIR__ . "/NoNamespace/TestControllerNoNamespace.php";
 
 class AnnotationServiceProviderTest extends AnnotationTestBase
 {
-    public function testRegisterControllersByDirectoryProvider()
+    public function registerControllersByDirectoryTestProvider()
     {
         $subDirFqcn = self::CONTROLLER_NAMESPACE."SubDir\\SubDirTestController";
         return array(
-            array("/SubDir", self::CONTROLLER_NAMESPACE."SubDir\\", $subDirFqcn),
-            array("/SubDir", null, $subDirFqcn),
-            array('', null, $subDirFqcn),
-            array("/../NoNamespace", null, "TestControllerNoNamespace")
+            array("/SubDir", $subDirFqcn),
+            array("/SubDir", $subDirFqcn),
+            array('', $subDirFqcn),
+            array("/../NoNamespace", "TestControllerNoNamespace")
         );
     }
 
     /**
-     * @dataProvider testRegisterControllersByDirectoryProvider
+     * @dataProvider registerControllersByDirectoryTestProvider
      */
-    public function testRegisterControllersByDirectory($dir, $namespace, $result)
+    public function testRegisterControllersByDirectory($dir, $result)
     {
         $service = $this->registerAnnotations();
-        $this->app['annot.controllerNamespace'] = $namespace;
-        $files = $service->discoverControllers(self::$CONTROLLER_DIR.$dir);
+        $files = $service->discoverControllers([self::$CONTROLLER_DIR.$dir]);
         if (is_array($result)) {
             $this->assertEquals($result, $files);
         } else {
-            $this->assertContains($result, $files);
+            $this->assertContains($result, $files['/']);
         }
-    }
-
-    public function testCustomControllerFinder()
-    {
-        $service = $this->registerAnnotations();
-        $this->app['annot.controllerFinder'] = $this->app->protect(function (Application $app, $dir) {
-            $regex = '/^.+\CollectionTestController.php$/i';
-            $iterator = new \RegexIterator(new \RecursiveDirectoryIterator($dir), $regex, \RecursiveRegexIterator::GET_MATCH);
-            $files = array();
-            foreach ($iterator as $filePath => $file) {
-                $pathInfo = pathinfo($filePath);
-                $files[] = AnnotationTestBase::CONTROLLER_NAMESPACE.$pathInfo['filename'];
-            }
-
-            return $files;
-        });
-        $files = $service->discoverControllers(self::$CONTROLLER_DIR);
-        $this->assertCount(8, $files);
-        $this->assertContains(self::CONTROLLER_NAMESPACE."AssertCollectionTestController", $files);
     }
 
     public function testControllerCache()
     {
-        $cacheKey = AnnotationService::CONTROLLER_CACHE_INDEX . "." . self::$CONTROLLER_DIR;
+        $cacheKey = AnnotationService::CONTROLLER_CACHE_INDEX;
         $cache = new TestArrayCache();
         $this->app['annot.cache'] = $cache;
         $this->app['debug'] = false;
         $service = $this->registerAnnotations();
-        $service->discoverControllers(self::$CONTROLLER_DIR);
-        $this->assertCount(14, $cache->fetch($cacheKey));
+        $service->discoverControllers([self::$CONTROLLER_DIR]);
+        $this->assertCount(13, $this->flattenControllerArray($cache->fetch($cacheKey)));
 
-        $files = $service->discoverControllers(self::$CONTROLLER_DIR);
+        $files = $service->discoverControllers([self::$CONTROLLER_DIR]);
+        $flatControllers = $this->flattenControllerArray($files);
         $this->assertTrue($cache->wasFetched($cacheKey));
-        $this->assertContains(self::CONTROLLER_NAMESPACE."SubDir\\SubDirTestController", $files);
+        $this->assertContains(self::CONTROLLER_NAMESPACE."SubDir\\SubDirTestController", $flatControllers);
         $this->assertContains(self::CONTROLLER_NAMESPACE."TestController", $files['/test']);
-        $this->assertCount(14, $files);
+        $this->assertCount(13, $flatControllers);
     }
 }
 
