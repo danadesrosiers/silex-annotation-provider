@@ -13,13 +13,21 @@ use Symfony\Component\HttpFoundation\Response;
 class BeforeCollectionTestController
 {
     /**
-     * @SLX\Request(method="GET", uri="/test")
+     * @SLX\Route(
+     *     @SLX\Request(method="GET", uri="/test")
+     * )
+     *
+     * @param $var
+     * @return Response
      */
     public function testMethod($var)
     {
         return new Response($var);
     }
 
+    /**
+     * @throws Exception
+     */
     public static function beforeCallback()
     {
         throw new Exception("before callback");

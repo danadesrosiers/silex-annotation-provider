@@ -12,7 +12,9 @@ use Symfony\Component\HttpFoundation\Response;
 class RequireHttpCollectionTestController
 {
     /**
-     * @SLX\Request(method="GET", uri="/test")
+     * @SLX\Route(
+     *     @SLX\Request(method="GET", uri="/test")
+     * )
      */
     public function testRequireHttp()
     {

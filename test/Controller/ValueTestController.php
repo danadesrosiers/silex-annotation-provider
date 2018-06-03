@@ -11,8 +11,13 @@ use Symfony\Component\HttpFoundation\Response;
 class ValueTestController
 {
     /**
-     * @SLX\Request(method="GET", uri="/{var}")
-     * @SLX\Value(variable="var", default="default")
+     * @SLX\Route(
+     *     @SLX\Request(method="GET", uri="/{var}"),
+     *     @SLX\Value(variable="var", default="default")
+     * )
+     *
+     * @param $var
+     * @return Response
      */
     public function testMethod($var)
     {

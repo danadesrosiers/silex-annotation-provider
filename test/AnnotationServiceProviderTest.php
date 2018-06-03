@@ -11,7 +11,6 @@
 namespace DDesrosiers\Test\SilexAnnotations;
 
 use DDesrosiers\SilexAnnotations\AnnotationService;
-use Symfony\Component\HttpFoundation\Response;
 
 include __DIR__ . "/NoNamespace/TestControllerNoNamespace.php";
 
@@ -58,31 +57,5 @@ class AnnotationServiceProviderTest extends AnnotationTestBase
         $this->assertContains(self::CONTROLLER_NAMESPACE."SubDir\\SubDirTestController", $flatControllers);
         $this->assertContains(self::CONTROLLER_NAMESPACE."TestController", $files['/test']);
         $this->assertCount(13, $flatControllers);
-    }
-}
-
-class TestControllerOne
-{
-    /**
-     * @SLX\Route(
-     *      @SLX\Request(method="GET", uri="/test1")
-     * )
-     */
-    public function test()
-    {
-        return new Response();
-    }
-}
-
-class TestControllerTwo
-{
-    /**
-     * @SLX\Route(
-     *      @SLX\Request(method="GET", uri="/test2")
-     * )
-     */
-    public function test()
-    {
-        return new Response();
     }
 }

@@ -11,7 +11,6 @@
 namespace DDesrosiers\SilexAnnotations;
 
 use DDesrosiers\SilexAnnotations\Annotations\Controller;
-use DDesrosiers\SilexAnnotations\Annotations\Request;
 use DDesrosiers\SilexAnnotations\Annotations\Route;
 use DDesrosiers\SilexAnnotations\Annotations\RouteAnnotation;
 use Doctrine\Common\Annotations\AnnotationReader;
@@ -194,13 +193,6 @@ class AnnotationService
                 foreach ($methodAnnotations as $annotation) {
                     if ($annotation instanceof Route) {
                         $annotation->process($controllerCollection, $controllerMethodName, $this->app);
-                    } else if ($annotation instanceof Request) {
-                        $controller = $annotation->process($controllerCollection, $controllerMethodName);
-                        foreach ($methodAnnotations as $routeAnnotation) {
-                            if ($routeAnnotation instanceof RouteAnnotation) {
-                                $routeAnnotation->process($controller);
-                            }
-                        }
                     }
                 }
             }

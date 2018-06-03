@@ -12,7 +12,12 @@ use Symfony\Component\HttpFoundation\Response;
 class TestControllerWithNoPrefix
 {
     /**
-     * @SLX\Request(method="GET", uri="/test")
+     * @SLX\Route(
+     *     @SLX\Request(method="GET", uri="/test")
+     * )
+     *
+     * @param $var
+     * @return Response
      */
     public function testMethod($var)
     {

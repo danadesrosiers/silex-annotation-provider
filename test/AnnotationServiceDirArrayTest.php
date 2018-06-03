@@ -11,25 +11,25 @@
 namespace DDesrosiers\Test\SilexAnnotations;
 
 use DDesrosiers\SilexAnnotations\AnnotationService;
+use Silex\Application;
 
-class AnnotationServiceDirArrayTest extends AnnotationDirArrayTestBase
+class AnnotationServiceDirArrayTest extends AnnotationTestBase
 {
+    public function setup()
+    {
+        self::$CONTROLLER_DIR = array(
+            __DIR__ . "/Controller",
+            __DIR__ . "/Controller2"
+        );
+        $this->app = new Application();
+        $this->app['debug'] = true;
+    }
+
     public function testServiceControllerDirArray()
     {
         $this->assertEndPointStatus(self::GET_METHOD, '/test/test1', self::STATUS_OK);
         $this->setup();
         $this->assertEndPointStatus(self::GET_METHOD, '/test2/test1', self::STATUS_OK);
-    }
-
-    public function testIsolationOfControllerModifiersDirArray()
-    {        
-        $this->assertEndPointStatus(self::GET_METHOD, '/before/test', self::STATUS_ERROR);
-        $this->setup();
-        $this->assertEndPointStatus(self::GET_METHOD, '/before2/test', self::STATUS_ERROR);
-        $this->setup();
-        $this->assertEndPointStatus(self::GET_METHOD, '/test2/test1', self::STATUS_OK);
-        $this->setup();
-        $this->assertEndPointStatus(self::GET_METHOD, '/test/test1', self::STATUS_OK);
     }
 
     public function testControllerCache()
@@ -59,8 +59,8 @@ class AnnotationServiceDirArrayTest extends AnnotationDirArrayTestBase
         $this->assertTrue($cache->wasFetched($cacheKey));
 
         $controllers = $cache->get($cacheKey);
-        $this->assertCount(13, $controllers);
-        $this->assertCount(25, $this->flattenControllerArray($controllers));
+        $this->assertCount(12, $controllers);
+        $this->assertCount(15, $this->flattenControllerArray($controllers));
     }
 }
 

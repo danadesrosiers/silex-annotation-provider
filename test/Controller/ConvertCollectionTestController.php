@@ -12,7 +12,12 @@ use Symfony\Component\HttpFoundation\Response;
 class ConvertCollectionTestController
 {
     /**
-     * @SLX\Request(method="GET", uri="/test/{var}")
+     * @SLX\Route(
+     *     @SLX\Request(method="GET", uri="/test/{var}")
+     * )
+     *
+     * @param $var
+     * @return Response
      */
     public function testMethod($var)
     {

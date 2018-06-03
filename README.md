@@ -24,7 +24,7 @@ Registration
 ============
 ```php
 $app->register(new DDesrosiers\SilexAnnotations\AnnotationServiceProvider(), array(
-    "annot.cache" => new ApcCache(),
+    "annot.cache" => new MyPsr16Cache(),
     "annot.controllerDir" => "$srcDir/Controller"
 ));
 ```
@@ -112,7 +112,7 @@ The @Route annotation groups annotations into an isolated endpoint definition.  
 
 **@Request**
 
-The @Request annotation associates a uri pattern to the controller method.  If multiple @Request annotations are given, all modifiers will be applied to all @Requests unless they wrapped in a @Route annotation.
+The @Request annotation associates a uri pattern to the controller method.
 * method: A valid Silex method (get, post, put, delete, match)
 * uri: The uri pattern.
 
