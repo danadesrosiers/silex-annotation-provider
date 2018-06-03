@@ -10,10 +10,6 @@
 
 namespace DDesrosiers\Test\SilexAnnotations;
 
-use DDesrosiers\SilexAnnotations\AnnotationService;
-use Doctrine\Common\Cache\ApcCache;
-use Silex\Application;
-
 class AnnotationServiceTest extends AnnotationTestBase
 {
     public function testServiceController()
@@ -26,29 +22,6 @@ class AnnotationServiceTest extends AnnotationTestBase
         $this->assertEndPointStatus(self::GET_METHOD, '/test/before', self::STATUS_ERROR);
         $this->setup();
         $this->assertEndPointStatus(self::GET_METHOD, '/test/test1', self::STATUS_OK);
-    }
-
-    public function cacheTestProvider()
-    {
-        return array(
-            array(new ApcCache()),                         // proper implementation of Cache
-            array(new NotCache(), 'TypeError')  // class that does not implement Cache
-        );
-    }
-
-    /**
-     * @dataProvider cacheTestProvider
-     */
-    public function testCache($cache, $exception=null)
-    {
-        $app = new Application();
-        $app['annot.cache'] = $cache;
-        try {
-            $service = new AnnotationService($app, $cache);
-            $this->assertInstanceOf("Doctrine\\Common\\Annotations\\CachedReader", $service->getReader());
-        } catch (\Throwable $e) {
-            $this->assertEquals($exception, get_class($e));
-        }
     }
 
     public function testFastRegister()

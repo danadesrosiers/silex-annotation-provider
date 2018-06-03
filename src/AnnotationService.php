@@ -15,9 +15,8 @@ use DDesrosiers\SilexAnnotations\Annotations\Request;
 use DDesrosiers\SilexAnnotations\Annotations\Route;
 use DDesrosiers\SilexAnnotations\Annotations\RouteAnnotation;
 use Doctrine\Common\Annotations\AnnotationReader;
-use Doctrine\Common\Annotations\CachedReader;
-use Doctrine\Common\Cache\Cache;
 use Pimple\Container;
+use Psr\SimpleCache\CacheInterface;
 use ReflectionClass;
 use ReflectionMethod;
 use RuntimeException;
@@ -38,7 +37,7 @@ class AnnotationService
     /** @var AnnotationReader */
     protected $reader;
 
-    /** @var Cache */
+    /** @var CacheInterface */
     protected $cache;
 
     /** @var bool */
@@ -48,20 +47,16 @@ class AnnotationService
 
     /**
      * @param Container  $app
-     * @param Cache|null $cache
+     * @param CacheInterface|null $cache
      * @param bool       $debug
      */
-    public function __construct(Container $app, Cache $cache = null, bool $debug = false)
+    public function __construct(Container $app, CacheInterface $cache = null, bool $debug = false)
     {
         $this->app = $app;
         $this->cache = $cache;
         $this->reader = new AnnotationReader();
 
-        if ($this->cache !== null) {
-            $this->reader = new CachedReader($this->reader, $this->cache, $debug);
-        }
-
-        $this->useCache = !$debug && $this->cache instanceof Cache;
+        $this->useCache = !$debug && $this->cache instanceof CacheInterface;
     }
 
     /**
@@ -70,8 +65,8 @@ class AnnotationService
      */
     public function discoverControllers(array $controllerDirs): array
     {
-        if ($this->useCache && $this->cache->contains(self::CONTROLLER_CACHE_INDEX)) {
-            $controllers = $this->cache->fetch(self::CONTROLLER_CACHE_INDEX);
+        if ($this->useCache && $this->cache->has(self::CONTROLLER_CACHE_INDEX)) {
+            $controllers = $this->cache->get(self::CONTROLLER_CACHE_INDEX);
         } else {
             $controllers = [];
             foreach ($controllerDirs as $dir) {
@@ -86,7 +81,7 @@ class AnnotationService
             }
 
             if ($this->useCache) {
-                $this->cache->save(self::CONTROLLER_CACHE_INDEX, $controllers);
+                $this->cache->set(self::CONTROLLER_CACHE_INDEX, $controllers);
             }
         }
 
@@ -210,14 +205,6 @@ class AnnotationService
                 }
             }
         }
-    }
-
-    /**
-     * @return AnnotationReader
-     */
-    public function getReader()
-    {
-        return $this->reader;
     }
 
     /**

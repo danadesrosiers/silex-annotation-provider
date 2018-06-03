@@ -11,8 +11,6 @@
 namespace DDesrosiers\Test\SilexAnnotations;
 
 use DDesrosiers\SilexAnnotations\AnnotationService;
-use Doctrine\Common\Cache\ApcCache;
-use Silex\Application;
 
 class AnnotationServiceDirArrayTest extends AnnotationDirArrayTestBase
 {
@@ -32,29 +30,6 @@ class AnnotationServiceDirArrayTest extends AnnotationDirArrayTestBase
         $this->assertEndPointStatus(self::GET_METHOD, '/test2/test1', self::STATUS_OK);
         $this->setup();
         $this->assertEndPointStatus(self::GET_METHOD, '/test/test1', self::STATUS_OK);
-    }
-
-    public function cacheTestProvider()
-    {
-        return array(
-            array(new ApcCache()),                         // proper implementation of Cache
-            array(new InvalidCache(), 'TypeError')  // class that does not implement Cache
-        );
-    }
-
-    /**
-     * @dataProvider cacheTestProvider
-     */
-    public function testCacheDirArray($cache, $exception=null)
-    {
-        $app = new Application();
-        $app['annot.cache'] = $cache;
-        try {
-            $service = new AnnotationService($app, $cache);
-            $this->assertInstanceOf("Doctrine\\Common\\Annotations\\CachedReader", $service->getReader());
-        } catch (\Throwable $e) {
-            $this->assertEquals($exception, get_class($e));
-        }
     }
 
     public function testControllerCache()
@@ -83,7 +58,7 @@ class AnnotationServiceDirArrayTest extends AnnotationDirArrayTestBase
         // check that we got the controllers from cache
         $this->assertTrue($cache->wasFetched($cacheKey));
 
-        $controllers = $cache->fetch($cacheKey);
+        $controllers = $cache->get($cacheKey);
         $this->assertCount(13, $controllers);
         $this->assertCount(25, $this->flattenControllerArray($controllers));
     }

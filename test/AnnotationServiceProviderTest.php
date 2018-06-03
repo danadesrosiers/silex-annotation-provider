@@ -11,7 +11,6 @@
 namespace DDesrosiers\Test\SilexAnnotations;
 
 use DDesrosiers\SilexAnnotations\AnnotationService;
-use Doctrine\Common\Cache\ArrayCache;
 use Symfony\Component\HttpFoundation\Response;
 
 include __DIR__ . "/NoNamespace/TestControllerNoNamespace.php";
@@ -51,7 +50,7 @@ class AnnotationServiceProviderTest extends AnnotationTestBase
         $this->app['debug'] = false;
         $service = $this->registerAnnotations();
         $service->discoverControllers([self::$CONTROLLER_DIR]);
-        $this->assertCount(13, $this->flattenControllerArray($cache->fetch($cacheKey)));
+        $this->assertCount(13, $this->flattenControllerArray($cache->get($cacheKey)));
 
         $files = $service->discoverControllers([self::$CONTROLLER_DIR]);
         $flatControllers = $this->flattenControllerArray($files);
@@ -59,27 +58,6 @@ class AnnotationServiceProviderTest extends AnnotationTestBase
         $this->assertContains(self::CONTROLLER_NAMESPACE."SubDir\\SubDirTestController", $flatControllers);
         $this->assertContains(self::CONTROLLER_NAMESPACE."TestController", $files['/test']);
         $this->assertCount(13, $flatControllers);
-    }
-}
-
-class TestArrayCache extends ArrayCache
-{
-    protected $fetchedIDs;
-
-    public function wasFetched($id)
-    {
-        return isset($this->fetchedIDs[$id]);
-    }
-
-    public function fetch($id)
-    {
-        $this->fetchedIDs[$id] = true;
-        return parent::fetch($id);
-    }
-
-    public function clearWasFetched()
-    {
-        $this->fetchedIDs = [];
     }
 }
 
