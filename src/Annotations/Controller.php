@@ -11,33 +11,56 @@
 
 namespace DDesrosiers\SilexAnnotations\Annotations;
 
-use DDesrosiers\SilexAnnotations\AnnotationService;
-use ReflectionClass;
-use Silex\Application;
-
-/**
- * @Annotation
- * @Target("CLASS")
- * @author Dana Desrosiers <dana.desrosiers@gmail.com>
- */
 class Controller
 {
+    /** @var string */
     public $prefix;
 
-    public function process(Application $app, ReflectionClass $reflectionClass)
+    /** @var string[] */
+    private $modifiers;
+
+    /** @var Route[] */
+    private $routes;
+
+    public function __construct(?string $prefix = '/')
     {
-        $controllerCollection = $app['controllers_factory'];
-        /** @var AnnotationService $annotationService */
-        $annotationService = $app['annot'];
-        $annotationService->processClassAnnotations($reflectionClass, $controllerCollection);
-        $annotationService->processMethodAnnotations($reflectionClass, $controllerCollection);
-        $app->mount($this->prefix, $controllerCollection);
+        $this->prefix = ($prefix[0] !== '/') ? "/$prefix" : $prefix;
     }
 
     public function getPrefix()
     {
-        // the prefix might not start with a forward slash, but the REQUEST_URI always will
-        // make sure we always have a forward slash so the comparison to REQUEST_URI works as expected
-        return ($this->prefix[0] !== '/') ? "/$this->prefix" : $this->prefix;
+        return $this->prefix;
+    }
+
+    /**
+     * @return string[]
+     */
+    public function getModifiers(): array
+    {
+        return $this->modifiers;
+    }
+
+    /**
+     * @return Route[]
+     */
+    public function getRoutes(): array
+    {
+        return $this->routes ?? [];
+    }
+
+    /**
+     * @param string[] $modifiers
+     */
+    public function setModifiers(array $modifiers)
+    {
+        $this->modifiers = $modifiers;
+    }
+
+    /**
+     * @param Route $route
+     */
+    public function addRoute(Route $route)
+    {
+        $this->routes[] = $route;
     }
 } 

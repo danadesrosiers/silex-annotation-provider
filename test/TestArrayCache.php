@@ -17,7 +17,7 @@ class TestArrayCache implements CacheInterface
     public function get($id, $default = null)
     {
         $this->fetchedIDs[$id] = true;
-        return $this->cache[$id];
+        return $this->cache[$id] ?? $default;
     }
 
     public function clearWasFetched()

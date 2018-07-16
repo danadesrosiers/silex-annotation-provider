@@ -2,20 +2,19 @@
 
 namespace DDesrosiers\Test\SilexAnnotations\Controller;
 
-use DDesrosiers\SilexAnnotations\Annotations as SLX;
 use Exception;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * @SLX\Controller(prefix="/after")
- * @SLX\After("DDesrosiers\Test\SilexAnnotations\Controller\AfterTestController::afterCallback")
+ * @Controller(
+ *     prefix => /after
+ *     after => DDesrosiers\Test\SilexAnnotations\Controller\AfterTestController::afterCallback
+ * )
  */
 class AfterCollectionTestController
 {
     /**
-     * @SLX\Route(
-     *     @SLX\Request(method="GET", uri="/test")
-     * )
+     * @Route(GET /test)
      *
      * @param $var
      * @return Response

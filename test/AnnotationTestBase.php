@@ -14,6 +14,8 @@ use DDesrosiers\SilexAnnotations\AnnotationService;
 use DDesrosiers\SilexAnnotations\AnnotationServiceProvider;
 use PHPUnit\Framework\TestCase;
 use Silex\Application;
+use Silex\Route;
+use Silex\Route\SecurityTrait;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Client;
 
@@ -29,8 +31,6 @@ class AnnotationTestBase extends TestCase
     const STATUS_UNAUTHORIZED = 401;
     const STATUS_NOT_FOUND = 404;
     const STATUS_ERROR = 500;
-
-    const CONTROLLER_NAMESPACE = "DDesrosiers\\Test\\SilexAnnotations\\Controller\\";
 
     protected static $CONTROLLER_DIR;
 
@@ -54,13 +54,14 @@ class AnnotationTestBase extends TestCase
      * @param array $options
      * @return AnnotationService
      */
-    protected function registerAnnotations($options = [])
+    protected function registerProviders($options = [])
     {
         if (!isset($options['annot.controllers'])) {
             $options['annot.controllerDir'] = self::$CONTROLLER_DIR;
         }
 
         $this->app->register(new AnnotationServiceProvider(), $options);
+        $this->app['route_class'] = SecurityRoute::class;
 
         return $this->app['annot'];
     }
@@ -68,7 +69,7 @@ class AnnotationTestBase extends TestCase
     protected function getClient($annotationOptions = array())
     {
         if (!$this->app->offsetExists('annot')) {
-            $this->registerAnnotations($annotationOptions);
+            $this->registerProviders($annotationOptions);
         }
         $this->client = new Client($this->app, $this->clientOptions);
     }
@@ -98,4 +99,9 @@ class AnnotationTestBase extends TestCase
 
         return $flattened;
     }
-} 
+}
+
+class SecurityRoute extends Route
+{
+    use SecurityTrait;
+}

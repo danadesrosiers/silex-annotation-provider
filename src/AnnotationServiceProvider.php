@@ -10,9 +10,10 @@
 
 namespace DDesrosiers\SilexAnnotations;
 
-use Doctrine\Common\Annotations\AnnotationRegistry;
+use DDesrosiers\SilexAnnotations\Cache\MemoCache;
 use Pimple\Container;
 use Pimple\ServiceProviderInterface;
+use Psr\SimpleCache\CacheInterface;
 use Silex\Api\BootableProviderInterface;
 use Silex\Application;
 use Silex\Provider\ServiceControllerServiceProvider;
@@ -27,31 +28,17 @@ class AnnotationServiceProvider implements ServiceProviderInterface, BootablePro
 {
     /**
      * @param \Silex\Application $app
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function boot(Application $app)
     {
         /** @var AnnotationService $annotationService */
         $annotationService = $app['annot'];
 
-        $controllers = [];
+        $controllerDir = $app->offsetExists('annot.controllerDir') ? $app['annot.controllerDir'] : null;
+        $controllers = $app->offsetExists('annot.controllers') ? $app['annot.controllers'] : [];
 
-        // Process annotations for all controllers in given directory/directories
-        if ($app->offsetExists('annot.controllerDir') && !empty($app['annot.controllerDir'])) {
-            
-            $controllerDir = $app['annot.controllerDir'];
-            if (!is_array($controllerDir)) {
-                $controllerDir = array($controllerDir);
-            }
-
-            $controllers = $annotationService->discoverControllers($controllerDir);
-        }
-
-        // Process annotations for any given controllers
-        if ($app->offsetExists('annot.controllers') && is_array($app['annot.controllers'])) {
-            $controllers = array_merge($controllers, $app['annot.controllers']);
-        }
-
-        $annotationService->registerControllers($controllers);
+        $annotationService->registerControllers($controllerDir, $controllers);
     }
 
     /**
@@ -61,12 +48,12 @@ class AnnotationServiceProvider implements ServiceProviderInterface, BootablePro
     {
         $app["annot"] = function (Container $app) {
             $cache = $app->offsetExists('annot.cache') ? $app->offsetGet('annot.cache') : null;
+            if ($app['debug'] || !($cache instanceof CacheInterface)) {
+                $cache = new MemoCache();
+            }
 
-            return new AnnotationService($app, $cache, $app['debug']);
+            return new AnnotationService($app, $cache);
         };
-
-        // A custom auto loader for Doctrine Annotations since it can't handle PSR-4 directory structure
-        AnnotationRegistry::registerLoader(function ($class) { return class_exists($class); });
 
         // Register ServiceControllerServiceProvider here so the user doesn't have to.
         $app->register(new ServiceControllerServiceProvider());

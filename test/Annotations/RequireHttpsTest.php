@@ -23,7 +23,7 @@ class RequireHttpsTest extends AnnotationTestBase
     public function testHttp()
     {
         // we make the request as http, but it should be redirected to a https request
-        $this->registerAnnotations();
+        $this->registerProviders();
         $_SERVER['REQUEST_URI'] = '/test/requirehttps';
         $request = Request::create('https://test.com/test/requirehttps');
         $response = $this->app->handle($request);
@@ -39,7 +39,7 @@ class RequireHttpsTest extends AnnotationTestBase
     public function testHttpCollection()
     {
         // we make the request as http, but it should be redirected to a https request
-        $this->registerAnnotations();
+        $this->registerProviders();
         $_SERVER['REQUEST_URI'] = '/test/requirehttps';
         $request = Request::create('https://test.com/test/requirehttps');
         $response = $this->app->handle($request);

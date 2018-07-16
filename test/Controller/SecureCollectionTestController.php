@@ -2,19 +2,18 @@
 
 namespace DDesrosiers\Test\SilexAnnotations\Controller;
 
-use DDesrosiers\SilexAnnotations\Annotations as SLX;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * @SLX\Controller(prefix="/testSecure")
- * @SLX\Secure("ROLE_ADMIN")
+ * @Controller(
+ *     prefix => /testSecure
+ *     secure => ROLE_ADMIN
+ * )
  */
 class SecureCollectionTestController
 {
     /**
-     * @SLX\Route(
-     *     @SLX\Request(method="GET", uri="/test")
-     * )
+     * @Route(GET /test)
      */
     public function testSecure()
     {

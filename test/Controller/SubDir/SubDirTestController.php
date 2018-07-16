@@ -2,10 +2,8 @@
 
 namespace DDesrosiers\Test\SilexAnnotations\Controller\SubDir;
 
-use DDesrosiers\SilexAnnotations\Annotations as SLX;
-
 /**
- * @SLX\Controller
+ * @Controller()
  */
 class SubDirTestController 
 {

@@ -11,51 +11,76 @@
 namespace DDesrosiers\Test\SilexAnnotations;
 
 use DDesrosiers\SilexAnnotations\AnnotationService;
-
-include __DIR__ . "/NoNamespace/TestControllerNoNamespace.php";
+use DDesrosiers\Test\SilexAnnotations\Controller\AfterCollectionTestController;
+use DDesrosiers\Test\SilexAnnotations\Controller\AssertCollectionTestController;
+use DDesrosiers\Test\SilexAnnotations\Controller\BeforeCollectionTestController;
+use DDesrosiers\Test\SilexAnnotations\Controller\ConvertCollectionTestController;
+use DDesrosiers\Test\SilexAnnotations\Controller\HostCollectionTestController;
+use DDesrosiers\Test\SilexAnnotations\Controller\RequireHttpCollectionTestController;
+use DDesrosiers\Test\SilexAnnotations\Controller\RequireHttpsCollectionTestController;
+use DDesrosiers\Test\SilexAnnotations\Controller\SecureCollectionTestController;
+use DDesrosiers\Test\SilexAnnotations\Controller\SubDir\SubDirTestController;
+use DDesrosiers\Test\SilexAnnotations\Controller\TestController;
+use DDesrosiers\Test\SilexAnnotations\Controller\TestController2;
+use DDesrosiers\Test\SilexAnnotations\Controller\ValueTestController;
 
 class AnnotationServiceProviderTest extends AnnotationTestBase
 {
     public function registerControllersByDirectoryTestProvider()
     {
-        $subDirFqcn = self::CONTROLLER_NAMESPACE."SubDir\\SubDirTestController";
+        $allControllers = [
+            AfterCollectionTestController::class,
+            AssertCollectionTestController::class,
+            BeforeCollectionTestController::class,
+            ConvertCollectionTestController::class,
+            HostCollectionTestController::class,
+            RequireHttpCollectionTestController::class,
+            RequireHttpsCollectionTestController::class,
+            SecureCollectionTestController::class,
+            SubDirTestController::class,
+            TestController::class,
+            TestController2::class,
+            ValueTestController::class
+        ];
+
         return array(
-            array("/SubDir", $subDirFqcn),
-            array("/SubDir", $subDirFqcn),
-            array('', $subDirFqcn),
-            array("/../NoNamespace", "TestControllerNoNamespace")
+            array("/SubDir", [SubDirTestController::class]),
+            array('', $allControllers)
         );
     }
 
     /**
      * @dataProvider registerControllersByDirectoryTestProvider
+     * @param $dir
+     * @param $result
      */
     public function testRegisterControllersByDirectory($dir, $result)
     {
-        $service = $this->registerAnnotations();
-        $files = $service->discoverControllers([self::$CONTROLLER_DIR.$dir]);
-        if (is_array($result)) {
-            $this->assertEquals($result, $files);
-        } else {
-            $this->assertContains($result, $files['/']);
-        }
+        $service = $this->registerProviders();
+        $files = $service->discoverControllers(self::$CONTROLLER_DIR.$dir);
+        self::assertEquals($result, $files);
     }
 
+    /**
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     */
     public function testControllerCache()
     {
+        $_SERVER['REQUEST_URI'] = '';
         $cacheKey = AnnotationService::CONTROLLER_CACHE_INDEX;
         $cache = new TestArrayCache();
         $this->app['annot.cache'] = $cache;
         $this->app['debug'] = false;
-        $service = $this->registerAnnotations();
-        $service->discoverControllers([self::$CONTROLLER_DIR]);
-        $this->assertCount(13, $this->flattenControllerArray($cache->get($cacheKey)));
+        $service = $this->registerProviders();
+        $service->registerControllers(self::$CONTROLLER_DIR);
+        $this->assertCount(12, $this->flattenControllerArray($cache->get($cacheKey)));
 
-        $files = $service->discoverControllers([self::$CONTROLLER_DIR]);
-        $flatControllers = $this->flattenControllerArray($files);
+        $cache->clearWasFetched();
+        $service->registerControllers(self::$CONTROLLER_DIR);
         $this->assertTrue($cache->wasFetched($cacheKey));
-        $this->assertContains(self::CONTROLLER_NAMESPACE."SubDir\\SubDirTestController", $flatControllers);
-        $this->assertContains(self::CONTROLLER_NAMESPACE."TestController", $files['/test']);
-        $this->assertCount(13, $flatControllers);
+        $controllers = $cache->get($cacheKey);
+        $this->assertContains(SubDirTestController::class, $controllers['/']);
+        $this->assertContains(TestController::class, $controllers['/test']);
+        $this->assertCount(12, $this->flattenControllerArray($controllers));
     }
 }
