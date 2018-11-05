@@ -6,6 +6,12 @@ silex-annotation-provider
 
 A Silex ServiceProvider that defines annotations that can be used in a Silex controller.  Define your controllers in a class and use annotations to setup routes and define modifiers.
 
+Changes in v3
+-------------
+* Redesigned annotation format.  No more Doctrine Annotations.
+* Uses PSR-16 cache instead of Doctrine Cache.
+* Simplified feature set.  Removes support for ServiceProviders, custom Service Controller registration, and other obscure customization options in favor of simplicity.
+* Minimum PHP version is now 7.1.  No official support for HHVM.
 
 Installation
 ============
@@ -25,7 +31,11 @@ Registration
 ```php
 $app->register(new DDesrosiers\SilexAnnotations\AnnotationServiceProvider(), array(
     "annot.cache" => new MyPsr16Cache(),
-    "annot.controllerDir" => "$srcDir/Controller"
+    "annot.controllerDir" => "$srcDir/Controller",
+    "annot.controllers" => [
+        MyClass1::class,
+        MyClass2::class
+    ]
 ));
 ```
 
@@ -33,28 +43,21 @@ Parameters
 ==========
 annot.controllerDir
 -------------------
-Specify the directory in which to search for controllers.  This directory will be searched recursively for classes with the `@Controller` annotation.  Found controller classes will be processed for route annotations.  Either this or annot.controllers is required to locate controllers.  If a cache object is given using the 'annot.cache' option and the 'debug' option is true, the list of controller classes will be cached to improve performance.
+Specify the directory in which to search for controllers.  This directory will be searched recursively for classes with the `@Controller` annotation.  Found controller classes will be processed for route annotations.  Either this or annot.controllers is required to locate controllers.
 
 annot.controllers
 -----------------
 An array of fully qualified controller names.  If set, the provider will automatically register each controller as a ServiceController and set up routes and modifiers based on annotations found.
-```php
-$app['annot.controllers'] = array(
-	Controller1::class,
-	Controller2::class,
-	Controller3::class,
-	Controller4::class
-);
-```
+
 annot.cache
 -----------
 An instance of a class that implements Psr\SimpleCache\CacheInterface.  This cache is used to cache annotation and the controller list to improve performance.
 
 annot.base_uri (Enables Faster Controller Registration)
 --------------
-This is the base uri of all requests.  Basically, it's the part of the URI that isn't included in `$_SERVER['REQUEST_URI']`.  If your bootstrap file is at the root of htdocs, the value is "/".  If your bootstrap file lives in a directory called "api", all your API's URIs are prefixed with "/api" and that is value you must specify for annot.uri.
+`annot.base_uri` enables faster registration of controllers.  Silex has to register every endpoint in your app on every request.  If you have a lot of endpoints, that could be a significant overhead on each and every request.  Silex Annotations can improve this by filtering the controllers that need to be registered using the `prefix` on the `Controller` annotation.  We only need to register the endpoints in the Controller if the prefix matches the URI.  In this way, Silex Annotations allows FASTER routing than pure Silex.
 
-annot.base_uri enables faster registration of controllers.  Silex has to register every endpoint in your app on every request.  If you have a lot of endpoints, that could be a significant overhead on each and every request.  Silex Annotations can improve this by filtering the controllers that need to be registered using the `prefix` on the `Controller` annotation.  We only need to register the endpoints in the Controller if the prefix matches the URI.  In this way, Silex Annotations allows FASTER routing than pure Silex. 
+The value of this option should be base uri of all requests.  Basically, it's the part of the URI that isn't included in `$_SERVER['REQUEST_URI']`.  If your bootstrap file is at the root of htdocs, the value is "/".  If your bootstrap file lives in a directory called "api", all your API's URIs are prefixed with "/api" and that is value you must specify for `annot.base_uri`. 
 
 Annotate Controllers
 ====================
@@ -124,4 +127,29 @@ The @Controller annotation marks a class as a controller.  The 'prefix' option d
 
 **@Route**
 
-The @Route annotation defines an endpoint.
+The @Route annotation defines an endpoint.  'uri' is required and must be the first option defined.
+
+Short Annotation Notation
+=========================
+In the Controller annotation, if prefix is the only option needed, the 'prefix' key can be omitted.
+
+In the Route annotation, if uri is the only option needed, the 'uri' key can be omitted.
+```php
+   namespace DDesrosiers\Controller;
+   
+   use Symfony\Component\HttpFoundation\Response;
+   
+   /**
+    * @Controller(test)
+    */
+   class TestController
+   {
+       /**
+        * @Route(GET test/{var})
+        */
+       public function testMethod($var)
+       {
+           return new Response("test Method: $var");
+       }
+   }
+```

@@ -8,8 +8,15 @@
  * @copyright (c) 2018, Dana Desrosiers <dana.desrosiers@gmail.com>
  */
 
+declare(strict_types=1);
+
 namespace DDesrosiers\SilexAnnotations\Annotations;
 
+/**
+ * Class Route defines a Silex endpoint and its modifiers.
+ *
+ * @author Dana Desrosiers <dana.desrosiers@gmail.com>
+ */
 class Route
 {
     /** @var string */
@@ -24,6 +31,10 @@ class Route
     /** @var string[][] */
     public $modifiers;
 
+    /**
+     * @param string $controllerName
+     * @param string $uri
+     */
     public function __construct(string $controllerName, string $uri)
     {
         $this->controllerName = $controllerName;

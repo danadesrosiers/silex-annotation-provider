@@ -8,18 +8,30 @@
  * @copyright (c) 2018, Dana Desrosiers <dana.desrosiers@gmail.com>
  */
 
+declare(strict_types=1);
+
 namespace DDesrosiers\SilexAnnotations\Cache;
 
 use Psr\SimpleCache\CacheInterface;
 use Psr\SimpleCache\InvalidArgumentException;
 
+/**
+ * Class AnnotationCache wraps a PSR-16 cache implementation.
+ * Uses an array to store data if no cache object is provided.
+ *
+ * @author Dana Desrosiers <dana.desrosiers@gmail.com>
+ */
 class AnnotationCache
 {
     /** @var CacheInterface */
     private $cache;
 
+    /** @var array */
     private $data;
 
+    /**
+     * @param CacheInterface|null $cache
+     */
     public function __construct(CacheInterface $cache = null)
     {
         $this->cache = $cache;

@@ -8,20 +8,39 @@
  * @copyright (c) 2018, Dana Desrosiers <dana.desrosiers@gmail.com>
  */
 
+declare(strict_types=1);
+
 namespace DDesrosiers\SilexAnnotations;
 
+/**
+ * Class ControllerFinder searches file directories for potential Controller classes.
+ *
+ * @author Dana Desrosiers <dana.desrosiers@gmail.com>
+ */
 class ControllerFinder
 {
+    /** @var null|string */
     private $controllerDir;
+
+    /** @var string[] */
     private $controllers;
 
+    /**
+     * ControllerFinder constructor.
+     *
+     * @param string|null $controllerDir
+     * @param string[]    $controllers
+     */
     public function __construct(string $controllerDir = null, array $controllers = [])
     {
         $this->controllerDir = $controllerDir;
         $this->controllers = $controllers;
     }
 
-    public function getControllerClasses()
+    /**
+     * @return string[]
+     */
+    public function getControllerClasses(): array
     {
         $controllers = isset($this->controllerDir) ? $this->getClassesInDirectory($this->controllerDir) : [];
         return array_merge($controllers, $this->controllers);
@@ -73,7 +92,7 @@ class ControllerFinder
      * @param $filePath
      * @return string
      */
-    private function parseNamespace($filePath)
+    private function parseNamespace($filePath): string
     {
         preg_match('/namespace(.*);/', file_get_contents($filePath), $result);
         return isset($result[1]) ? $result[1] . "\\" : '';

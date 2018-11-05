@@ -8,12 +8,15 @@
  * @copyright (c) 2018, Dana Desrosiers <dana.desrosiers@gmail.com>
  */
 
+declare(strict_types=1);
+
 namespace DDesrosiers\SilexAnnotations;
 
 use DDesrosiers\SilexAnnotations\AnnotationReader\AnnotationReader;
 use DDesrosiers\SilexAnnotations\Cache\AnnotationCache;
 use Pimple\Container;
 use Pimple\ServiceProviderInterface;
+use Psr\SimpleCache\InvalidArgumentException;
 use Silex\Api\BootableProviderInterface;
 use Silex\Application;
 use Silex\Provider\ServiceControllerServiceProvider;
@@ -27,8 +30,8 @@ use Silex\Provider\ServiceControllerServiceProvider;
 class AnnotationServiceProvider implements ServiceProviderInterface, BootableProviderInterface
 {
     /**
-     * @param \Silex\Application $app
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @param Application $app
+     * @throws InvalidArgumentException
      */
     public function boot(Application $app)
     {
@@ -38,7 +41,7 @@ class AnnotationServiceProvider implements ServiceProviderInterface, BootablePro
     }
 
     /**
-     * @param Container|Application $app
+     * @param Container $app
      */
     public function register(Container $app)
     {

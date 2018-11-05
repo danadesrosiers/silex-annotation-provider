@@ -8,14 +8,24 @@
  * @copyright (c) 2018, Dana Desrosiers <dana.desrosiers@gmail.com>
  */
 
+declare(strict_types=1);
+
 namespace DDesrosiers\SilexAnnotations\AnnotationReader;
 
+/**
+ * Class DocBlock parses doc block annotations into an array representation.
+ *
+ * @author Dana Desrosiers <dana.desrosiers@gmail.com>
+ */
 class DocBlock
 {
     const LINE_ENDINGS = ["\r\n","\n\r","\r"];
 
     private $docBlockString;
 
+    /**
+     * @param string $docBlockString
+     */
     public function __construct(string $docBlockString)
     {
         $this->docBlockString = $docBlockString;
@@ -56,6 +66,10 @@ class DocBlock
         return explode("\n", str_replace(self::LINE_ENDINGS,"\n", trim($str)));
     }
 
+    /**
+     * @param string $str
+     * @return array
+     */
     private function tokenizeLine(string $str): array
     {
         $trimmedLine = trim($str, " \t*)");

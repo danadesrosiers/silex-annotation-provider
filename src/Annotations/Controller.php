@@ -9,8 +9,15 @@
  * @copyright (c) 2018, Dana Desrosiers <dana.desrosiers@gmail.com>
  */
 
+declare(strict_types=1);
+
 namespace DDesrosiers\SilexAnnotations\Annotations;
 
+/**
+ * Class Controller defines a Silex Controller Collection and its modifiers and Routes.
+ *
+ * @author Dana Desrosiers <dana.desrosiers@gmail.com>
+ */
 class Controller
 {
     /** @var string */
@@ -22,12 +29,18 @@ class Controller
     /** @var Route[] */
     private $routes;
 
+    /**
+     * @param null|string $prefix
+     */
     public function __construct(?string $prefix = '/')
     {
         $this->prefix = ($prefix[0] !== '/') ? "/$prefix" : $prefix;
     }
 
-    public function getPrefix()
+    /**
+     * @return string
+     */
+    public function getPrefix(): string
     {
         return $this->prefix;
     }

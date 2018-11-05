@@ -8,6 +8,8 @@
  * @copyright (c) 2018, Dana Desrosiers <dana.desrosiers@gmail.com>
  */
 
+declare(strict_types=1);
+
 namespace DDesrosiers\SilexAnnotations;
 
 use DDesrosiers\SilexAnnotations\AnnotationReader\AnnotationReader;

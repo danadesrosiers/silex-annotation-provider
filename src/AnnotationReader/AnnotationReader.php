@@ -8,11 +8,18 @@
  * @copyright (c) 2018, Dana Desrosiers <dana.desrosiers@gmail.com>
  */
 
+declare(strict_types=1);
+
 namespace DDesrosiers\SilexAnnotations\AnnotationReader;
 
 use DDesrosiers\SilexAnnotations\Annotations\Controller;
 use DDesrosiers\SilexAnnotations\Annotations\Route;
 
+/**
+ * Class AnnotationReader parses doc block annotations and converts them to Annotation classes.
+ *
+ * @author Dana Desrosiers <dana.desrosiers@gmail.com>
+ */
 class AnnotationReader
 {
     /**
