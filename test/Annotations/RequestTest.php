@@ -30,6 +30,9 @@ class RequestTest extends AnnotationTestBase
 
     /**
      * @dataProvider requestTestDataProvider
+     * @param     $method
+     * @param     $uri
+     * @param int $status
      */
     public function testRequests($method, $uri, $status=self::STATUS_OK)
     {

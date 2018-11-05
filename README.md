@@ -15,7 +15,7 @@ Install the silex-annotation-provider using composer.
 ```json
 {
     "require": {
-        "ddesrosiers/silex-annotation-provider": "~2.0"
+        "ddesrosiers/silex-annotation-provider": "~3.0"
     }
 }
 ```
@@ -37,7 +37,7 @@ Specify the directory in which to search for controllers.  This directory will b
 
 annot.controllers
 -----------------
-An array of fully qualified controller names.  If set, the provider will automatically register each controller as a ServiceController and set up routes and modifiers based on annotations found.  Controllers can be grouped into controller collections by grouping them with an associative array using the array key as the mount point.
+An array of fully qualified controller names.  If set, the provider will automatically register each controller as a ServiceController and set up routes and modifiers based on annotations found.
 ```php
 $app['annot.controllers'] = array(
 	Controller1::class,
@@ -48,7 +48,7 @@ $app['annot.controllers'] = array(
 ```
 annot.cache
 -----------
-An instance of a class that implements Doctrine\Common\Cache\Cache.  This is the cache that will be used by the AnnotationReader to cache annotations so they don't have to be parsed every time.  Make sure to include Doctrine Cache as it is not a required dependency of this project.
+An instance of a class that implements Psr\SimpleCache\CacheInterface.  This cache is used to cache annotation and the controller list to improve performance.
 
 annot.base_uri (Enables Faster Controller Registration)
 --------------
@@ -62,41 +62,57 @@ Create your controller.  The following is an example demonstrating the use of an
 ```php
 namespace DDesrosiers\Controller;
 
-use DDesrosiers\SilexAnnotations\Annotations as SLX;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * @SLX\Controller(prefix="/prefix")
- * @SLX\RequireHttps
+ * @Controller(
+ *     prefix => test
+ *     after => \DDesrosiers\Controller\TestController::converter
+ *     host => www.test.com
+ *     requireHttp
+ *     secure => ADMIN
+ * )
  */
 class TestController
 {
-	/**
-	 * @SLX\Route(
-	 *		@SLX\Request(method="GET", uri="test/{var}"),
-	 *		@SLX\Assert(variable="var", regex="\d+"),
-	 *		@SLX\Convert(variable="var", callback="\DDesrosiers\Controller\TestController::converter")
-	 * )
-	 */
-	public function testMethod($var)
-	{
-		return new Response("test Method: $var");
-	}
+    /**
+     * @Route(
+     *     uri => GET test/{var}
+     *     assert => var, \d+
+     *     convert => var, \DDesrosiers\Controller\TestController::converter
+     *     after => \DDesrosiers\Controller\TestController::converter
+     *     host => www.test.com
+     *     requireHttps
+     *     secure => DEV
+     *     value => var, default
+     * )
+     */
+    public function testMethod($var)
+    {
+        return new Response("test Method: $var");
+    }
 
-	public static function converter($var)
-	{
-		return $var;
-	}
+    public static function converter($var)
+    {
+        return $var;
+    }
 }
 ```
 
 The annotations in our TestController are interpreted as follows:
 ```php
-$controllerCollection = $app['controller_factory'];
-$controllerCollection->requireHttps();
-$controller->get("test/{var}", "\\DDesrosiers\\Controller\\TestController:testMethod")
-	->assert('var', '\d+')
-	->convert('var', "\\DDesrosiers\\Controller\\TestController::converter");
+$controllerCollection = $app['controller_factory']
+    ->after('\DDesrosiers\Controller\TestController::converter');
+    ->host('www.test.com');
+    ->requireHttp();
+    ->secure('ADMIN');
+$controllerCollection->get("test/{var}", "\\DDesrosiers\\Controller\\TestController:testMethod")
+    ->assert('var', '\d+')
+    ->convert('var', "\\DDesrosiers\\Controller\\TestController::converter");
+    ->host('www.test.com')
+    ->requireHttps()
+    ->secure('DEV')
+    ->value('var', 'default');
 $app->mount('/prefix', $controllerCollection);
 ```
 
@@ -104,70 +120,8 @@ Annotations
 ===========
 **Controller**
 
-The @Controller annotation marks a class as a controller.  The 'prefix' option defines the mount point for the controller collection.
+The @Controller annotation marks a class as a controller.  The 'prefix' option defines the mount point for the controller collection.  The prefix must be the first option.
 
 **@Route**
 
-The @Route annotation groups annotations into an isolated endpoint definition.  This is required if you have multiple aliases for your controller method with different modifiers.  All other annotations can be included as sub-annotations of @Route or stand on their own.
-
-**@Request**
-
-The @Request annotation associates a uri pattern to the controller method.
-* method: A valid Silex method (get, post, put, delete, match)
-* uri: The uri pattern.
-
-**@Assert**
-
-Silex\Route::assert()
-* variable
-* regex
-
-**@Convert**
-
-Silex\Route::convert()
-* variable
-* callback
-
-**@Host**
-
-Silex\Route::host()
-* host
-
-**@RequireHttp**
-
-Silex\Route::requireHttp()
-
-**@RequestHttps**
-
-Silex\Route::requireHttps()
-
-**@Value**
-
-Silex\Route::value()
-* variable
-* default
-
-**@Before**
-
-Silex\Route::before()
-* callback
-
-**@After**
-
-Silex\Route::after()
-* callback
-
-**@Bind**
-
-Silex\Controller::bind()
-* routeName
-
-**@Modifier**
-
-The Modifier annotation is a catch-all to execute any method of the Controller or Route.  All methods should have an annotation, but this annotation is provided as a way to "future-proof" the annotation provider.  In case something is added in the future, users can use it right away instead of waiting for a new annotation to be added.
-
-Silex\Route::{method}()
-
-Silex\Controller::{method}()
-* method (name of the method to call on the Route object)
-* args (array of arguments to send the the method)
+The @Route annotation defines an endpoint.

@@ -72,11 +72,11 @@ class AnnotationServiceProviderTest extends AnnotationTestBase
         $this->app['annot.cache'] = $cache;
         $this->app['debug'] = false;
         $service = $this->registerProviders();
-        $service->registerControllers(self::$CONTROLLER_DIR);
+        $service->registerControllers(self::$CONTROLLER_DIR, []);
         $this->assertCount(12, $this->flattenControllerArray($cache->get($cacheKey)));
 
         $cache->clearWasFetched();
-        $service->registerControllers(self::$CONTROLLER_DIR);
+        $service->registerControllers(self::$CONTROLLER_DIR, []);
         $this->assertTrue($cache->wasFetched($cacheKey));
         $controllers = $cache->get($cacheKey);
         $this->assertContains(SubDirTestController::class, $controllers['/']);

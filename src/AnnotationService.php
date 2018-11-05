@@ -10,9 +10,10 @@
 
 namespace DDesrosiers\SilexAnnotations;
 
+use DDesrosiers\SilexAnnotations\AnnotationReader\AnnotationReader;
 use DDesrosiers\SilexAnnotations\Annotations\Controller;
+use DDesrosiers\SilexAnnotations\Cache\AnnotationCache;
 use Pimple\Container;
-use Psr\SimpleCache\CacheInterface;
 use Psr\SimpleCache\InvalidArgumentException;
 use RuntimeException;
 use Silex\Application;
@@ -32,20 +33,21 @@ class AnnotationService
     /** @var AnnotationReader */
     protected $reader;
 
-    /** @var CacheInterface */
+    /** @var AnnotationCache */
     protected $cache;
 
     const CONTROLLER_CACHE_INDEX = 'annot.controllerFiles';
 
     /**
-     * @param Container  $app
-     * @param CacheInterface $cache
+     * @param Container        $app
+     * @param AnnotationReader $reader
+     * @param AnnotationCache  $cache
      */
-    public function __construct(Container $app, CacheInterface $cache)
+    public function __construct(Container $app, AnnotationReader $reader, AnnotationCache $cache)
     {
         $this->app = $app;
         $this->cache = $cache;
-        $this->reader = new AnnotationReader();
+        $this->reader = $reader;
     }
 
     /**
@@ -53,9 +55,9 @@ class AnnotationService
      * @param array $controllerClassNames
      * @throws InvalidArgumentException
      */
-    public function registerControllers(string $controllerDir = null, array $controllerClassNames = [])
+    public function registerControllers(string $controllerDir, array $controllerClassNames)
     {
-        $controllers = $this->fetchCache(
+        $controllers = $this->cache->fetch(
             self::CONTROLLER_CACHE_INDEX,
             function () use ($controllerDir, $controllerClassNames) {
                 $potentialControllers = array_merge($this->discoverControllers($controllerDir), $controllerClassNames);
@@ -85,14 +87,15 @@ class AnnotationService
      */
     public function discoverControllers(string $controllerDir): array
     {
-        $controllers = [];
-        foreach ($this->getFiles($controllerDir) as $className) {
-            if (class_exists($className)) {
-                $controllers[] = $className;
+        if ($controllerDir) {
+            foreach ($this->getFiles($controllerDir) as $className) {
+                if (class_exists($className)) {
+                    $controllers[] = $className;
+                }
             }
         }
 
-        return $controllers;
+        return $controllers ?? [];
     }
 
     /**
@@ -102,7 +105,7 @@ class AnnotationService
      */
     private function getControllerAnnotation(string $controllerClassName): ?Controller
     {
-        return $this->fetchCache($controllerClassName, function () use ($controllerClassName) {
+        return $this->cache->fetch($controllerClassName, function () use ($controllerClassName) {
             return $this->reader->getControllerAnnotation($controllerClassName);
         });
     }
@@ -198,6 +201,7 @@ class AnnotationService
 
         $this->app->mount($controllerAnnotation->getPrefix(), $controllerCollection);
     }
+
     /**
      * Parse the given file to find the namespace.
      *
@@ -208,22 +212,5 @@ class AnnotationService
     {
         preg_match('/namespace(.*);/', file_get_contents($filePath), $result);
         return isset($result[1]) ? $result[1] . "\\" : '';
-    }
-
-    /**
-     * @param string   $key
-     * @param \Closure $closure
-     * @return mixed|null
-     * @throws InvalidArgumentException
-     */
-    private function fetchCache(string $key, \Closure $closure)
-    {
-        $data = $this->cache->get($key);
-        if ($data === null) {
-            $data = $closure();
-            $this->cache->set($key, $data);
-        }
-
-        return $data;
     }
 }

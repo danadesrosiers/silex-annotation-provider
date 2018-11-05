@@ -20,6 +20,9 @@ class RequireHttpsTest extends AnnotationTestBase
         $this->assertEndPointStatus(self::GET_METHOD, "/test/requirehttps", self::STATUS_OK);
     }
 
+    /**
+     * @throws \Exception
+     */
     public function testHttp()
     {
         // we make the request as http, but it should be redirected to a https request
@@ -36,6 +39,9 @@ class RequireHttpsTest extends AnnotationTestBase
         $this->assertEndPointStatus(self::GET_METHOD, "/test/requirehttps", self::STATUS_OK);
     }
 
+    /**
+     * @throws \Exception
+     */
     public function testHttpCollection()
     {
         // we make the request as http, but it should be redirected to a https request

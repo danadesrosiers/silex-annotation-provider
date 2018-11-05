@@ -2,11 +2,14 @@
 
 namespace DDesrosiers\Test\SilexAnnotations;
 
-use DDesrosiers\SilexAnnotations\AnnotationReader;
+use DDesrosiers\SilexAnnotations\AnnotationReader\AnnotationReader;
 use PHPUnit\Framework\TestCase;
 
 class AnnotationReaderTest extends TestCase
 {
+    /**
+     * @throws \ReflectionException
+     */
     public function testParseAnnotation()
     {
         $def = (new AnnotationReader())->getControllerAnnotation(AnnotationReaderTestController::class);

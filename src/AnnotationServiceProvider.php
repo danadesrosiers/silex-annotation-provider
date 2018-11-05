@@ -10,10 +10,10 @@
 
 namespace DDesrosiers\SilexAnnotations;
 
-use DDesrosiers\SilexAnnotations\Cache\MemoCache;
+use DDesrosiers\SilexAnnotations\AnnotationReader\AnnotationReader;
+use DDesrosiers\SilexAnnotations\Cache\AnnotationCache;
 use Pimple\Container;
 use Pimple\ServiceProviderInterface;
-use Psr\SimpleCache\CacheInterface;
 use Silex\Api\BootableProviderInterface;
 use Silex\Application;
 use Silex\Provider\ServiceControllerServiceProvider;
@@ -34,11 +34,7 @@ class AnnotationServiceProvider implements ServiceProviderInterface, BootablePro
     {
         /** @var AnnotationService $annotationService */
         $annotationService = $app['annot'];
-
-        $controllerDir = $app->offsetExists('annot.controllerDir') ? $app['annot.controllerDir'] : null;
-        $controllers = $app->offsetExists('annot.controllers') ? $app['annot.controllers'] : [];
-
-        $annotationService->registerControllers($controllerDir, $controllers);
+        $annotationService->registerControllers($app['annot.controllerDir'], $app['annot.controllers']);
     }
 
     /**
@@ -47,17 +43,14 @@ class AnnotationServiceProvider implements ServiceProviderInterface, BootablePro
     public function register(Container $app)
     {
         $app["annot"] = function (Container $app) {
-            $cache = $app->offsetExists('annot.cache') ? $app->offsetGet('annot.cache') : null;
-            if ($app['debug'] || !($cache instanceof CacheInterface)) {
-                $cache = new MemoCache();
-            }
-
-            return new AnnotationService($app, $cache);
+            $cache = (!$app['debug'] && $app->offsetExists('annot.cache')) ? $app['annot.cache'] : null;
+            return new AnnotationService($app, new AnnotationReader(), new AnnotationCache($cache));
         };
 
-        // Register ServiceControllerServiceProvider here so the user doesn't have to.
         $app->register(new ServiceControllerServiceProvider());
 
         $app['annot.base_uri'] = '';
+        $app['annot.controllers'] = [];
+        $app['annot.controllerDir'] = '';
     }
 }
