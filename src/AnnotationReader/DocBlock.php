@@ -1,4 +1,13 @@
 <?php
+/**
+ * This file is part of the silex-annotation-provider package.
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ *
+ * @license       MIT License
+ * @copyright (c) 2018, Dana Desrosiers <dana.desrosiers@gmail.com>
+ */
+
 namespace DDesrosiers\SilexAnnotations\AnnotationReader;
 
 class DocBlock
@@ -18,16 +27,14 @@ class DocBlock
      */
     public function parseAnnotation($annotationName): ?array
     {
-        $annotation = explode("@$annotationName(", $this->docBlockString)[1];
+        $annotation = explode("@$annotationName(", $this->docBlockString)[1] ?? null;
 
         if ($annotation === null) {
             return null;
         }
 
-        $lines = isset($annotation) ? $this->splitLines($annotation) : [];
-
         $def = [];
-        foreach ($lines as $line) {
+        foreach ($this->splitLines($annotation) as $line) {
             $tokens = $this->tokenizeLine($line);
             if (strlen($tokens[0]) > 0) {
                 $def[$tokens[0]][] = (count($tokens) === 1) ? [] : explode(', ', $tokens[1]);

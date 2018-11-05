@@ -5,7 +5,7 @@
  * file that was distributed with this source code.
  *
  * @license       MIT License
- * @copyright (c) 2014, Dana Desrosiers <dana.desrosiers@gmail.com>
+ * @copyright (c) 2018, Dana Desrosiers <dana.desrosiers@gmail.com>
  */
 
 namespace DDesrosiers\SilexAnnotations;
@@ -34,7 +34,7 @@ class AnnotationServiceProvider implements ServiceProviderInterface, BootablePro
     {
         /** @var AnnotationService $annotationService */
         $annotationService = $app['annot'];
-        $annotationService->registerControllers($app['annot.controllerDir'], $app['annot.controllers']);
+        $annotationService->registerControllers();
     }
 
     /**
@@ -44,13 +44,17 @@ class AnnotationServiceProvider implements ServiceProviderInterface, BootablePro
     {
         $app["annot"] = function (Container $app) {
             $cache = (!$app['debug'] && $app->offsetExists('annot.cache')) ? $app['annot.cache'] : null;
-            return new AnnotationService($app, new AnnotationReader(), new AnnotationCache($cache));
+            return new AnnotationService(
+                $app,
+                new ControllerFinder($app['annot.controllerDir'], $app['annot.controllers']),
+                new AnnotationReader(),
+                new AnnotationCache($cache));
         };
 
         $app->register(new ServiceControllerServiceProvider());
 
         $app['annot.base_uri'] = '';
         $app['annot.controllers'] = [];
-        $app['annot.controllerDir'] = '';
+        $app['annot.controllerDir'] = null;
     }
 }

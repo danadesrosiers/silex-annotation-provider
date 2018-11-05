@@ -1,4 +1,12 @@
 <?php
+/**
+ * This file is part of the silex-annotation-provider package.
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ *
+ * @license       MIT License
+ * @copyright (c) 2018, Dana Desrosiers <dana.desrosiers@gmail.com>
+ */
 
 namespace DDesrosiers\SilexAnnotations\Cache;
 
@@ -51,8 +59,7 @@ class AnnotationCache
     {
         $data = $this->get($key);
         if ($data === null) {
-            $data = $closure();
-            $this->set($key, $data);
+            $this->set($key, $data = $closure());
         }
 
         return $data;

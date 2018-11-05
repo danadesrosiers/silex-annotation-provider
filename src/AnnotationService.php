@@ -5,7 +5,7 @@
  * file that was distributed with this source code.
  *
  * @license       MIT License
- * @copyright (c) 2014, Dana Desrosiers <dana.desrosiers@gmail.com>
+ * @copyright (c) 2018, Dana Desrosiers <dana.desrosiers@gmail.com>
  */
 
 namespace DDesrosiers\SilexAnnotations;
@@ -15,7 +15,6 @@ use DDesrosiers\SilexAnnotations\Annotations\Controller;
 use DDesrosiers\SilexAnnotations\Cache\AnnotationCache;
 use Pimple\Container;
 use Psr\SimpleCache\InvalidArgumentException;
-use RuntimeException;
 use Silex\Application;
 use Silex\ControllerCollection;
 
@@ -28,74 +27,60 @@ use Silex\ControllerCollection;
 class AnnotationService
 {
     /** @var Application */
-    protected $app;
+    private $app;
+
+    /** @var ControllerFinder */
+    private $controllerFinder;
 
     /** @var AnnotationReader */
-    protected $reader;
+    private $reader;
 
     /** @var AnnotationCache */
-    protected $cache;
+    private $cache;
 
     const CONTROLLER_CACHE_INDEX = 'annot.controllerFiles';
 
     /**
      * @param Container        $app
+     * @param ControllerFinder $finder
      * @param AnnotationReader $reader
      * @param AnnotationCache  $cache
      */
-    public function __construct(Container $app, AnnotationReader $reader, AnnotationCache $cache)
-    {
+    public function __construct(
+        Container $app,
+        ControllerFinder $finder,
+        AnnotationReader $reader,
+        AnnotationCache $cache
+    ) {
         $this->app = $app;
+        $this->controllerFinder = $finder;
         $this->cache = $cache;
         $this->reader = $reader;
     }
 
     /**
-     * @param string $controllerDir
-     * @param array $controllerClassNames
      * @throws InvalidArgumentException
      */
-    public function registerControllers(string $controllerDir, array $controllerClassNames)
+    public function registerControllers()
     {
-        $controllers = $this->cache->fetch(
-            self::CONTROLLER_CACHE_INDEX,
-            function () use ($controllerDir, $controllerClassNames) {
-                $potentialControllers = array_merge($this->discoverControllers($controllerDir), $controllerClassNames);
-                foreach ($potentialControllers as $className) {
-                    $controller = $this->getControllerAnnotation($className);
-                    if ($controller instanceof Controller) {
-                        $controllers[$controller->getPrefix()][] = $className;
-                    }
+        $controllers = $this->cache->fetch(self::CONTROLLER_CACHE_INDEX, function () {
+            foreach ($this->controllerFinder->getControllerClasses() as $className) {
+                $controller = $this->getControllerAnnotation($className);
+                if ($controller instanceof Controller) {
+                    $controllers[$controller->getPrefix()][] = $className;
                 }
-
-                return $controllers ?? [];
             }
-        );
+            return $controllers ?? [];
+        });
 
         foreach ($controllers as $prefix => $controllerGroup) {
-            if ($this->prefixMatchesUri($prefix)) {
+            // register the controller only if the prefix matches the request uri
+            if (strpos($_SERVER['REQUEST_URI'], $this->app['annot.base_uri'].$prefix) === 0) {
                 foreach ($controllerGroup as $controllerClassName) {
                     $this->registerController($controllerClassName);
                 }
             }
         }
-    }
-
-    /**
-     * @param string $controllerDir
-     * @return string[]
-     */
-    public function discoverControllers(string $controllerDir): array
-    {
-        if ($controllerDir) {
-            foreach ($this->getFiles($controllerDir) as $className) {
-                if (class_exists($className)) {
-                    $controllers[] = $className;
-                }
-            }
-        }
-
-        return $controllers ?? [];
     }
 
     /**
@@ -108,49 +93,6 @@ class AnnotationService
         return $this->cache->fetch($controllerClassName, function () use ($controllerClassName) {
             return $this->reader->getControllerAnnotation($controllerClassName);
         });
-    }
-
-    private function prefixMatchesUri($prefix)
-    {
-        return ($this->app->offsetExists('annot.base_uri')
-            && strpos($_SERVER['REQUEST_URI'], $this->app['annot.base_uri'].$prefix) === 0);
-    }
-
-    /**
-     * Recursively walk the file tree starting from $dir to find potential controller class files.
-     * Returns array of fully qualified class names.
-     * Namespace detection works with PSR-0 or PSR-4 autoloading.
-     *
-     * @param string  $dir
-     * @param string  $namespace
-     * @param array   $files
-     * @return array
-     */
-    private function getFiles(string $dir, string $namespace='', $files=[]): array
-    {
-        if (!is_dir($dir)) {
-            throw new RuntimeException("Controller directory: {$dir} does not exist.");
-        }
-
-        if ($handle = opendir($dir)) {
-            while (false !== ($entry = readdir($handle))) {
-                if (!in_array($entry, array('.', '..'))) {
-                    $filePath = "$dir/$entry";
-                    if (is_dir($filePath)) {
-                        $subNamespace = $namespace ? $namespace."$entry\\" : '';
-                        $files = $this->getFiles($filePath, $subNamespace, $files);
-                    } else {
-                        if (!$namespace) {
-                            $namespace = $this->parseNamespace($filePath);
-                        }
-                        $files[] = trim($namespace.pathinfo($entry)['filename']);
-                    }
-                }
-            }
-            closedir($handle);
-        }
-
-        return $files;
     }
 
     /**
@@ -200,17 +142,5 @@ class AnnotationService
         }
 
         $this->app->mount($controllerAnnotation->getPrefix(), $controllerCollection);
-    }
-
-    /**
-     * Parse the given file to find the namespace.
-     *
-     * @param $filePath
-     * @return string
-     */
-    private function parseNamespace($filePath)
-    {
-        preg_match('/namespace(.*);/', file_get_contents($filePath), $result);
-        return isset($result[1]) ? $result[1] . "\\" : '';
     }
 }

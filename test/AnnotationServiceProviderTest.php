@@ -5,12 +5,13 @@
  * file that was distributed with this source code.
  *
  * @license       MIT License
- * @copyright (c) 2014, Dana Desrosiers <dana.desrosiers@gmail.com>
+ * @copyright (c) 2018, Dana Desrosiers <dana.desrosiers@gmail.com>
  */
 
 namespace DDesrosiers\Test\SilexAnnotations;
 
 use DDesrosiers\SilexAnnotations\AnnotationService;
+use DDesrosiers\SilexAnnotations\ControllerFinder;
 use DDesrosiers\Test\SilexAnnotations\Controller\AfterCollectionTestController;
 use DDesrosiers\Test\SilexAnnotations\Controller\AssertCollectionTestController;
 use DDesrosiers\Test\SilexAnnotations\Controller\BeforeCollectionTestController;
@@ -56,8 +57,8 @@ class AnnotationServiceProviderTest extends AnnotationTestBase
      */
     public function testRegisterControllersByDirectory($dir, $result)
     {
-        $service = $this->registerProviders();
-        $files = $service->discoverControllers(self::$CONTROLLER_DIR.$dir);
+        $controllerFinder = new ControllerFinder(self::$CONTROLLER_DIR.$dir, []);
+        $files = $controllerFinder->getControllerClasses();
         self::assertEquals($result, $files);
     }
 
@@ -72,11 +73,11 @@ class AnnotationServiceProviderTest extends AnnotationTestBase
         $this->app['annot.cache'] = $cache;
         $this->app['debug'] = false;
         $service = $this->registerProviders();
-        $service->registerControllers(self::$CONTROLLER_DIR, []);
+        $service->registerControllers();
         $this->assertCount(12, $this->flattenControllerArray($cache->get($cacheKey)));
 
         $cache->clearWasFetched();
-        $service->registerControllers(self::$CONTROLLER_DIR, []);
+        $service->registerControllers();
         $this->assertTrue($cache->wasFetched($cacheKey));
         $controllers = $cache->get($cacheKey);
         $this->assertContains(SubDirTestController::class, $controllers['/']);
