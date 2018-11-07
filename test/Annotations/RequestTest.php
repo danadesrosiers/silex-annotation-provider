@@ -5,14 +5,12 @@
  * file that was distributed with this source code.
  *
  * @license       MIT License
- * @copyright (c) 2014, Dana Desrosiers <dana.desrosiers@gmail.com>
+ * @copyright (c) 2018, Dana Desrosiers <dana.desrosiers@gmail.com>
  */
 
 namespace DDesrosiers\Test\SilexAnnotations\Annotations;
 
 use DDesrosiers\Test\SilexAnnotations\AnnotationTestBase;
-use Silex\Route;
-use Symfony\Component\Routing\RouteCollection;
 
 class RequestTest extends AnnotationTestBase
 {
@@ -27,43 +25,17 @@ class RequestTest extends AnnotationTestBase
             array(self::POST_METHOD, "/test/multi-method", self::STATUS_OK),
             array(self::GET_METHOD, "/test/match", self::STATUS_OK),
             array(self::POST_METHOD, "/test/match", self::STATUS_OK),
-            // multiple requests
-            array(self::GET_METHOD, "/test/firstRequest", self::STATUS_OK),
-            array(self::GET_METHOD, "/test/secondRequest", self::STATUS_OK),
         );
     }
 
     /**
      * @dataProvider requestTestDataProvider
+     * @param     $method
+     * @param     $uri
+     * @param int $status
      */
     public function testRequests($method, $uri, $status=self::STATUS_OK)
     {
         $this->assertEndPointStatus($method, $uri, $status);
-    }
-
-    public function testMultipleRequestsShareModifiers()
-    {
-        $this->assertEndPointStatus(self::GET_METHOD, "/test/firstRequest/foo", self::STATUS_NOT_FOUND);
-        $this->assertEndPointStatus(self::GET_METHOD, "/test/secondRequest/foo", self::STATUS_NOT_FOUND);
-
-        /** @var RouteCollection $routes */
-        $routes = $this->app['routes'];
-        /** @var Route[] $iterator */
-        $iterator = $routes->getIterator();
-
-        $firstRoute = null;
-        $secondRoute = null;
-        foreach ($iterator as $route) {
-            if ($route->getPath() == "/test/firstRequest/{num}") {
-                $firstRoute = $route;
-            } else if ($route->getPath() == "/test/secondRequest/{num}") {
-                $secondRoute = $route;
-            }
-        }
-
-        $this->assertInstanceOf('Silex\Route', $firstRoute);
-        $this->assertEquals('\d+', $firstRoute->getRequirement('num'));
-        $this->assertInstanceOf('Silex\Route', $secondRoute);
-        $this->assertEquals('\d+', $secondRoute->getRequirement('num'));
     }
 }

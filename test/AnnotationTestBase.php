@@ -5,18 +5,21 @@
  * file that was distributed with this source code.
  *
  * @license       MIT License
- * @copyright (c) 2014, Dana Desrosiers <dana.desrosiers@gmail.com>
+ * @copyright (c) 2018, Dana Desrosiers <dana.desrosiers@gmail.com>
  */
 
 namespace DDesrosiers\Test\SilexAnnotations;
 
 use DDesrosiers\SilexAnnotations\AnnotationService;
 use DDesrosiers\SilexAnnotations\AnnotationServiceProvider;
+use PHPUnit\Framework\TestCase;
 use Silex\Application;
+use Silex\Route;
+use Silex\Route\SecurityTrait;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Client;
 
-class AnnotationTestBase extends \PHPUnit_Framework_TestCase
+class AnnotationTestBase extends TestCase
 {
     const GET_METHOD = 'GET';
     const POST_METHOD = 'POST';
@@ -28,8 +31,6 @@ class AnnotationTestBase extends \PHPUnit_Framework_TestCase
     const STATUS_UNAUTHORIZED = 401;
     const STATUS_NOT_FOUND = 404;
     const STATUS_ERROR = 500;
-
-    const CONTROLLER_NAMESPACE = "DDesrosiers\\Test\\SilexAnnotations\\Controller\\";
 
     protected static $CONTROLLER_DIR;
 
@@ -53,13 +54,14 @@ class AnnotationTestBase extends \PHPUnit_Framework_TestCase
      * @param array $options
      * @return AnnotationService
      */
-    protected function registerAnnotations($options = array())
+    protected function registerProviders($options = [])
     {
         if (!isset($options['annot.controllers'])) {
             $options['annot.controllerDir'] = self::$CONTROLLER_DIR;
         }
 
         $this->app->register(new AnnotationServiceProvider(), $options);
+        $this->app['route_class'] = SecurityRoute::class;
 
         return $this->app['annot'];
     }
@@ -67,7 +69,7 @@ class AnnotationTestBase extends \PHPUnit_Framework_TestCase
     protected function getClient($annotationOptions = array())
     {
         if (!$this->app->offsetExists('annot')) {
-            $this->registerAnnotations($annotationOptions);
+            $this->registerProviders($annotationOptions);
         }
         $this->client = new Client($this->app, $this->clientOptions);
     }
@@ -90,4 +92,16 @@ class AnnotationTestBase extends \PHPUnit_Framework_TestCase
     {
         $this->assertEquals($status, $response->getStatusCode());
     }
-} 
+
+    protected function flattenControllerArray($controllers)
+    {
+        array_walk_recursive($controllers, function($a) use (&$flattened) { $flattened[] = $a; });
+
+        return $flattened;
+    }
+}
+
+class SecurityRoute extends Route
+{
+    use SecurityTrait;
+}

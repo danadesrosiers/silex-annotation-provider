@@ -6,38 +6,74 @@
  * file that was distributed with this source code.
  *
  * @license       MIT License
- * @copyright (c) 2014, Dana Desrosiers <dana.desrosiers@gmail.com>
+ * @copyright (c) 2018, Dana Desrosiers <dana.desrosiers@gmail.com>
  */
+
+declare(strict_types=1);
 
 namespace DDesrosiers\SilexAnnotations\Annotations;
 
-use DDesrosiers\SilexAnnotations\AnnotationService;
-use ReflectionClass;
-use Silex\Application;
-
 /**
- * @Annotation
- * @Target("CLASS")
+ * Class Controller defines a Silex Controller Collection and its modifiers and Routes.
+ *
  * @author Dana Desrosiers <dana.desrosiers@gmail.com>
  */
 class Controller
 {
+    /** @var string */
     public $prefix;
 
-    public function process(Application $app, ReflectionClass $reflectionClass)
+    /** @var string[] */
+    private $modifiers;
+
+    /** @var Route[] */
+    private $routes;
+
+    /**
+     * @param null|string $prefix
+     */
+    public function __construct(?string $prefix = '/')
     {
-        $controllerCollection = $app['controllers_factory'];
-        /** @var AnnotationService $annotationService */
-        $annotationService = $app['annot'];
-        $annotationService->processClassAnnotations($reflectionClass, $controllerCollection);
-        $annotationService->processMethodAnnotations($reflectionClass, $controllerCollection);
-        $app->mount($this->prefix, $controllerCollection);
+        $this->prefix = ($prefix[0] !== '/') ? "/$prefix" : $prefix;
     }
 
-    public function getPrefix()
+    /**
+     * @return string
+     */
+    public function getPrefix(): string
     {
-        // the prefix might not start with a forward slash, but the REQUEST_URI always will
-        // make sure we always have a forward slash so the comparison to REQUEST_URI works as expected
-        return ($this->prefix[0] !== '/') ? "/$this->prefix" : $this->prefix;
+        return $this->prefix;
+    }
+
+    /**
+     * @return string[]
+     */
+    public function getModifiers(): array
+    {
+        return $this->modifiers;
+    }
+
+    /**
+     * @return Route[]
+     */
+    public function getRoutes(): array
+    {
+        return $this->routes ?? [];
+    }
+
+    /**
+     * @param string[] $modifiers
+     */
+    public function setModifiers(array $modifiers)
+    {
+        $this->modifiers = $modifiers;
+    }
+
+    /**
+     * @param Route $route
+     */
+    public function addRoute(Route $route)
+    {
+        $this->routes[] = $route;
     }
 } 

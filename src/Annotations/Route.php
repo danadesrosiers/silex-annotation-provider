@@ -5,81 +5,81 @@
  * file that was distributed with this source code.
  *
  * @license       MIT License
- * @copyright (c) 2014, Dana Desrosiers <dana.desrosiers@gmail.com>
+ * @copyright (c) 2018, Dana Desrosiers <dana.desrosiers@gmail.com>
  */
+
+declare(strict_types=1);
 
 namespace DDesrosiers\SilexAnnotations\Annotations;
 
-use Silex\Application;
-use Silex\ControllerCollection;
-
 /**
- * @Annotation
- * @Target("METHOD")
+ * Class Route defines a Silex endpoint and its modifiers.
+ *
  * @author Dana Desrosiers <dana.desrosiers@gmail.com>
  */
 class Route
 {
-    /** @var Request[] */
-    public $request;
+    /** @var string */
+    public $controllerName;
 
-    /** @var Convert[] */
-    public $convert;
+    /** @var string */
+    public $method;
 
-    /** @var Assert[] */
-    public $assert;
+    /** @var string */
+    public $uri;
 
-    /** @var RequireHttp[] */
-    public $requireHttp;
-
-    /** @var RequireHttps[] */
-    public $requireHttps;
-
-    /** @var Value[] */
-    public $value;
-
-    /** @var Host[] */
-    public $host;
-
-    /** @var Before[] */
-    public $before;
-
-    /** @var After[] */
-    public $after;
+    /** @var string[][] */
+    public $modifiers;
 
     /**
-     * @param array $values
+     * @param string $controllerName
+     * @param string $uri
      */
-    public function __construct(array $values)
+    public function __construct(string $controllerName, string $uri)
     {
-        $annotations = is_array($values['value']) ? $values['value'] : array($values['value']);
-        foreach ($annotations as $annotation) {
-            $classPath = explode("\\", get_class($annotation));
-            $propertyName = lcfirst(array_pop($classPath));
-            $this->{$propertyName}[] = $annotation;
-        }
+        $this->controllerName = $controllerName;
+        $uri = explode(' ', $uri);
+        $this->uri = array_pop($uri);
+        $this->method = count($uri) > 0 ? array_shift($uri) : 'MATCH';
     }
 
     /**
-     * Process annotations on a method to register it as a controller.
-     *
-     * @param \Silex\ControllerCollection $controllerCollection the controller collection to add the route to
-     * @param string                      $controllerName       fully qualified method name of the controller
-     * @param Application                 $app
+     * @return string
      */
-    public function process(ControllerCollection $controllerCollection, $controllerName, Application $app=null)
+    public function getMethod(): string
     {
-        foreach ($this->request as $request) {
-            $controller = $request->process($controllerCollection, $controllerName);
-            foreach ($this as $annotations) {
-                if (is_array($annotations)) {
-                    foreach ($annotations as $annotation) {
-                        if ($annotation instanceof RouteAnnotation) {
-                            $annotation->process($controller);
-                        }
-                    }
-                }
-            }
-        }
+        return $this->method;
+    }
+
+    /**
+     * @return string
+     */
+    public function getUri(): string
+    {
+        return $this->uri;
+    }
+
+    /**
+     * @return string
+     */
+    public function getControllerName(): string
+    {
+        return $this->controllerName;
+    }
+
+    /**
+     * @return string[][]
+     */
+    public function getModifiers(): array
+    {
+        return $this->modifiers;
+    }
+
+    /**
+     * @param string[][] $modifiers
+     */
+    public function setModifiers(array $modifiers)
+    {
+        $this->modifiers = $modifiers;
     }
 }

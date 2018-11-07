@@ -5,127 +5,84 @@
  * file that was distributed with this source code.
  *
  * @license       MIT License
- * @copyright (c) 2014, Dana Desrosiers <dana.desrosiers@gmail.com>
+ * @copyright (c) 2018, Dana Desrosiers <dana.desrosiers@gmail.com>
  */
 
 namespace DDesrosiers\Test\SilexAnnotations;
 
-use DDesrosiers\SilexAnnotations\Annotations as SLX;
 use DDesrosiers\SilexAnnotations\AnnotationService;
-use Doctrine\Common\Cache\ArrayCache;
-use Silex\Application;
-use Symfony\Component\HttpFoundation\Response;
-
-include __DIR__ . "/NoNamespace/TestControllerNoNamespace.php";
+use DDesrosiers\SilexAnnotations\ControllerFinder;
+use DDesrosiers\Test\SilexAnnotations\Controller\AfterCollectionTestController;
+use DDesrosiers\Test\SilexAnnotations\Controller\AssertCollectionTestController;
+use DDesrosiers\Test\SilexAnnotations\Controller\BeforeCollectionTestController;
+use DDesrosiers\Test\SilexAnnotations\Controller\ConvertCollectionTestController;
+use DDesrosiers\Test\SilexAnnotations\Controller\HostCollectionTestController;
+use DDesrosiers\Test\SilexAnnotations\Controller\RequireHttpCollectionTestController;
+use DDesrosiers\Test\SilexAnnotations\Controller\RequireHttpsCollectionTestController;
+use DDesrosiers\Test\SilexAnnotations\Controller\SecureCollectionTestController;
+use DDesrosiers\Test\SilexAnnotations\Controller\SubDir\SubDirTestController;
+use DDesrosiers\Test\SilexAnnotations\Controller\TestController;
+use DDesrosiers\Test\SilexAnnotations\Controller\TestController2;
+use DDesrosiers\Test\SilexAnnotations\Controller\ValueTestController;
 
 class AnnotationServiceProviderTest extends AnnotationTestBase
 {
-    public function testRegisterControllersByDirectoryProvider()
+    public function registerControllersByDirectoryTestProvider()
     {
-        $subDirFqcn = self::CONTROLLER_NAMESPACE."SubDir\\SubDirTestController";
+        $allControllers = [
+            AfterCollectionTestController::class,
+            AssertCollectionTestController::class,
+            BeforeCollectionTestController::class,
+            ConvertCollectionTestController::class,
+            HostCollectionTestController::class,
+            RequireHttpCollectionTestController::class,
+            RequireHttpsCollectionTestController::class,
+            SecureCollectionTestController::class,
+            SubDirTestController::class,
+            TestController::class,
+            TestController2::class,
+            ValueTestController::class
+        ];
+
         return array(
-            array("/SubDir", self::CONTROLLER_NAMESPACE."SubDir\\", $subDirFqcn),
-            array("/SubDir", null, $subDirFqcn),
-            array('', null, $subDirFqcn),
-            array("/../NoNamespace", null, "TestControllerNoNamespace")
+            array("/SubDir", [SubDirTestController::class]),
+            array('', $allControllers)
         );
     }
 
     /**
-     * @dataProvider testRegisterControllersByDirectoryProvider
+     * @dataProvider registerControllersByDirectoryTestProvider
+     * @param $dir
+     * @param $result
      */
-    public function testRegisterControllersByDirectory($dir, $namespace, $result)
+    public function testRegisterControllersByDirectory($dir, $result)
     {
-        $service = $this->registerAnnotations();
-        $this->app['annot.controllerNamespace'] = $namespace;
-        $files = $service->discoverControllers(self::$CONTROLLER_DIR.$dir);
-        if (is_array($result)) {
-            $this->assertEquals($result, $files);
-        } else {
-            $this->assertContains($result, $files);
-        }
+        $controllerFinder = new ControllerFinder(self::$CONTROLLER_DIR . $dir, []);
+        $files = $controllerFinder->getControllerClasses();
+        sort($files);
+        self::assertEquals($result, $files);
     }
 
-    public function testCustomControllerFinder()
-    {
-        $service = $this->registerAnnotations();
-        $this->app['annot.controllerFinder'] = $this->app->protect(function (Application $app, $dir) {
-            $regex = '/^.+\CollectionTestController.php$/i';
-            $iterator = new \RegexIterator(new \RecursiveDirectoryIterator($dir), $regex, \RecursiveRegexIterator::GET_MATCH);
-            $files = array();
-            foreach ($iterator as $filePath => $file) {
-                $pathInfo = pathinfo($filePath);
-                $files[] = AnnotationTestBase::CONTROLLER_NAMESPACE.$pathInfo['filename'];
-            }
-
-            return $files;
-        });
-        $files = $service->discoverControllers(self::$CONTROLLER_DIR);
-        $this->assertCount(8, $files);
-        $this->assertContains(self::CONTROLLER_NAMESPACE."AssertCollectionTestController", $files);
-    }
-
+    /**
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     */
     public function testControllerCache()
     {
-        $cacheKey = AnnotationService::CONTROLLER_CACHE_INDEX . "." . self::$CONTROLLER_DIR;
+        $_SERVER['REQUEST_URI'] = '';
+        $cacheKey = AnnotationService::CONTROLLER_CACHE_INDEX;
         $cache = new TestArrayCache();
         $this->app['annot.cache'] = $cache;
         $this->app['debug'] = false;
-        $service = $this->registerAnnotations();
-        $service->discoverControllers(self::$CONTROLLER_DIR);
-        $this->assertCount(14, $cache->fetch($cacheKey));
+        $service = $this->registerProviders();
+        $service->registerControllers();
+        $this->assertCount(12, $this->flattenControllerArray($cache->get($cacheKey)));
 
-        $files = $service->discoverControllers(self::$CONTROLLER_DIR);
+        $cache->clearWasFetched();
+        $service->registerControllers();
         $this->assertTrue($cache->wasFetched($cacheKey));
-        $this->assertContains(self::CONTROLLER_NAMESPACE."SubDir\\SubDirTestController", $files);
-        $this->assertContains(self::CONTROLLER_NAMESPACE."TestController", $files['/test']);
-        $this->assertCount(14, $files);
-    }
-}
-
-class TestArrayCache extends ArrayCache
-{
-    protected $fetchedIDs;
-
-    public function wasFetched($id)
-    {
-        return isset($this->fetchedIDs[$id]);
-    }
-
-    public function fetch($id)
-    {
-        $this->fetchedIDs[$id] = true;
-        return parent::fetch($id);
-    }
-
-    public function clearWasFetched()
-    {
-        $this->fetchedIDs = [];
-    }
-}
-
-class TestControllerOne
-{
-    /**
-     * @SLX\Route(
-     *      @SLX\Request(method="GET", uri="/test1")
-     * )
-     */
-    public function test()
-    {
-        return new Response();
-    }
-}
-
-class TestControllerTwo
-{
-    /**
-     * @SLX\Route(
-     *      @SLX\Request(method="GET", uri="/test2")
-     * )
-     */
-    public function test()
-    {
-        return new Response();
+        $controllers = $cache->get($cacheKey);
+        $this->assertContains(SubDirTestController::class, $controllers['/']);
+        $this->assertContains(TestController::class, $controllers['/test']);
+        $this->assertCount(12, $this->flattenControllerArray($controllers));
     }
 }

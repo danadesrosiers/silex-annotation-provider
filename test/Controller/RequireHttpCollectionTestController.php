@@ -2,17 +2,19 @@
 
 namespace DDesrosiers\Test\SilexAnnotations\Controller;
 
-use DDesrosiers\SilexAnnotations\Annotations as SLX;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * @SLX\Controller(prefix="/requirehttp")
- * @SLX\RequireHttp
+ * @Controller(
+ *     prefix => /requirehttp
+ *     requireHttp
+ * )
 */
 class RequireHttpCollectionTestController
 {
     /**
-     * @SLX\Request(method="GET", uri="/test")
+     * @Route(GET /test)
+     * )
      */
     public function testRequireHttp()
     {

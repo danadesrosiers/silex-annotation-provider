@@ -2,21 +2,18 @@
 
 namespace DDesrosiers\Test\SilexAnnotations\Controller;
 
-use DDesrosiers\SilexAnnotations\Annotations as SLX;
 use Exception;
 use Silex\Application;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Generator\UrlGenerator;
 
 /**
- * @SLX\Controller(prefix="/test")
+ * @Controller(/test)
  */
 class TestController
 {
     /**
-     * @SLX\Route(
-     *      @SLX\Request(method="GET", uri="test1")
-     * )
+     * @Route(GET test1)
      */
     public function test1()
     {
@@ -24,7 +21,7 @@ class TestController
     }
 
     /**
-     * @SLX\Request(method="POST", uri="/post")
+     * @Route(POST /post)
      */
     public function testPostRequest()
     {
@@ -32,7 +29,7 @@ class TestController
     }
 
     /**
-     * @SLX\Request(method="PUT", uri="/put")
+     * @Route(PUT /put)
      */
     public function testPutRequest()
     {
@@ -40,7 +37,7 @@ class TestController
     }
 
     /**
-     * @SLX\Request(method="DELETE", uri="/delete")
+     * @Route(DELETE /delete)
      */
     public function testDeleteRequest()
     {
@@ -48,7 +45,7 @@ class TestController
     }
 
     /**
-     * @SLX\Request(method="MATCH", uri="/match")
+     * @Route(/match)
      */
     public function testMatchRequest()
     {
@@ -56,7 +53,7 @@ class TestController
     }
 
     /**
-     * @SLX\Request(method="GET|POST", uri="/multi-method")
+     * @Route(GET|POST /multi-method)
      */
     public function testMultiMethodRequest()
     {
@@ -64,31 +61,13 @@ class TestController
     }
 
     /**
-     * @SLX\Request(method="GET", uri="firstRequest")
-     * @SLX\Request(method="GET", uri="secondRequest")
-     * @return Response
-     */
-    public function testMultipleRequests()
-    {
-        return new Response();
-    }
-
-    /**
-     * The assert modifier should be applied to both endpoints.
+     * @Route(
+     *     uri => GET assert/{var}
+     *     assert => var, \d+
+     * )
      *
-     * @SLX\Request(method="GET", uri="firstRequest/{num}")
-     * @SLX\Request(method="GET", uri="secondRequest/{num}")
-     * @SLX\Assert(variable="num", regex="\d+")
+     * @param $var
      * @return Response
-     */
-    public function testMultipleRequestsShareModifiers()
-    {
-        return new Response();
-    }
-
-    /**
-     * @SLX\Request(method="GET", uri="assert/{var}")
-     * @SLX\Assert(variable="var", regex="\d+")
      */
     public function assertTest($var)
     {
@@ -96,8 +75,10 @@ class TestController
     }
 
     /**
-     * @SLX\Request(method="GET", uri="/before")
-     * @SLX\Before("DDesrosiers\Test\SilexAnnotations\Controller\TestController::beforeCallback")
+     * @Route(
+     *     uri => GET /before
+     *     before => DDesrosiers\Test\SilexAnnotations\Controller\TestController::beforeCallback
+     * )
      */
     public function beforeTest()
     {
@@ -105,8 +86,10 @@ class TestController
     }
 
     /**
-     * @SLX\Request(method="GET", uri="/after")
-     * @SLX\After("DDesrosiers\Test\SilexAnnotations\Controller\TestController::afterCallback")
+     * @Route(
+     *     uri => GET /after
+     *     after => DDesrosiers\Test\SilexAnnotations\Controller\TestController::afterCallback
+     * )
      */
     public function afterTest()
     {
@@ -114,8 +97,13 @@ class TestController
     }
 
     /**
-     * @SLX\Request(method="GET", uri="/bind")
-     * @SLX\Bind(routeName="testRouteName")
+     * @Route(
+     *     uri => GET /bind
+     *     bind => testRouteName
+     * )
+     *
+     * @param Application $app
+     * @return Response
      */
     public function bindTest(Application $app)
     {
@@ -125,8 +113,13 @@ class TestController
     }
 
     /**
-     * @SLX\Request(method="GET", uri="/convert/{var}")
-     * @SLX\Convert(variable="var", callback="DDesrosiers\Test\SilexAnnotations\Controller\TestController::convert")
+     * @Route(
+     *     uri => GET /convert/{var}
+     *     convert => var, DDesrosiers\Test\SilexAnnotations\Controller\TestController::convert
+     * )
+     *
+     * @param $var
+     * @return Response
      */
     public function convertTest($var)
     {
@@ -134,8 +127,10 @@ class TestController
     }
 
     /**
-     * @SLX\Request(method="GET", uri="/hostTest")
-     * @SLX\Host("www.test.com")
+     * @Route(
+     *     uri => GET /hostTest
+     *     host => www.test.com
+     * )
      */
     public function testHost()
     {
@@ -143,8 +138,10 @@ class TestController
     }
 
     /**
-     * @SLX\Request(method="GET", uri="/requirehttp")
-     * @SLX\RequireHttp
+     * @Route(
+     *     uri => GET /requirehttp
+     *     requireHttp
+     * )
      */
     public function testRequireHttp()
     {
@@ -152,8 +149,10 @@ class TestController
     }
 
     /**
-     * @SLX\Request(method="GET", uri="/requirehttps")
-     * @SLX\RequireHttp
+     * @Route(
+     *     uri => GET /requirehttps
+     *     requireHttp
+     * )
      */
     public function testRequireHttps()
     {
@@ -161,8 +160,10 @@ class TestController
     }
 
     /**
-     * @SLX\Request(method="GET", uri="/secure")
-     * @SLX\Secure("ROLE_ADMIN")
+     * @Route(
+     *     uri => GET /secure
+     *     secure => ROLE_ADMIN
+     * )
      */
     public function testSecure()
     {
@@ -170,52 +171,16 @@ class TestController
     }
 
     /**
-     * @SLX\Request(method="GET", uri="/assert/modifier/{var}")
-     * @SLX\Modifier(method="assert", args={"var", "\d+"})
+     * @throws Exception
      */
-    public function testAssertModifier($var)
-    {
-        return new Response($var);
-    }
-
-    /**
-     * @SLX\Request(method="GET", uri="/requirehttps/modifier")
-     * @SLX\Modifier("requireHttps")
-     */
-    public function testRequireHttpsModifier()
-    {
-        return new Response();
-    }
-
-    /**
-     * @SLX\Request(method="GET", uri="/host/modifier")
-     * @SLX\Modifier(method="host", args="www.wronghost.com")
-     */
-    public function testHostModifier()
-    {
-        return new Response();
-    }
-
-    /**
-     * @SLX\Route(
-     *      @SLX\Request(method="GET", uri="/route/{var}"),
-     *      @SLX\Assert(variable="var", regex="\d+")
-     * )
-     *
-     * @SLX\Route(
-     *      @SLX\Request(method="GET", uri="/route2/{var}")
-     * )
-     */
-    public function routeTest($var)
-    {
-        return new Response($var);
-    }
-
     public static function beforeCallback()
     {
         throw new Exception("before callback");
     }
 
+    /**
+     * @throws Exception
+     */
     public static function afterCallback()
     {
         throw new Exception("after callback");

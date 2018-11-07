@@ -2,17 +2,21 @@
 
 namespace DDesrosiers\Test\SilexAnnotations\Controller;
 
-use DDesrosiers\SilexAnnotations\Annotations as SLX;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * @SLX\Controller(prefix="/")
+ * @Controller(/)
  */
 class ValueTestController
 {
     /**
-     * @SLX\Request(method="GET", uri="/{var}")
-     * @SLX\Value(variable="var", default="default")
+     * @Route(
+     *     uri => GET /{var}
+     *     value => var, default
+     * )
+     *
+     * @param $var
+     * @return Response
      */
     public function testMethod($var)
     {
