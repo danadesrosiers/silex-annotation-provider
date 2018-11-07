@@ -57,8 +57,9 @@ class AnnotationServiceProviderTest extends AnnotationTestBase
      */
     public function testRegisterControllersByDirectory($dir, $result)
     {
-        $controllerFinder = new ControllerFinder(self::$CONTROLLER_DIR.$dir, []);
+        $controllerFinder = new ControllerFinder(self::$CONTROLLER_DIR . $dir, []);
         $files = $controllerFinder->getControllerClasses();
+        sort($files);
         self::assertEquals($result, $files);
     }
 
