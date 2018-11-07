@@ -1,4 +1,7 @@
+[![Latest Stable Version](https://poser.pugx.org/ddesrosiers/silex-annotation-provider/v/stable)](https://packagist.org/packages/ddesrosiers/silex-annotation-provider)
 [![Build Status](https://travis-ci.org/danadesrosiers/silex-annotation-provider.svg?branch=master)](https://travis-ci.org/danadesrosiers/silex-annotation-provider)
+[![Total Downloads](https://poser.pugx.org/ddesrosiers/silex-annotation-provider/downloads)](https://packagist.org/packages/ddesrosiers/silex-annotation-provider)
+[![License](https://poser.pugx.org/ddesrosiers/silex-annotation-provider/license)](https://packagist.org/packages/ddesrosiers/silex-annotation-provider)
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/danadesrosiers/silex-annotation-provider/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/danadesrosiers/silex-annotation-provider/?branch=master)
 
 silex-annotation-provider
