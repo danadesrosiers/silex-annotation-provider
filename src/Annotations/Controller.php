@@ -46,7 +46,7 @@ class Controller
     }
 
     /**
-     * @return string[]
+     * @return string[][]
      */
     public function getModifiers(): array
     {

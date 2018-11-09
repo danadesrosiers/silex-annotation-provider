@@ -45,7 +45,7 @@ class AnnotationServiceProvider implements ServiceProviderInterface, BootablePro
      */
     public function register(Container $app)
     {
-        $app["annot"] = function (Container $app) {
+        $app["annot"] = function (Application $app) {
             $cache = (!$app['debug'] && $app->offsetExists('annot.cache')) ? $app['annot.cache'] : null;
             return new AnnotationService(
                 $app,

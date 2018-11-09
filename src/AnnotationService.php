@@ -15,7 +15,6 @@ namespace DDesrosiers\SilexAnnotations;
 use DDesrosiers\SilexAnnotations\AnnotationReader\AnnotationReader;
 use DDesrosiers\SilexAnnotations\Annotations\Controller;
 use DDesrosiers\SilexAnnotations\Cache\AnnotationCache;
-use Pimple\Container;
 use Psr\SimpleCache\InvalidArgumentException;
 use Silex\Application;
 use Silex\ControllerCollection;
@@ -43,13 +42,13 @@ class AnnotationService
     const CONTROLLER_CACHE_INDEX = 'annot.controllerFiles';
 
     /**
-     * @param Container        $app
+     * @param Application      $app
      * @param ControllerFinder $finder
      * @param AnnotationReader $reader
      * @param AnnotationCache  $cache
      */
     public function __construct(
-        Container $app,
+        Application $app,
         ControllerFinder $finder,
         AnnotationReader $reader,
         AnnotationCache $cache
@@ -66,13 +65,14 @@ class AnnotationService
     public function registerControllers()
     {
         $controllers = $this->cache->fetch(self::CONTROLLER_CACHE_INDEX, function () {
+            $controllers = [];
             foreach ($this->controllerFinder->getControllerClasses() as $className) {
                 $controller = $this->getControllerAnnotation($className);
                 if ($controller instanceof Controller) {
                     $controllers[$controller->getPrefix()][] = $className;
                 }
             }
-            return $controllers ?? [];
+            return $controllers;
         });
 
         foreach ($controllers as $prefix => $controllerGroup) {

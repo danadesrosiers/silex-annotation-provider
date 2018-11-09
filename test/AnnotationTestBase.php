@@ -54,7 +54,7 @@ class AnnotationTestBase extends TestCase
      * @param array $options
      * @return AnnotationService
      */
-    protected function registerProviders($options = [])
+    protected function registerProviders($options = []): AnnotationService
     {
         if (!isset($options['annot.controllers'])) {
             $options['annot.controllerDir'] = self::$CONTROLLER_DIR;
@@ -74,12 +74,24 @@ class AnnotationTestBase extends TestCase
         $this->client = new Client($this->app, $this->clientOptions);
     }
 
+    /**
+     * @param       $method
+     * @param       $uri
+     * @param       $status
+     * @param array $annotationOptions
+     */
     protected function assertEndPointStatus($method, $uri, $status, $annotationOptions = array())
     {
         $this->assertStatus($this->makeRequest($method, $uri, $annotationOptions), $status);
     }
 
-    protected function makeRequest($method, $uri, $annotationOptions = array())
+    /**
+     * @param       $method
+     * @param       $uri
+     * @param array $annotationOptions
+     * @return null|Response
+     */
+    protected function makeRequest($method, $uri, $annotationOptions = array()): ?Response
     {
         $_SERVER['REQUEST_URI'] = $uri;
         $this->getClient($annotationOptions);
@@ -88,12 +100,20 @@ class AnnotationTestBase extends TestCase
         return $response;
     }
 
+    /**
+     * @param Response $response
+     * @param          $status
+     */
     protected function assertStatus(Response $response, $status)
     {
         $this->assertEquals($status, $response->getStatusCode());
     }
 
-    protected function flattenControllerArray($controllers)
+    /**
+     * @param $controllers
+     * @return string[]
+     */
+    protected function flattenControllerArray($controllers): array
     {
         array_walk_recursive($controllers, function($a) use (&$flattened) { $flattened[] = $a; });
 
