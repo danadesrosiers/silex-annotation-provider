@@ -20,7 +20,7 @@ include __DIR__ . "/NoNamespace/TestControllerNoNamespace.php";
 
 class AnnotationServiceProviderTest extends AnnotationTestBase
 {
-    public function testRegisterControllersByDirectoryProvider()
+    public function registerControllersByDirectoryTestProvider()
     {
         $subDirFqcn = self::CONTROLLER_NAMESPACE."SubDir\\SubDirTestController";
         return array(
@@ -32,7 +32,7 @@ class AnnotationServiceProviderTest extends AnnotationTestBase
     }
 
     /**
-     * @dataProvider testRegisterControllersByDirectoryProvider
+     * @dataProvider registerControllersByDirectoryTestProvider
      */
     public function testRegisterControllersByDirectory($dir, $namespace, $result)
     {
@@ -42,7 +42,7 @@ class AnnotationServiceProviderTest extends AnnotationTestBase
         if (is_array($result)) {
             $this->assertEquals($result, $files);
         } else {
-            $this->assertContains($result, $files);
+            $this->assertContains($result, $files['/']);
         }
     }
 
@@ -73,13 +73,13 @@ class AnnotationServiceProviderTest extends AnnotationTestBase
         $this->app['debug'] = false;
         $service = $this->registerAnnotations();
         $service->discoverControllers(self::$CONTROLLER_DIR);
-        $this->assertCount(14, $cache->fetch($cacheKey));
+        $this->assertCount(11, $cache->fetch($cacheKey));
 
         $files = $service->discoverControllers(self::$CONTROLLER_DIR);
         $this->assertTrue($cache->wasFetched($cacheKey));
-        $this->assertContains(self::CONTROLLER_NAMESPACE."SubDir\\SubDirTestController", $files);
+        $this->assertContains(self::CONTROLLER_NAMESPACE."SubDir\\SubDirTestController", $files['/']);
         $this->assertContains(self::CONTROLLER_NAMESPACE."TestController", $files['/test']);
-        $this->assertCount(14, $files);
+        $this->assertCount(11, $files);
     }
 }
 

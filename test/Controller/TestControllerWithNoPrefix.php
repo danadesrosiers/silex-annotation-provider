@@ -7,20 +7,14 @@ use Symfony\Component\HttpFoundation\Response;
 
 /**
  * @SLX\Controller
- * @SLX\Before("DDesrosiers\SilexAnnotations\Test\Annotations\BeforeTestController::beforeCallback")
  */
 class TestControllerWithNoPrefix
 {
     /**
      * @SLX\Request(method="GET", uri="/test")
      */
-    public function testMethod($var)
+    public function testMethod()
     {
-        return new Response($var);
-    }
-
-    public static function beforeCallback()
-    {
-        throw new \Exception("before callback");
+        return new Response();
     }
 }
