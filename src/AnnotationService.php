@@ -103,21 +103,14 @@ class AnnotationService
         foreach ($controllers as $prefix => $controllerNames) {
             if (!is_array($controllerNames)) {
                 $controllerNames = [$controllerNames];
+                $prefix = '/';
             }
-            if (strlen($this->app['annot.base_uri']) === 0 || $this->prefixMatchesUri($prefix)) {
+            if (strpos($_SERVER['REQUEST_URI'], $prefix) === 0) {
                 foreach ($controllerNames as $fqcn) {
                     $this->registerController($fqcn);
                 }
             }
         }
-    }
-
-    public function prefixMatchesUri($prefix)
-    {
-        return strpos(
-            $_SERVER['REQUEST_URI'],
-            $this->cleanPrefix($this->app['annot.base_uri'] . $prefix)
-        ) === 0;
     }
 
     /**
@@ -151,7 +144,7 @@ class AnnotationService
                             $controllerAnnotation = $this->reader->getClassAnnotation($reflectionClass, $annotationClassName);
 
                             if ($controllerAnnotation instanceof Controller) {
-                                $prefix = $this->cleanPrefix("/$controllerAnnotation->prefix");
+                                $prefix = str_replace('//', '/', "/$controllerAnnotation->prefix");
                                 $files[$prefix][] = $className;
                             }
                         }
@@ -262,10 +255,5 @@ class AnnotationService
     {
         preg_match('/namespace(.*);/', file_get_contents($filePath), $result);
         return isset($result[1]) ? $result[1] . "\\" : '';
-    }
-
-    private function cleanPrefix($str)
-    {
-        return str_replace('//', '/', $str);
     }
 }

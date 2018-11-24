@@ -66,7 +66,7 @@ class AnnotationServiceTest extends AnnotationTestBase
     public function testControllerEndpointWithNoPrefix()
     {
         $this->assertEndPointStatus(self::GET_METHOD, '/test', self::STATUS_OK);
-        $this->assertEquals(35, count($this->app['routes']->all()));
+        $this->assertEquals(26, count($this->app['routes']->all()));
     }
 
     public function testFastRegister()
@@ -74,8 +74,7 @@ class AnnotationServiceTest extends AnnotationTestBase
         $this->assertEndPointStatus(
             self::GET_METHOD,
             '/two/test',
-            self::STATUS_OK,
-            ['annot.base_uri' => '/']);
+            self::STATUS_OK);
         // there are 35 routes, but only 3 are registered (the ones with prefix '/' and '/two')
         $this->assertEquals(3, count($this->app['routes']->all()));
     }
