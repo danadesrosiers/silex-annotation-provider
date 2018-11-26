@@ -11,9 +11,9 @@
 namespace DDesrosiers\SilexAnnotations;
 
 use Doctrine\Common\Annotations\AnnotationRegistry;
-use RuntimeException;
 use Pimple\Container;
 use Pimple\ServiceProviderInterface;
+use RuntimeException;
 use Silex\Api\BootableProviderInterface;
 use Silex\Application;
 use Silex\Provider\ServiceControllerServiceProvider;
@@ -107,7 +107,5 @@ class AnnotationServiceProvider implements ServiceProviderInterface, BootablePro
         );
 
         $app['annot.controllerNamespace'] = '';
-
-        $app['annot.base_uri'] = '';
     }
 }

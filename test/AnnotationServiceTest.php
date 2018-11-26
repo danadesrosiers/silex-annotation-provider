@@ -63,11 +63,18 @@ class AnnotationServiceTest extends AnnotationTestBase
         }
     }
 
+    public function testControllerEndpointWithNoPrefix()
+    {
+        $this->assertEndPointStatus(self::GET_METHOD, '/test', self::STATUS_OK);
+        // there are 35 routes, but only 26 are registered (the ones with prefix '/' and '/test')
+        $this->assertEquals(26, count($this->app['routes']->all()));
+    }
+
     public function testFastRegister()
     {
         $this->assertEndPointStatus(self::GET_METHOD, '/two/test', self::STATUS_OK);
-        // there are 35 routes, but only 2 are registered (the ones with prefix '/' and '/two')
-        $this->assertEquals(2, count($this->app['routes']->all()));
+        // there are 35 routes, but only 3 are registered (the ones with prefix '/' and '/two')
+        $this->assertEquals(3, count($this->app['routes']->all()));
     }
 }
 

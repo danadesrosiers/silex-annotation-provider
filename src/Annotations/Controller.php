@@ -33,11 +33,4 @@ class Controller
         $annotationService->processMethodAnnotations($reflectionClass, $controllerCollection);
         $app->mount($this->prefix, $controllerCollection);
     }
-
-    public function getPrefix()
-    {
-        // the prefix might not start with a forward slash, but the REQUEST_URI always will
-        // make sure we always have a forward slash so the comparison to REQUEST_URI works as expected
-        return ($this->prefix[0] !== '/') ? "/$this->prefix" : $this->prefix;
-    }
-} 
+}

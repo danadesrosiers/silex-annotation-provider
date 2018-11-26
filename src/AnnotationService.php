@@ -103,19 +103,14 @@ class AnnotationService
         foreach ($controllers as $prefix => $controllerNames) {
             if (!is_array($controllerNames)) {
                 $controllerNames = [$controllerNames];
+                $prefix = '/';
             }
-            foreach ($controllerNames as $fqcn) {
-                if (strlen($prefix) == 0 || $this->prefixMatchesUri($prefix)) {
+            if (strpos($_SERVER['REQUEST_URI'], $prefix) === 0) {
+                foreach ($controllerNames as $fqcn) {
                     $this->registerController($fqcn);
                 }
             }
         }
-    }
-
-    public function prefixMatchesUri($prefix)
-    {
-        return ($this->app->offsetExists('annot.base_uri')
-            && strpos($_SERVER['REQUEST_URI'], $this->app['annot.base_uri'].$prefix) === 0);
     }
 
     /**
@@ -148,10 +143,9 @@ class AnnotationService
                             $annotationClassName = "\\DDesrosiers\\SilexAnnotations\\Annotations\\Controller";
                             $controllerAnnotation = $this->reader->getClassAnnotation($reflectionClass, $annotationClassName);
 
-                            if ($this->hasPrefix($controllerAnnotation)) {
-                                $files[$controllerAnnotation->getPrefix()][] = $className;
-                            } else {
-                                $files[] = $className;
+                            if ($controllerAnnotation instanceof Controller) {
+                                $prefix = str_replace('//', '/', "/$controllerAnnotation->prefix");
+                                $files[$prefix][] = $className;
                             }
                         }
                     }
@@ -161,13 +155,6 @@ class AnnotationService
         }
 
         return $files;
-    }
-
-    public function hasPrefix(Controller $controllerAnnotation = null)
-    {
-        $hasPrefix = $controllerAnnotation instanceof Controller && strlen($controllerAnnotation->prefix) > 0;
-
-        return $this->app->offsetExists('annot.base_uri') && $hasPrefix;
     }
 
     /**

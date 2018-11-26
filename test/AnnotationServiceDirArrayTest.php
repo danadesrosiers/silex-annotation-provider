@@ -97,8 +97,8 @@ class AnnotationServiceDirArrayTest extends AnnotationDirArrayTestBase
         $this->assertTrue($cache->wasFetched($cacheKey1));
         $this->assertTrue($cache->wasFetched($cacheKey2));
 
-        $this->assertCount(14, $cache->fetch($cacheKey1));
-        $this->assertCount(13, $cache->fetch($cacheKey2));
+        $this->assertCount(11, $cache->fetch($cacheKey1));
+        $this->assertCount(10, $cache->fetch($cacheKey2));
     }
 }
 
