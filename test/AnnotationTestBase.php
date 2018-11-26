@@ -12,12 +12,11 @@ namespace DDesrosiers\Test\SilexAnnotations;
 
 use DDesrosiers\SilexAnnotations\AnnotationService;
 use DDesrosiers\SilexAnnotations\AnnotationServiceProvider;
-use PHPUnit\Framework\TestCase;
 use Silex\Application;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Client;
 
-class AnnotationTestBase extends TestCase
+class AnnotationTestBase extends \PHPUnit_Framework_TestCase
 {
     const GET_METHOD = 'GET';
     const POST_METHOD = 'POST';
