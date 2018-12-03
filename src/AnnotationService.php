@@ -100,12 +100,13 @@ class AnnotationService
      */
     public function registerControllers($controllers)
     {
+        $request = new \Symfony\Component\HttpFoundation\Request([], [], [], [], [], $_SERVER);
         foreach ($controllers as $prefix => $controllerNames) {
             if (!is_array($controllerNames)) {
                 $controllerNames = [$controllerNames];
                 $prefix = '/';
             }
-            if (strpos($_SERVER['REQUEST_URI'], $prefix) === 0) {
+            if (strpos($request->getPathInfo(), $prefix) === 0) {
                 foreach ($controllerNames as $fqcn) {
                     $this->registerController($fqcn);
                 }
