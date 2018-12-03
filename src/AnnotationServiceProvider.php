@@ -56,7 +56,6 @@ class AnnotationServiceProvider implements ServiceProviderInterface, BootablePro
 
         $app->register(new ServiceControllerServiceProvider());
 
-        $app['annot.base_uri'] = '';
         $app['annot.controllers'] = [];
         $app['annot.controllerDir'] = null;
     }

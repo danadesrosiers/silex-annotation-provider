@@ -37,7 +37,7 @@ class DocBlock
      */
     public function parseAnnotation($annotationName): ?array
     {
-        $annotation = explode("@$annotationName(", $this->docBlockString)[1];
+        $annotation = explode("@$annotationName(", $this->docBlockString)[1] ?? null;
 
         if ($annotation === null) {
             return null;

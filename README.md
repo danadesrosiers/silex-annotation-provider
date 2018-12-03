@@ -56,11 +56,9 @@ annot.cache
 -----------
 An instance of a class that implements Psr\SimpleCache\CacheInterface.  This cache is used to cache annotation and the controller list to improve performance.
 
-annot.base_uri (Enables Faster Controller Registration)
---------------
-`annot.base_uri` enables faster registration of controllers.  Silex has to register every endpoint in your app on every request.  If you have a lot of endpoints, that could be a significant overhead on each and every request.  Silex Annotations can improve this by filtering the controllers that need to be registered using the `prefix` on the `Controller` annotation.  We only need to register the endpoints in the Controller if the prefix matches the URI.  In this way, Silex Annotations allows FASTER routing than pure Silex.
-
-The value of this option should be base uri of all requests.  Basically, it's the part of the URI that isn't included in `$_SERVER['REQUEST_URI']`.  If your bootstrap file is at the root of htdocs, the value is "/".  If your bootstrap file lives in a directory called "api", all your API's URIs are prefixed with "/api" and that is value you must specify for `annot.base_uri`. 
+Faster Controller Registration
+==============================
+Silex has to register every endpoint in your app on every request.  If you have a lot of endpoints, that could be a significant overhead on each and every request.  Silex Annotations can improve this by filtering the controllers that need to be registered using the `prefix` on the `Controller` annotation.  We only need to register the endpoints in the Controller if the prefix matches the URI.  In this way, Silex Annotations allows FASTER routing than pure Silex.
 
 Annotate Controllers
 ====================

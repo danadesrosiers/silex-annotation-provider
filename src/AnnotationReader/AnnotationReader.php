@@ -35,7 +35,7 @@ class AnnotationReader
         if ($controllerDefinition !== null) {
             $prefix = $controllerDefinition['prefix'][0][0] ?? key($controllerDefinition);
             array_shift($controllerDefinition);
-            $controller = new Controller($prefix);
+            $controller = new Controller((string) $prefix);
             $controller->setModifiers($controllerDefinition);
             foreach ($this->getRouteAnnotations($reflectionClass) as $route) {
                 $controller->addRoute($route);

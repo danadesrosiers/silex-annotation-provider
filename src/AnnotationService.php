@@ -18,6 +18,7 @@ use DDesrosiers\SilexAnnotations\Cache\AnnotationCache;
 use Psr\SimpleCache\InvalidArgumentException;
 use Silex\Application;
 use Silex\ControllerCollection;
+use Symfony\Component\HttpFoundation\Request;
 
 /**
  * Class AnnotationService parses annotations on classes and converts them to
@@ -75,9 +76,10 @@ class AnnotationService
             return $controllers;
         });
 
+        $request = new Request([], [], [], [], [], $_SERVER);
         foreach ($controllers as $prefix => $controllerGroup) {
-            // register the controller only if the prefix matches the request uri
-            if (strpos($_SERVER['REQUEST_URI'], $this->app['annot.base_uri'].$prefix) === 0) {
+            // register the controller only if the prefix matches the URI
+            if (strpos($request->getPathInfo(), $prefix) === 0) {
                 foreach ($controllerGroup as $controllerClassName) {
                     $this->registerController($controllerClassName);
                 }

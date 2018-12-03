@@ -21,7 +21,7 @@ namespace DDesrosiers\SilexAnnotations\Annotations;
 class Controller
 {
     /** @var string */
-    public $prefix;
+    private $prefix;
 
     /** @var string[] */
     private $modifiers;
@@ -34,7 +34,7 @@ class Controller
      */
     public function __construct(?string $prefix = '/')
     {
-        $this->prefix = ($prefix[0] !== '/') ? "/$prefix" : $prefix;
+        $this->prefix = (($prefix[0] ?? null) !== '/') ? "/$prefix" : $prefix;
     }
 
     /**
